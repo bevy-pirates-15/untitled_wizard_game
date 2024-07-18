@@ -3,10 +3,10 @@
 //! If you want to move the player in a smoother way,
 //! consider using a [fixed timestep](https://github.com/bevyengine/bevy/blob/latest/examples/movement/physics_in_fixed_timestep.rs).
 
+use crate::game::input::PlayerAction;
+use crate::AppSet;
 use bevy::{prelude::*, window::PrimaryWindow};
 use leafwing_input_manager::action_state::ActionState;
-use crate::AppSet;
-use crate::game::input::PlayerAction;
 
 pub(super) fn plugin(app: &mut App) {
     // Record directional input as movement controls.
@@ -31,16 +31,17 @@ pub(super) fn plugin(app: &mut App) {
 pub struct PlayerMovement(pub Vec2);
 
 fn record_movement_controller(
-    input: Res<ButtonInput<KeyCode>>,
     action_state: Res<ActionState<PlayerAction>>,
     mut controller_query: Query<&mut PlayerMovement>,
 ) {
     // Collect directional input.
     let mut intent = Vec2::ZERO;
     if action_state.pressed(&PlayerAction::Move) {
-        intent = action_state.clamped_axis_pair(&PlayerAction::Move)
+        intent = action_state
+            .clamped_axis_pair(&PlayerAction::Move)
             .unwrap()
-            .xy().clamp_length_max(1.0);
+            .xy()
+            .clamp_length_max(1.0);
     }
 
     for mut controller in &mut controller_query {

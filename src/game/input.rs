@@ -1,18 +1,15 @@
-use bevy::app::{App, Update};
-use bevy::prelude::{GamepadButtonType, IntoSystemConfigs, MouseButton, Reflect};
+use bevy::app::App;
+use bevy::prelude::{GamepadButtonType, MouseButton, Reflect};
 use leafwing_input_manager::action_state::ActionState;
-use leafwing_input_manager::Actionlike;
 use leafwing_input_manager::input_map::InputMap;
 use leafwing_input_manager::plugin::InputManagerPlugin;
 use leafwing_input_manager::prelude::{DualAxis, VirtualDPad};
-use crate::AppSet;
-use crate::game::movement::{Movement, PlayerMovement, WrapWithinWindow};
+use leafwing_input_manager::Actionlike;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(InputManagerPlugin::<PlayerAction>::default());
     app.init_resource::<ActionState<PlayerAction>>();
     app.insert_resource(PlayerAction::default_input_map());
-
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
