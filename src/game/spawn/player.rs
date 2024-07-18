@@ -6,7 +6,7 @@ use crate::{
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
-        movement::{Movement, PlayerMovement, WrapWithinWindow},
+        movement::{Movement, PlayerMovement},
     },
     screen::Screen,
 };
@@ -51,7 +51,6 @@ fn spawn_player(
         },
         PlayerMovement::default(),
         Movement { speed: 420.0 },
-        WrapWithinWindow,
         player_animation,
         StateScoped(Screen::Playing),
     ));
