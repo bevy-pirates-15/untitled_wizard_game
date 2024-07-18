@@ -56,9 +56,9 @@ env:
   PACKAGE_NAME: bevy-template
   # The itch.io page to upload to, in the format: `user-name/project-name`.
   # Comment this out to disable.
-  ITCH_TARGET: the-bevy-flock/bevy-template
+  ITCH_TARGET: the-wizard-gang/bevy-template
   # The organization or author that owns the rights to the game.
-  OWNER: the-bevy-flock
+  OWNER: the-wizard-gang
   # The path to the assets directory.
   ASSETS_DIR: assets
   # Whether packages produced by this workflow should be uploaded to the Github release.
