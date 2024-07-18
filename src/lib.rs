@@ -5,9 +5,7 @@ mod screen;
 mod ui;
 
 use bevy::{
-    asset::AssetMetaCheck,
-    audio::{AudioPlugin, Volume},
-    prelude::*,
+    asset::AssetMetaCheck, audio::{AudioPlugin, Volume}, prelude::*, render::camera::ScalingMode, window::WindowResolution
 };
 
 pub struct AppPlugin;
@@ -37,6 +35,7 @@ impl Plugin for AppPlugin {
                     primary_window: Window {
                         title: "wizard_game".to_string(),
                         canvas: Some("#bevy".to_string()),
+                        resolution: WindowResolution::new(1289., 720.).with_scale_factor_override(1.0),
                         fit_canvas_to_parent: true,
                         prevent_default_event_handling: true,
                         ..default()
@@ -75,9 +74,12 @@ enum AppSet {
 }
 
 fn spawn_camera(mut commands: Commands) {
+    let mut camera = Camera2dBundle::default();
+    camera.projection.scaling_mode = ScalingMode::Fixed { width: 1280., height: 720. };
+    
     commands.spawn((
         Name::new("Camera"),
-        Camera2dBundle::default(),
+        camera,
         IsDefaultUiCamera,
     ));
 }
