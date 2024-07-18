@@ -8,6 +8,8 @@ use crate::AppSet;
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 
+use super::aiming::PlayerAim;
+
 pub(super) fn plugin(app: &mut App) {
     // Record directional input as movement controls.
     app.register_type::<PlayerMovement>();
@@ -27,9 +29,10 @@ pub struct PlayerMovement(pub Vec2);
 
 fn record_movement_controller(
     action_state: Res<ActionState<PlayerAction>>,
-    mut controller_query: Query<&mut PlayerMovement>,
+    mut movement_query: Query<&mut PlayerMovement>,
+    mut aim_query: Query<&mut PlayerAim>,
 ) {
-    // Collect directional input.
+    // Collect directional input for movement
     let mut intent = Vec2::ZERO;
     if action_state.pressed(&PlayerAction::Move) {
         intent = action_state
@@ -38,9 +41,20 @@ fn record_movement_controller(
             .xy()
             .clamp_length_max(1.0);
     }
+    if let Ok(mut player_movement) = movement_query.get_single_mut() {
+        player_movement.0 = intent
+    };
 
-    for mut controller in &mut controller_query {
-        controller.0 = intent;
+    // Collect directional input for aiming
+    if action_state.pressed(&PlayerAction::Look) {
+        let look = action_state
+            .axis_pair(&PlayerAction::Look)
+            .unwrap()
+            .xy()
+            .normalize();
+        if let Ok(mut player_aim) = aim_query.get_single_mut() {
+            player_aim.0 = look
+        };
     }
 }
 
