@@ -6,7 +6,7 @@ use crate::{
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
-        movement::{Movement, MovementController, WrapWithinWindow},
+        movement::{Movement, PlayerMovement, WrapWithinWindow},
     },
     screen::Screen,
 };
@@ -49,7 +49,7 @@ fn spawn_player(
             layout: texture_atlas_layout.clone(),
             index: player_animation.get_atlas_index(),
         },
-        MovementController::default(),
+        PlayerMovement::default(),
         Movement { speed: 420.0 },
         WrapWithinWindow,
         player_animation,
