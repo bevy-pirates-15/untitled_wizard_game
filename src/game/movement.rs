@@ -3,13 +3,14 @@
 //! If you want to move the player in a smoother way,
 //! consider using a [fixed timestep](https://github.com/bevyengine/bevy/blob/latest/examples/movement/physics_in_fixed_timestep.rs).
 
-use bevy::{prelude::*, window::PrimaryWindow};
-
+use crate::game::input::PlayerAction;
 use crate::AppSet;
+use bevy::{prelude::*, window::PrimaryWindow};
+use leafwing_input_manager::action_state::ActionState;
 
 pub(super) fn plugin(app: &mut App) {
     // Record directional input as movement controls.
-    app.register_type::<MovementController>();
+    app.register_type::<PlayerMovement>();
     app.add_systems(
         Update,
         record_movement_controller.in_set(AppSet::RecordInput),
@@ -27,32 +28,22 @@ pub(super) fn plugin(app: &mut App) {
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct MovementController(pub Vec2);
+pub struct PlayerMovement(pub Vec2);
 
 fn record_movement_controller(
-    input: Res<ButtonInput<KeyCode>>,
-    mut controller_query: Query<&mut MovementController>,
+    action_state: Res<ActionState<PlayerAction>>,
+    mut controller_query: Query<&mut PlayerMovement>,
 ) {
     // Collect directional input.
     let mut intent = Vec2::ZERO;
-    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
-        intent.y += 1.0;
-    }
-    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
-        intent.y -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
-        intent.x -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
-        intent.x += 1.0;
+    if action_state.pressed(&PlayerAction::Move) {
+        intent = action_state
+            .clamped_axis_pair(&PlayerAction::Move)
+            .unwrap()
+            .xy()
+            .clamp_length_max(1.0);
     }
 
-    // Normalize so that diagonal movement has the same speed as
-    // horizontal and vertical movement.
-    let intent = intent.normalize_or_zero();
-
-    // Apply movement intent to controllers.
     for mut controller in &mut controller_query {
         controller.0 = intent;
     }
@@ -70,7 +61,7 @@ pub struct Movement {
 
 fn apply_movement(
     time: Res<Time>,
-    mut movement_query: Query<(&MovementController, &Movement, &mut Transform)>,
+    mut movement_query: Query<(&PlayerMovement, &Movement, &mut Transform)>,
 ) {
     for (controller, movement, mut transform) in &mut movement_query {
         let velocity = movement.speed * controller.0;

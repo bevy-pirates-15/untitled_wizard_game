@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use super::{audio::sfx::Sfx, movement::MovementController};
+use super::{audio::sfx::Sfx, movement::PlayerMovement};
 use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
@@ -31,7 +31,7 @@ pub(super) fn plugin(app: &mut App) {
 
 /// Update the sprite direction and animation state (idling/walking).
 fn update_animation_movement(
-    mut player_query: Query<(&MovementController, &mut Sprite, &mut PlayerAnimation)>,
+    mut player_query: Query<(&PlayerMovement, &mut Sprite, &mut PlayerAnimation)>,
 ) {
     for (controller, mut sprite, mut animation) in &mut player_query {
         let dx = controller.0.x;
