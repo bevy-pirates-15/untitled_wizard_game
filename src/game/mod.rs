@@ -2,6 +2,7 @@
 
 use bevy::prelude::*;
 
+mod aiming;
 mod animation;
 pub mod assets;
 pub mod audio;
@@ -18,5 +19,6 @@ pub(super) fn plugin(app: &mut App) {
         audio::plugin,
         movement::plugin,
         spawn::plugin,
+        aiming::plugin,
     ));
 }

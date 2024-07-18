@@ -6,7 +6,7 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use super::player::SpawnPlayer;
+use super::{player::SpawnPlayer, wand::SpawnWand};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);
@@ -30,4 +30,5 @@ fn spawn_level(
     // The only thing we have in our level is a player,
     // but add things like walls etc. here.
     commands.trigger(SpawnPlayer);
+    commands.trigger(SpawnWand);
 }
