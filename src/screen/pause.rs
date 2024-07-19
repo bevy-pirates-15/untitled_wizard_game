@@ -7,7 +7,10 @@ use crate::ui::prelude::*;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(PauseState::Paused), enter_pause.run_if(in_state(Screen::Playing)));
+    app.add_systems(
+        OnEnter(PauseState::Paused),
+        enter_pause.run_if(in_state(Screen::Playing)),
+    );
 
     app.register_type::<PauseAction>();
     app.add_systems(
