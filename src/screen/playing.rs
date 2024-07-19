@@ -2,7 +2,7 @@
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-use super::{PauseState, Screen};
+use super::{GameState, Screen};
 use crate::game::{audio::soundtrack::Soundtrack, spawn::level::SpawnLevel};
 
 pub(super) fn plugin(app: &mut App) {
@@ -27,11 +27,11 @@ fn exit_playing(mut commands: Commands) {
 }
 
 fn toggle_game_pause(
-    pause_state: Res<State<PauseState>>,
-    mut next_pause_state: ResMut<NextState<PauseState>>,
+    curr_pause_state: Res<State<GameState>>,
+    mut next_pause_state: ResMut<NextState<GameState>>,
 ) {
-    match pause_state.get() {
-        PauseState::Paused => next_pause_state.set(PauseState::Running),
-        PauseState::Running => next_pause_state.set(PauseState::Paused),
+    match curr_pause_state.get() {
+        GameState::Paused => next_pause_state.set(GameState::Running),
+        GameState::Running => next_pause_state.set(GameState::Paused),
     }
 }

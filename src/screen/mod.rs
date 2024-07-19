@@ -10,9 +10,9 @@ mod title;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.init_state::<Screen>().add_sub_state::<PlayScreen>();
+    app.init_state::<Screen>().add_sub_state::<GameState>();
     app.enable_state_scoped_entities::<Screen>();
-    app.enable_state_scoped_entities::<PauseState>();
+    app.enable_state_scoped_entities::<GameState>();
 
     app.add_plugins((
         splash::plugin,
@@ -26,7 +26,7 @@ pub(super) fn plugin(app: &mut App) {
 
 /// The game's main screen states.
 #[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default)]
-pub enum Screen {
+pub enum Screen { 
     #[default]
     Splash,
     Loading,
@@ -38,9 +38,8 @@ pub enum Screen {
 /// The game's states while playing
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
 #[source(Screen = Screen::Playing)]
-enum PlayScreen {
+enum GameState {
     #[default]
     Running,
-    Paused,
-    LevelUp,
+    Paused
 }
