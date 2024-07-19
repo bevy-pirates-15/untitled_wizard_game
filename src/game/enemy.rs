@@ -1,20 +1,20 @@
 // Handles the logic for a wave of enemies attacking the player
 
+use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
-use rand::Rng;
 
 use bevy::{
     prelude::*,
     time::common_conditions::on_timer,
-    {app::App, prelude::Event, math::vec3},
+    {app::App, math::vec3, prelude::Event},
 };
 
 use crate::{
     config::*,
-    screen::Screen,
     game::assets::{ImageAsset, ImageAssets},
     game::spawn::{player::Player, Health},
+    screen::Screen,
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -22,23 +22,20 @@ pub(super) fn plugin(app: &mut App) {
     app.observe(clear_wave);
     app.register_type::<Enemy>();
     app.add_systems(
-        Update, 
+        Update,
         (
             spawn_enemies.run_if(on_timer(Duration::from_secs_f32(ENEMY_SPAWN_PERIOD))),
             chase_player,
             clear_dead_enemies,
-        ).run_if(in_state(Screen::Playing))
+        )
+            .run_if(in_state(Screen::Playing)),
     );
-
 }
 
 #[derive(Event, Debug)]
 pub struct StartWave;
 
-fn start_wave(
-    _trigger: Trigger<StartWave>,
-) {}
-
+fn start_wave(_trigger: Trigger<StartWave>) {}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
@@ -59,7 +56,7 @@ fn spawn_enemies(
 
     let player_pos = player_query.single().translation.truncate();
     for _ in 0..enemy_spawn_count {
-        let (x,y) = get_random_pos_around(player_pos);
+        let (x, y) = get_random_pos_around(player_pos);
 
         commands.spawn((
             Name::new("Enemy"),
@@ -72,7 +69,7 @@ fn spawn_enemies(
             },
             StateScoped(Screen::Playing),
         ));
-    };
+    }
 }
 
 fn get_random_pos_around(pos: Vec2) -> (f32, f32) {
@@ -92,7 +89,7 @@ fn get_random_pos_around(pos: Vec2) -> (f32, f32) {
 //Enemies will always follow the position of the player
 fn chase_player(
     player_query: Query<&Transform, With<Player>>,
-    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Player>)>
+    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Player>)>,
 ) {
     if player_query.is_empty() || enemy_query.is_empty() {
         return;
@@ -126,7 +123,7 @@ pub struct ClearWave;
 fn clear_wave(
     _trigger: Trigger<ClearWave>,
     mut commands: Commands,
-    all_enemies: Query<Entity, With<Enemy>>
+    all_enemies: Query<Entity, With<Enemy>>,
 ) {
     if all_enemies.is_empty() {
         return;

@@ -7,10 +7,10 @@ mod animation;
 pub mod assets;
 pub mod audio;
 mod camera;
+mod enemy;
 mod input;
 mod movement;
 pub mod spawn;
-mod enemy;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((

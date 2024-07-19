@@ -3,11 +3,13 @@
 use bevy::prelude::*;
 
 use crate::{
-    config::PLAYER_HEALTH, game::{
+    config::PLAYER_HEALTH,
+    game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
         movement::{Movement, PlayerMovement},
-    }, screen::Screen
+    },
+    screen::Screen,
 };
 
 use super::Health;

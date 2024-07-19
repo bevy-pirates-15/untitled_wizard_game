@@ -1,9 +1,9 @@
+mod config;
 #[cfg(feature = "dev")]
 mod dev_tools;
 mod game;
 mod screen;
 mod ui;
-mod config;
 
 use bevy::{
     asset::AssetMetaCheck,
