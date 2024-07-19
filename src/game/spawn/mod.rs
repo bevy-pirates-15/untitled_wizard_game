@@ -8,6 +8,10 @@ pub mod level;
 pub mod player;
 pub mod wand;
 
+#[derive(Debug, Component, Reflect)]
+#[reflect(Component)]
+pub struct Health(pub f32);
+
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((level::plugin, player::plugin, wand::plugin));
 }
