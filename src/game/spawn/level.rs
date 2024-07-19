@@ -6,8 +6,8 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use super::{enemy::SpawnEnemies, player::SpawnPlayer, wand::SpawnWand};
-use crate::config::*;
+use super::{player::SpawnPlayer, wand::SpawnWand};
+use crate::{config::*, game::enemy::StartWave};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);
@@ -35,5 +35,5 @@ fn spawn_level(
     // but add things like walls etc. here.
     commands.trigger(SpawnPlayer);
     commands.trigger(SpawnWand);
-    commands.trigger(SpawnEnemies);
+    commands.trigger(StartWave);
 }

@@ -2,13 +2,16 @@
 //! [observers](https://docs.rs/bevy/latest/bevy/ecs/prelude/struct.Observer.html)
 //! for this, but you could also use `Events<E>` or `Commands`.
 
-use bevy::prelude::*;
+use bevy::{ecs::reflect, prelude::*};
 
-pub mod enemy;
 pub mod level;
 pub mod player;
 pub mod wand;
 
+#[derive(Debug, Component, Reflect)]
+#[reflect(Component)]
+pub struct Health(pub f32);
+
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((enemy::plugin, level::plugin, player::plugin, wand::plugin));
+    app.add_plugins((level::plugin, player::plugin, wand::plugin));
 }

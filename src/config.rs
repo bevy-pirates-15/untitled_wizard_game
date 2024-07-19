@@ -15,3 +15,4 @@ pub const ENEMY_HEALTH: f32 = 75.0;
 pub const ENEMY_DAMAGE: f32 = 10.0;
 pub const SPAWN_RATE_PER_SECOND: usize = 200;
 pub const SPAWN_RADIUS: Range<f32> = 1000.0..4000.0;
+pub const ENEMY_SPAWN_PERIOD: f32 = 1.0;

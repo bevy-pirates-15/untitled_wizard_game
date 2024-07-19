@@ -10,6 +10,7 @@ mod camera;
 mod input;
 mod movement;
 pub mod spawn;
+mod enemy;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
@@ -20,5 +21,6 @@ pub(super) fn plugin(app: &mut App) {
         movement::plugin,
         spawn::plugin,
         aiming::plugin,
+        enemy::plugin,
     ));
 }

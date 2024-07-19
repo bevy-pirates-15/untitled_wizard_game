@@ -9,7 +9,7 @@ mod title;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.init_state::<Screen>();
+    app.init_state::<Screen>().add_sub_state::<PlayScreen>();
     app.enable_state_scoped_entities::<Screen>();
 
     app.add_plugins((
@@ -30,4 +30,13 @@ pub enum Screen {
     Title,
     Credits,
     Playing,
+}
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
+#[source(Screen = Screen::Playing)]
+enum PlayScreen {
+    #[default]
+    Running,
+    Paused,
+    LevelUp,
 }
