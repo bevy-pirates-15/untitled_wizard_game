@@ -6,6 +6,8 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
+use crate::screen::Screen;
+
 use super::{player::SpawnPlayer, wand::SpawnWand};
 use crate::{config::*, game::enemy::StartWave};
 
@@ -29,7 +31,8 @@ fn spawn_level(
             transform: Transform::default().with_scale(Vec2::splat(420.).extend(0.0)),
             material: materials.add(Color::from(PURPLE)),
             ..default()
-        }
+        },
+        StateScoped(Screen::Playing),
     ));
     // The only thing we have in our level is a player,
     // but add things like walls etc. here.

@@ -2,6 +2,7 @@
 
 mod credits;
 mod loading;
+mod pause;
 mod playing;
 mod splash;
 mod title;
@@ -11,6 +12,7 @@ use bevy::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Screen>().add_sub_state::<PlayScreen>();
     app.enable_state_scoped_entities::<Screen>();
+    app.enable_state_scoped_entities::<PauseState>();
 
     app.add_plugins((
         splash::plugin,
@@ -18,6 +20,7 @@ pub(super) fn plugin(app: &mut App) {
         title::plugin,
         credits::plugin,
         playing::plugin,
+        pause::plugin,
     ));
 }
 
@@ -32,6 +35,7 @@ pub enum Screen {
     Playing,
 }
 
+/// The game's states while playing
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
 #[source(Screen = Screen::Playing)]
 enum PlayScreen {

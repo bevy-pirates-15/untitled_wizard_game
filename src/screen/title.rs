@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::Screen;
+use super::{PauseState, Screen};
 use crate::ui::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -37,13 +37,17 @@ fn enter_title(mut commands: Commands) {
 
 fn handle_title_action(
     mut next_screen: ResMut<NextState<Screen>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
     mut button_query: InteractionQuery<&TitleAction>,
     #[cfg(not(target_family = "wasm"))] mut app_exit: EventWriter<AppExit>,
 ) {
     for (interaction, action) in &mut button_query {
         if matches!(interaction, Interaction::Pressed) {
             match action {
-                TitleAction::Play => next_screen.set(Screen::Playing),
+                TitleAction::Play => {
+                    next_screen.set(Screen::Playing);
+                    next_pause_state.set(PauseState::Running);
+                }
                 TitleAction::Credits => next_screen.set(Screen::Credits),
 
                 #[cfg(not(target_family = "wasm"))]

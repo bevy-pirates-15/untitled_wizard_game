@@ -4,6 +4,7 @@
 //! consider using a [fixed timestep](https://github.com/bevyengine/bevy/blob/latest/examples/movement/physics_in_fixed_timestep.rs).
 
 use crate::game::input::PlayerAction;
+use crate::screen::PauseState;
 use crate::AppSet;
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
@@ -15,12 +16,20 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<PlayerMovement>();
     app.add_systems(
         Update,
-        record_movement_controller.in_set(AppSet::RecordInput),
+        record_movement_controller
+            .in_set(AppSet::RecordInput)
+            .run_if(in_state(PauseState::Running)),
     );
 
     // Apply movement based on controls.
     app.register_type::<Movement>();
-    app.add_systems(Update, apply_movement.chain().in_set(AppSet::Update));
+    app.add_systems(
+        Update,
+        apply_movement
+            .chain()
+            .in_set(AppSet::Update)
+            .run_if(in_state(PauseState::Running)),
+    );
 }
 
 #[derive(Component, Reflect, Default)]
