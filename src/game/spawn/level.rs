@@ -9,6 +9,7 @@ use bevy::{
 use crate::screen::Screen;
 
 use super::{player::SpawnPlayer, wand::SpawnWand};
+use crate::{config::*, game::enemy::StartWave};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);
@@ -32,7 +33,7 @@ fn spawn_level(
         Name::new("Level Box"),
         LevelBox,
         MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
+            mesh: Mesh2dHandle(meshes.add(Rectangle::new(MAP_WIDTH, MAP_HEIGHT))),
             transform: Transform::default().with_scale(Vec2::splat(420.).extend(0.0)),
             material: materials.add(Color::from(PURPLE)),
             ..default()
@@ -43,4 +44,5 @@ fn spawn_level(
     // but add things like walls etc. here.
     commands.trigger(SpawnPlayer);
     commands.trigger(SpawnWand);
+    commands.trigger(StartWave);
 }

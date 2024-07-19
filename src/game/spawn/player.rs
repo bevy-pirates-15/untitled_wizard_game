@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    config::PLAYER_HEALTH,
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
@@ -10,6 +11,8 @@ use crate::{
     },
     screen::Screen,
 };
+
+use super::Health;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_player);
@@ -40,6 +43,7 @@ fn spawn_player(
     commands.spawn((
         Name::new("Player"),
         Player,
+        Health(PLAYER_HEALTH),
         SpriteBundle {
             texture: images[&ImageAsset::Ducky].clone_weak(),
             transform: Transform::from_scale(Vec3::splat(8.0))

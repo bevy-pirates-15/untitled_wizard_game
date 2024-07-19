@@ -7,6 +7,7 @@ mod animation;
 pub mod assets;
 pub mod audio;
 mod camera;
+mod enemy;
 mod input;
 mod movement;
 pub mod spawn;
@@ -20,5 +21,6 @@ pub(super) fn plugin(app: &mut App) {
         movement::plugin,
         spawn::plugin,
         aiming::plugin,
+        enemy::plugin,
     ));
 }
