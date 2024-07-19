@@ -4,6 +4,7 @@
 
 use bevy::prelude::*;
 
+pub mod borders;
 pub mod level;
 pub mod player;
 pub mod wand;
@@ -13,5 +14,5 @@ pub mod wand;
 pub struct Health(pub f32);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((level::plugin, player::plugin, wand::plugin));
+    app.add_plugins((level::plugin, player::plugin, wand::plugin, borders::plugin));
 }
