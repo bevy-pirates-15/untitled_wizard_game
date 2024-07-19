@@ -2,7 +2,7 @@
 //! [observers](https://docs.rs/bevy/latest/bevy/ecs/prelude/struct.Observer.html)
 //! for this, but you could also use `Events<E>` or `Commands`.
 
-use bevy::{ecs::reflect, prelude::*};
+use bevy::prelude::*;
 
 pub mod level;
 pub mod player;
