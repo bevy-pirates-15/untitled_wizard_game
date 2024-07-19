@@ -9,7 +9,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use super::{audio::sfx::Sfx, movement::PlayerMovement};
-use crate::AppSet;
+use crate::{screen::PauseState, AppSet};
 
 pub(super) fn plugin(app: &mut App) {
     // Animate and play sound effects based on controls.
@@ -24,7 +24,8 @@ pub(super) fn plugin(app: &mut App) {
                 trigger_step_sfx,
             )
                 .chain()
-                .in_set(AppSet::Update),
+                .in_set(AppSet::Update)
+                .run_if(in_state(PauseState::Running)),
         ),
     );
 }

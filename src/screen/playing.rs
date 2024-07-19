@@ -2,7 +2,7 @@
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-use super::Screen;
+use super::{PauseState, Screen};
 use crate::game::{audio::soundtrack::Soundtrack, spawn::level::SpawnLevel};
 
 pub(super) fn plugin(app: &mut App) {
@@ -11,7 +11,7 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        return_to_title_screen
+        toggle_game_pause
             .run_if(in_state(Screen::Playing).and_then(input_just_pressed(KeyCode::Escape))),
     );
 }
@@ -26,6 +26,12 @@ fn exit_playing(mut commands: Commands) {
     commands.trigger(Soundtrack::Disable);
 }
 
-fn return_to_title_screen(mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Title);
+fn toggle_game_pause(
+    pause_state: Res<State<PauseState>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
+) {
+    match pause_state.get() {
+        PauseState::Paused => next_pause_state.set(PauseState::Running),
+        PauseState::Running => next_pause_state.set(PauseState::Paused),
+    }
 }

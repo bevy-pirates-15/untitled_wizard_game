@@ -4,7 +4,7 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use crate::game::aiming::PlayerAim;
+use crate::{game::aiming::PlayerAim, screen::Screen};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_wand);
@@ -32,5 +32,6 @@ fn spawn_wand(
             ..default()
         },
         PlayerAim::default(),
+        StateScoped(Screen::Playing),
     ));
 }
