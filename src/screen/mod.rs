@@ -38,7 +38,7 @@ pub enum Screen {
 /// The game's states while playing
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
 #[source(Screen = Screen::Playing)]
-enum GameState {
+pub enum GameState {
     #[default]
     Running,
     Paused
