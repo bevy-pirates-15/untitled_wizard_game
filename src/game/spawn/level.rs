@@ -17,13 +17,20 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Event, Debug)]
 pub struct SpawnLevel;
 
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
+#[reflect(Component)]
+pub struct LevelBox;
+
 fn spawn_level(
     _trigger: Trigger<SpawnLevel>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    // Spawn level box here, change to very pretty art later
     commands.spawn((
+        Name::new("Level Box"),
+        LevelBox,
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
             transform: Transform::default().with_scale(Vec2::splat(420.).extend(0.0)),
