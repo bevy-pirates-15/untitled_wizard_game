@@ -4,10 +4,11 @@
 
 use bevy::prelude::*;
 
+pub mod enemy;
 pub mod level;
 pub mod player;
 pub mod wand;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((level::plugin, player::plugin, wand::plugin));
+    app.add_plugins((enemy::plugin, level::plugin, player::plugin, wand::plugin));
 }
