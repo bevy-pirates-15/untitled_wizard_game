@@ -83,6 +83,7 @@ fn apply_movement(
 ) {
     for (controller, movement, mut transform) in &mut movement_query {
         let velocity = movement.speed * controller.0;
-        transform.translation += velocity.extend(1.0) * time.delta_seconds();
+        // this is the trouble code
+        transform.translation += (velocity * time.delta_seconds()).extend(0.);
     }
 }

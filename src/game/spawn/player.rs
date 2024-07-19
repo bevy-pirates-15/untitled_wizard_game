@@ -42,7 +42,8 @@ fn spawn_player(
         Player,
         SpriteBundle {
             texture: images[&ImageAsset::Ducky].clone_weak(),
-            transform: Transform::from_scale(Vec2::splat(8.0).extend(1.0)),
+            transform: Transform::from_scale(Vec3::splat(8.0))
+                .with_translation(Vec3::new(0., 0., 1.)),
             ..Default::default()
         },
         TextureAtlas {
