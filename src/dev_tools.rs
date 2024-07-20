@@ -1,11 +1,7 @@
 //! Development tools for the game. This plugin is only enabled in dev builds.
 
 use avian2d::debug_render::{PhysicsDebugPlugin, PhysicsGizmos};
-use bevy::{
-    color::palettes::css::BLUE,
-    dev_tools::states::log_transitions,
-    prelude::*,
-};
+use bevy::{color::palettes::css::BLUE, dev_tools::states::log_transitions, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use crate::screen::{GameState, Screen};

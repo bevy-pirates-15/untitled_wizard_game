@@ -20,10 +20,7 @@ pub struct SpawnBorders;
 #[reflect(Component)]
 pub struct Border;
 
-fn spawn_box_borders(
-    _trigger: Trigger<SpawnBorders>,
-    mut commands: Commands,
-) {
+fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
     let borders = [
         // Right border
         (
