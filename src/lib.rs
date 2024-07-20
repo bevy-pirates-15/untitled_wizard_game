@@ -5,6 +5,7 @@ mod game;
 mod screen;
 mod ui;
 
+use avian2d::PhysicsPlugins;
 use bevy::{
     asset::AssetMetaCheck,
     audio::{AudioPlugin, Volume},
@@ -56,6 +57,8 @@ impl Plugin for AppPlugin {
                     ..default()
                 }),
         );
+        // Add physics
+        app.add_plugins(PhysicsPlugins::default().with_length_unit(20.));
 
         // Add other plugins.
         app.add_plugins((game::plugin, screen::plugin, ui::plugin));
