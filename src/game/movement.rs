@@ -6,6 +6,7 @@
 use crate::game::input::PlayerAction;
 use crate::screen::GameState;
 use crate::AppSet;
+use avian2d::{math::*, prelude::*};
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 
@@ -79,11 +80,12 @@ pub struct Movement {
 
 fn apply_movement(
     time: Res<Time>,
-    mut movement_query: Query<(&PlayerMovement, &Movement, &mut Transform)>,
+    mut movement_query: Query<(&mut LinearVelocity, &PlayerMovement, &Movement)>,
 ) {
-    for (controller, movement, mut transform) in &mut movement_query {
-        let velocity = movement.speed * controller.0;
-        // this is the trouble code
-        transform.translation += (velocity * time.delta_seconds()).extend(0.);
+    for (mut velocity, controller, movement) in &mut movement_query {
+        let delta_time = time.delta_seconds_f64().adjust_precision();
+
+        velocity.x = controller.0.x * movement.speed * delta_time;
+        velocity.y = controller.0.y * movement.speed * delta_time;
     }
 }

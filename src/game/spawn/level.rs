@@ -1,7 +1,7 @@
 //! Spawn the main level by triggering other observers.
 
 use bevy::{
-    color::palettes::css::PURPLE,
+    color::palettes::css::GREEN,
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
@@ -39,7 +39,7 @@ fn spawn_level(
             mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
             transform: Transform::default()
                 .with_scale(Vec2::new(MAP_WIDTH, MAP_HEIGHT).extend(0.0)),
-            material: materials.add(Color::from(PURPLE)),
+            material: materials.add(Color::from(GREEN)),
             ..default()
         },
         StateScoped(Screen::Playing),
