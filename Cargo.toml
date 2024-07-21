@@ -82,3 +82,7 @@ inherits = "release"
 opt-level = 3
 # Keep debug information in the binary.
 strip = "none"
+
+[[example]]
+name = "level_ui"
+path = "examples/level_ui/main.rs"
