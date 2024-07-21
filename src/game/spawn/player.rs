@@ -3,16 +3,16 @@
 use bevy::prelude::*;
 
 use crate::{
-    config::PLAYER_HEALTH,
+    config::{PLAYER_HEALTH, PLAYER_SPEED},
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
+        levelling::PlayerLevel,
         movement::{Movement, PlayerMovement},
+        Health,
     },
     screen::Screen,
 };
-
-use super::Health;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_player);
@@ -41,9 +41,10 @@ fn spawn_player(
     let player_animation = PlayerAnimation::new();
 
     commands.spawn((
-        Name::new("Player"),
+        Name::new("Wizard"),
         Player,
         Health(PLAYER_HEALTH),
+        PlayerLevel::default(),
         SpriteBundle {
             texture: images[&ImageAsset::Ducky].clone_weak(),
             transform: Transform::from_scale(Vec3::splat(8.0))
@@ -55,7 +56,9 @@ fn spawn_player(
             index: player_animation.get_atlas_index(),
         },
         PlayerMovement::default(),
-        Movement { speed: 420.0 },
+        Movement {
+            speed: PLAYER_SPEED,
+        },
         player_animation,
         StateScoped(Screen::Playing),
     ));
