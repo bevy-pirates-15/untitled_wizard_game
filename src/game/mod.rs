@@ -8,9 +8,11 @@ pub mod assets;
 pub mod audio;
 mod camera;
 mod enemy;
-mod input;
+pub mod input;
 mod movement;
+pub mod projectiles;
 pub mod spawn;
+pub mod spells;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
