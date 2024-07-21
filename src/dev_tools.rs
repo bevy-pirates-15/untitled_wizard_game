@@ -23,9 +23,9 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn change_state_menu(
-    mut contexts: EguiContexts, 
-    mut set_state: ResMut<NextState<Screen>>, 
-    mut set_sub_playing_state: ResMut<NextState<GameState>>
+    mut contexts: EguiContexts,
+    mut set_state: ResMut<NextState<Screen>>,
+    mut set_sub_playing_state: ResMut<NextState<GameState>>,
 ) {
     let ctx = contexts.ctx_mut();
 

@@ -1,9 +1,8 @@
 // Notes: I don't like using UI here, UI is unflexable for what I need
 
 use bevy::{
-    color::palettes::css::{BLACK, BLUE, BROWN, RED, WHITE},
+    color::palettes::css::{BLACK, BLUE, BROWN},
     prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle}, tasks::futures_lite::io::Empty,
 };
 
 fn main() -> AppExit {
@@ -37,29 +36,25 @@ enum LevelState {
 #[derive(Component)]
 struct SelectedGem;
 
-#[derive(Component)]
-struct EmptySlot;
-
-
-
 // TODO: Make spawn_gem be what takes arguments, make separate
 // "random_gem" function that then calls spawn_gem
 fn spawn_gem(commands: &mut Commands, asset_server: &AssetServer, index: i32) -> (Entity, Entity) {
     // For spawning the actual gem image
     let gem_image = asset_server.load("images/gem.png");
     let gem_image_entity = commands
-        .spawn((ImageBundle {
-            style: Style {
-                width: Val::Percent(80.0),
-                height: Val::Percent(45.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+        .spawn((
+            ImageBundle {
+                style: Style {
+                    width: Val::Percent(80.0),
+                    height: Val::Percent(45.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                image: UiImage::new(gem_image),
                 ..default()
             },
-            image: UiImage::new(gem_image),
-            ..default()
-        },
-        Name::new(format!("Gem{}", index)),
+            Name::new(format!("Gem{}", index)),
         ))
         .id();
 
@@ -160,7 +155,7 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         };
         let (gem_entity, text_entity) = spawn_gem(&mut commands, &asset_server, gem_index);
-        
+
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
             .insert(LevelUpAction::Selected(gem_entity))
@@ -193,12 +188,7 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            border_radius: BorderRadius::px(
-                2.0,
-                2.0,
-                2.0,
-                2.0,
-            ),
+            border_radius: BorderRadius::px(2.0, 2.0, 2.0, 2.0),
             border_color: BLACK.into(),
             background_color: Color::from(BROWN).into(),
             ..default()
@@ -215,7 +205,7 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         };
 
-        // TODO: Read data to see if there is already a gem there, then render with 
+        // TODO: Read data to see if there is already a gem there, then render with
         // spawn_gem
 
         let slot_container_entity = commands.spawn(slot_container).id();
@@ -226,7 +216,9 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             .push_children(&[slot_container_entity])
             .id();
 
-        commands.entity(wand_container_entity).push_children(&[select_wand_button_entitiy]);
+        commands
+            .entity(wand_container_entity)
+            .push_children(&[select_wand_button_entitiy]);
         // If this were real, I would search for the gem here
         // then push as a child of "select_wand_button"
         // for now, I will use "spawn_gem"
@@ -235,10 +227,8 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         // in wand already?
         // let (gem_entity, _) = spawn_gem(&mut commands, &asset_server);
         // commands.entity(select_wand_button_entitiy).push_children(&[gem_entity]);
-
     }
 }
-
 
 fn handle_level_action(
     mut commands: Commands,
@@ -260,7 +250,7 @@ fn handle_level_action(
                     commands.entity(*gem_entity).insert(SelectedGem);
                     //TODO: Change color of selected gem button
                     info!("current gem selected: {}", gem_entity);
-                },
+                }
                 LevelUpAction::Place(slot) => {
                     // Check to see if a gem is selected
                     if let Ok((selected_gem_entity, _)) = selected_gem_query.get_single() {
@@ -272,9 +262,8 @@ fn handle_level_action(
                         // or in a player table for later rendering
                         commands.entity(selected_gem_entity).remove::<SelectedGem>();
                         // TODO: make it so that no other gems can be selected/ placed
-                        
                     }
-                },
+                }
                 // Probably here we save the position of slots to be read when spell casting
                 LevelUpAction::Continue => next_level_state.set(LevelState::Wand),
             }

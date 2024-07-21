@@ -12,7 +12,10 @@ use bevy::{
 
 use crate::{
     config::*,
-    game::{assets::{ImageAsset, ImageAssets}, spawn::{player::Player, Health}},
+    game::{
+        assets::{ImageAsset, ImageAssets},
+        spawn::{player::Player, Health},
+    },
     screen::{GameState, Screen},
 };
 

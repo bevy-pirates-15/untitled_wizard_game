@@ -1,17 +1,17 @@
-use bevy::{color::palettes::css::{BLACK, BLUE, BROWN}, prelude::*};
+use bevy::{
+    color::palettes::css::{BLACK, BLUE, BROWN},
+    prelude::*,
+};
 
 use crate::ui::interaction::InteractionQuery;
 
 use super::GameState;
 
 pub(super) fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(GameState::GemSelection), gem_menu);
     app.add_systems(
-        OnEnter(GameState::GemSelection),
-        gem_menu
-    );
-    app.add_systems(
-        Update, 
-        handle_level_action.run_if(in_state(GameState::GemSelection))
+        Update,
+        handle_level_action.run_if(in_state(GameState::GemSelection)),
     );
 }
 
@@ -25,29 +25,25 @@ enum LevelUpAction {
 #[derive(Component)]
 struct SelectedGem;
 
-
 // TODO: Make spawn_gem be what takes arguments, make separate
 // "random_gem" function that then calls spawn_gem
-fn spawn_gem(
-    commands: &mut Commands, 
-    asset_server: &AssetServer, 
-    index: i32
-) -> (Entity, Entity) {
+fn spawn_gem(commands: &mut Commands, asset_server: &AssetServer, index: i32) -> (Entity, Entity) {
     // For spawning the actual gem image
     let gem_image = asset_server.load("images/gem.png");
     let gem_image_entity = commands
-        .spawn((ImageBundle {
-            style: Style {
-                width: Val::Percent(80.0),
-                height: Val::Percent(45.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+        .spawn((
+            ImageBundle {
+                style: Style {
+                    width: Val::Percent(80.0),
+                    height: Val::Percent(45.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                image: UiImage::new(gem_image),
                 ..default()
             },
-            image: UiImage::new(gem_image),
-            ..default()
-        },
-        Name::new(format!("Gem{}", index)),
+            Name::new(format!("Gem{}", index)),
         ))
         .id();
 
@@ -72,11 +68,7 @@ fn spawn_gem(
     (gem_image_entity, text_entity)
 }
 
-fn gem_menu(
-    mut commands: Commands, 
-    asset_server: Res<AssetServer>
-) {
-    
+fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let ui_container = NodeBundle {
         style: Style {
             width: Val::Percent(100.0),
@@ -122,8 +114,8 @@ fn gem_menu(
     // is a child of it
     let ui_container_entity = commands
         .spawn(ui_container)
-            .insert(StateScoped(GameState::GemSelection))
-            .id();
+        .insert(StateScoped(GameState::GemSelection))
+        .id();
     let gem_container_entity = commands.spawn(gem_container).id();
     let wand_container_entity = commands.spawn(wand_container).id();
 
@@ -156,7 +148,7 @@ fn gem_menu(
             ..default()
         };
         let (gem_entity, text_entity) = spawn_gem(&mut commands, &asset_server, gem_index);
-        
+
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
             .insert(LevelUpAction::Selected(gem_entity))
@@ -189,12 +181,7 @@ fn gem_menu(
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            border_radius: BorderRadius::px(
-                2.0,
-                2.0,
-                2.0,
-                2.0,
-            ),
+            border_radius: BorderRadius::px(2.0, 2.0, 2.0, 2.0),
             border_color: BLACK.into(),
             background_color: Color::from(BROWN).into(),
             ..default()
@@ -211,7 +198,7 @@ fn gem_menu(
             ..default()
         };
 
-        // TODO: Read data to see if there is already a gem there, then render with 
+        // TODO: Read data to see if there is already a gem there, then render with
         // spawn_gem
 
         let slot_container_entity = commands.spawn(slot_container).id();
@@ -222,7 +209,9 @@ fn gem_menu(
             .push_children(&[slot_container_entity])
             .id();
 
-        commands.entity(wand_container_entity).push_children(&[select_wand_button_entitiy]);
+        commands
+            .entity(wand_container_entity)
+            .push_children(&[select_wand_button_entitiy]);
     }
 }
 
@@ -246,7 +235,7 @@ fn handle_level_action(
                     commands.entity(*gem_entity).insert(SelectedGem);
                     //TODO: Change color of selected gem button
                     info!("current gem selected: {}", gem_entity);
-                },
+                }
                 LevelUpAction::Place(slot) => {
                     // Check to see if a gem is selected
                     if let Ok((selected_gem_entity, _)) = selected_gem_query.get_single() {
@@ -260,7 +249,7 @@ fn handle_level_action(
                         // TODO: make it so that no other gems can be selected/ placed
                         next_pause_state.set(GameState::Running)
                     }
-                },
+                }
             }
         }
     }
