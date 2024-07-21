@@ -6,6 +6,7 @@ mod pause;
 mod playing;
 mod splash;
 mod title;
+mod gem_selection;
 
 use bevy::prelude::*;
 
@@ -21,11 +22,12 @@ pub(super) fn plugin(app: &mut App) {
         credits::plugin,
         playing::plugin,
         pause::plugin,
+        gem_selection::plugin,
     ));
 }
 
 /// The game's main screen states.
-#[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default)]
+#[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default, Reflect)]
 pub enum Screen {
     #[default]
     Splash,
@@ -36,10 +38,11 @@ pub enum Screen {
 }
 
 /// The game's states while playing
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates, Reflect)]
 #[source(Screen = Screen::Playing)]
 pub enum GameState {
     #[default]
     Running,
     Paused,
+    GemSelection,
 }
