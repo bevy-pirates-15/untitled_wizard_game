@@ -8,6 +8,7 @@ pub mod assets;
 pub mod audio;
 mod camera;
 mod enemy;
+pub mod input;
 mod input;
 mod levelling;
 mod movement;
