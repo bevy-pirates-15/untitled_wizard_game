@@ -11,7 +11,9 @@ mod enemy;
 mod input;
 mod levelling;
 mod movement;
+pub mod projectiles;
 pub mod spawn;
+pub mod spells;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
