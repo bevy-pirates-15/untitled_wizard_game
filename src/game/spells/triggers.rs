@@ -49,7 +49,7 @@ pub fn do_timer_trigger(
     timer_trigger: Query<(Entity, &TimerSpellTrigger)>,
     mut commands: Commands,
 ) {
-    for (entity, mut trigger) in timer_trigger.iter() {
+    for (entity, trigger) in timer_trigger.iter() {
         if trigger.timer.just_finished() {
             let to_trigger = trigger.to_trigger.clone();
             commands.trigger_targets(SpellTriggerEvent { to_trigger }, entity);
