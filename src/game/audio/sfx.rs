@@ -8,6 +8,8 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
     let source = match event {
         Sfx::ButtonHover => &sfxs[&SfxAsset::ButtonHover],
         Sfx::ButtonPress => &sfxs[&SfxAsset::ButtonPress],
+        Sfx::PickUpGem => &sfxs[&SfxAsset::PickUpGem],
+        Sfx::PlaceGem => &sfxs[&SfxAsset::PlaceGem],
         Sfx::Step => random_step(&sfxs),
     }
     .clone_weak();
@@ -23,6 +25,8 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
 pub enum Sfx {
     ButtonHover,
     ButtonPress,
+    PickUpGem,
+    PlaceGem,
     Step,
 }
 

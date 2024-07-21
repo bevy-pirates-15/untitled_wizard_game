@@ -38,6 +38,8 @@ impl ImageAssets {
 pub enum SfxAsset {
     ButtonHover,
     ButtonPress,
+    PickUpGem,
+    PlaceGem,
     Step1,
     Step2,
     Step3,
@@ -59,6 +61,14 @@ impl SfxAssets {
             SfxAsset::ButtonPress,
             asset_server.load("audio/sfx/button_press.ogg"),
         );
+        assets.insert(
+            SfxAsset::PickUpGem,
+            asset_server.load("audio/sfx/pick_up_gem.wav"),
+        );
+        assets.insert(
+            SfxAsset::PlaceGem,
+            asset_server.load("audio/sfx/place_gem.wav"),
+        );
         assets.insert(SfxAsset::Step1, asset_server.load("audio/sfx/step1.ogg"));
         assets.insert(SfxAsset::Step2, asset_server.load("audio/sfx/step2.ogg"));
         assets.insert(SfxAsset::Step3, asset_server.load("audio/sfx/step3.ogg"));
@@ -74,6 +84,7 @@ impl SfxAssets {
 
 #[derive(PartialEq, Eq, Hash, Reflect)]
 pub enum SoundtrackAsset {
+    MainMenu,
     Credits,
     Gameplay,
 }
@@ -84,6 +95,10 @@ pub struct SoundtrackAssets(HashMap<SoundtrackAsset, Handle<AudioSource>>);
 impl SoundtrackAssets {
     pub fn new(asset_server: &AssetServer) -> Self {
         let mut assets = HashMap::new();
+        assets.insert(
+            SoundtrackAsset::MainMenu,
+            asset_server.load("audio/soundtracks/Minutes To Midnight.mp3"),
+        );
         assets.insert(
             SoundtrackAsset::Credits,
             asset_server.load("audio/soundtracks/Monkeys Spinning Monkeys.ogg"),

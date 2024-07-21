@@ -17,6 +17,7 @@ pub(super) fn play_soundtrack(
         Soundtrack::Disable => {
             return;
         }
+        Soundtrack::MainMenu => &soundtracks[&SoundtrackAsset::MainMenu],
         Soundtrack::Credits => &soundtracks[&SoundtrackAsset::Credits],
         Soundtrack::Gameplay => &soundtracks[&SoundtrackAsset::Gameplay],
     }
@@ -38,6 +39,7 @@ pub(super) struct SoundtrackMarker;
 /// Soundtracks will loop.
 #[derive(Event)]
 pub enum Soundtrack {
+    MainMenu,
     Credits,
     Gameplay,
     Disable,
