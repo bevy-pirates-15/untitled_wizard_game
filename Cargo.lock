@@ -5232,6 +5232,7 @@ dependencies = [
  "avian2d",
  "bevy",
  "bevy-inspector-egui",
+ "bevy_egui",
  "leafwing-input-manager",
  "log",
  "rand",

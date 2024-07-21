@@ -26,6 +26,8 @@ fn exit_playing(mut commands: Commands) {
     commands.trigger(Soundtrack::Disable);
 }
 
+// Probably add a level bar here somewhere
+
 fn toggle_game_pause(
     curr_pause_state: Res<State<GameState>>,
     mut next_pause_state: ResMut<NextState<GameState>>,
@@ -33,5 +35,7 @@ fn toggle_game_pause(
     match curr_pause_state.get() {
         GameState::Paused => next_pause_state.set(GameState::Running),
         GameState::Running => next_pause_state.set(GameState::Paused),
+        // Unable to pause game when in Gem Selection
+        GameState::GemSelection => {}
     }
 }

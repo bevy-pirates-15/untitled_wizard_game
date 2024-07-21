@@ -12,9 +12,11 @@ use bevy::{
 
 use crate::{
     config::*,
-    game::assets::{ImageAsset, ImageAssets},
-    game::spawn::{player::Player, Health},
-    screen::Screen,
+    game::{
+        assets::{ImageAsset, ImageAssets},
+        spawn::{player::Player, Health},
+    },
+    screen::{GameState, Screen},
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -28,7 +30,8 @@ pub(super) fn plugin(app: &mut App) {
             chase_player,
             clear_dead_enemies,
         )
-            .run_if(in_state(Screen::Playing)),
+            .run_if(in_state(Screen::Playing))
+            .run_if(in_state(GameState::Running)),
     );
 }
 
