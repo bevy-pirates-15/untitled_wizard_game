@@ -16,7 +16,7 @@ pub struct ZapSpellData {
     pub base_damage: f64,
 }
 impl SpellData for ZapSpellData {
-    fn build(&self, iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
+    fn build(&self, _iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
         return Some(Arc::new(ZapSpell {
             base_damage: self.base_damage,
         }));

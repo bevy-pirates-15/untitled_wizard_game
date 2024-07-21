@@ -1,5 +1,4 @@
 use std::sync::{Arc, Mutex};
-use std::task::Context;
 use std::time::Duration;
 
 use bevy::app::{App, Update};
@@ -12,9 +11,7 @@ use leafwing_input_manager::action_state::ActionState;
 use crate::AppSet;
 use crate::game::input::PlayerAction;
 use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
-use crate::game::spells::triggers::{
-    do_timer_trigger, SpellTriggerEvent, tick_timer_trigger, ToTrigger,
-};
+use crate::game::spells::triggers::ToTrigger;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -39,15 +36,6 @@ pub struct SpellCastContext {
     pub modifiers: Arc<SpellModifierNode>,
 }
 impl SpellCastContext {
-    pub fn empty(caster: Entity) -> Self {
-        SpellCastContext {
-            caster,
-            spell_delay: Arc::new(Mutex::new(Duration::from_secs_f32(0.2))),
-            spread: 0.0,
-            modifiers: Arc::new(SpellModifierNode::Root),
-        }
-    }
-
     pub fn add_modifier(&mut self, id: &str, modifier: SpellModifier) {
         self.modifiers = SpellModifierNode::with_new(id, self.modifiers.clone(), modifier);
     }
@@ -112,7 +100,7 @@ pub fn do_sequential_caster(
     mut sequential_trigger: Query<&mut SequentialCaster>,
     mut commands: Commands,
 ) {
-    for (mut seq_caster) in sequential_trigger.iter_mut() {
+    for mut seq_caster in sequential_trigger.iter_mut() {
         //can cast?
         if !seq_caster.spell_delay.finished() {
             continue;
