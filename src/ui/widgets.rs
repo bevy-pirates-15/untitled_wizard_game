@@ -48,7 +48,6 @@ impl<T: Spawn> Widgets for T {
                         color: BUTTON_TEXT,
                         ..default()
                     },
-
                 ),
             ));
         });
