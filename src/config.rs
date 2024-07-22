@@ -21,8 +21,4 @@ pub const SPAWN_RADIUS: Range<f32> = 1000.0..4000.0;
 pub const ENEMY_SPAWN_PERIOD: f32 = 1.0;
 
 // Experience Mechanic
-pub const LEVEL_EXP_LIST: [f64; 7] = [
-    100., // exp required to go from level 1 to 2
-    200., 300., 500., 800., 1100., 1900.,
-];
-pub const BASE_ENEMY_XP: f64 = 5.0;
+pub const BASE_ENEMY_XP: u32 = 5;
