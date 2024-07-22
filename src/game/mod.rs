@@ -9,10 +9,10 @@ pub mod audio;
 mod camera;
 mod enemy;
 pub mod input;
-mod levelling;
+pub mod levelling;
 mod movement;
-pub mod projectiles;
 pub mod spawn;
+pub mod projectiles;
 pub mod spells;
 
 pub(super) fn plugin(app: &mut App) {

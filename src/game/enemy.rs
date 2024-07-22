@@ -1,5 +1,6 @@
 // Handles the logic for a wave of enemies attacking the player
 
+use avian2d::collision::Collider;
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
@@ -125,11 +126,12 @@ fn clear_dead_enemies(
                 ItemDrop,
                 MaterialMesh2dBundle {
                     //todo add texture
-                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(5., 5.))),
+                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
                     material: materials.add(Color::from(LIGHT_CORAL)),
                     transform: *pos,
                     ..default()
                 },
+                Collider::circle(20.),
             ));
             // todo xp drops should only live for a short while
         }
