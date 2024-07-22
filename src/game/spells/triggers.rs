@@ -4,9 +4,9 @@ use bevy::app::{App, Update};
 use bevy::prelude::{Commands, Component, Entity, Event, IntoSystemConfigs, Query, Res, Timer};
 use bevy::time::Time;
 
-use crate::AppSet;
 use crate::game::spells::casting::SpellCastContext;
 use crate::game::spells::SpellEffect;
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(

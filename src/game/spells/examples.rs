@@ -1,19 +1,17 @@
+use crate::game::projectiles::ProjectileDamage;
+use crate::game::spells::casting::SpellCastContext;
+use crate::game::spells::helpers::spawn_player_projectile;
+use crate::game::spells::triggers::{SpellTriggerEvent, TimerSpellTrigger, ToTrigger};
+use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
+use bevy::prelude::{Commands, Entity, Reflect, Timer, TimerMode, Trigger, World};
 use std::slice::Iter;
 use std::sync::Arc;
-
-use bevy::prelude::{
-    Commands, Entity, GlobalTransform, Reflect, SpatialBundle, Timer, TimerMode, Trigger, World,
-};
-
-use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
-use crate::game::spells::casting::SpellCastContext;
-use crate::game::spells::triggers::{SpellTriggerEvent, TimerSpellTrigger, ToTrigger};
 
 /////////////////////////////
 // EXAMPLE IMPLEMENTATIONS //
 /////////////////////////////
 pub struct ZapSpellData {
-    pub base_damage: f64,
+    pub base_damage: f32,
 }
 impl SpellData for ZapSpellData {
     fn build(&self, _iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
@@ -31,7 +29,7 @@ impl SpellData for ZapSpellData {
 
 #[derive(Reflect, Debug, Clone, PartialEq)]
 pub struct ZapSpell {
-    pub base_damage: f64,
+    pub base_damage: f32,
 }
 impl SpellEffect for ZapSpell {
     fn get_name(&self) -> &str {
@@ -39,26 +37,14 @@ impl SpellEffect for ZapSpell {
     }
 
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
-        let Some(caster_gt) = world.entity(context.caster).get::<GlobalTransform>() else {
-            println!("Tried to cast spell from an entity with no global transform");
+        let Some(spell_entity) =
+            spawn_player_projectile(context, world, 50.0, 1000.0, self.base_damage)
+        else {
+            println!("Failed to spawn zap spell entity");
             return;
         };
-        let spell_transform = caster_gt.compute_transform();
-
-        //create new spell entity:
-        let spell = world.spawn(SpatialBundle {
-            transform: spell_transform,
-            ..Default::default()
-        });
-
-        //add relevant components to spell:
-        // basic projectile setup here
-        // spell.insert((ProjectileDamage { damage: self.base_damage },));
-        //todo
-
-        let spell_entity = spell.id();
-        context.modifiers.apply(spell_entity, world);
-        println!("Cast Zap - DMG: {}", self.base_damage); //todo - get damage from spell damage component
+        let spell_damage = world.get::<ProjectileDamage>(spell_entity).unwrap().damage;
+        println!("Cast Zap - DMG: {}", spell_damage);
     }
 }
 
@@ -112,10 +98,12 @@ impl SpellEffect for TriggerSpell {
         let to_trigger = self.spells_triggered.clone();
         let new_context = context.fresh_clone();
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
+            let mut spell_context = new_context.clone();
+            spell_context.caster = e;
             mod_world
                 .entity_mut(e)
                 .insert(TimerSpellTrigger {
-                    to_trigger: ToTrigger::new(to_trigger.clone(), new_context.clone()),
+                    to_trigger: ToTrigger::new(to_trigger.clone(), spell_context),
                     timer: Timer::from_seconds(1.0, TimerMode::Once),
                 })
                 .observe(

@@ -1,5 +1,5 @@
 use std::fmt;
-use std::fmt::{Debug};
+use std::fmt::Debug;
 use std::slice::Iter;
 use std::sync::Arc;
 
@@ -11,8 +11,8 @@ use crate::game::spells::SpellModifierNode::Node;
 
 pub mod casting;
 pub mod examples;
-pub mod triggers;
 mod helpers;
+pub mod triggers;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((casting::plugin, triggers::plugin));
@@ -56,7 +56,11 @@ impl Debug for SpellModifierNode {
             SpellModifierNode::Root => {
                 write!(f, "SpellMod:ROOT")
             }
-            SpellModifierNode::Node { id, modifier : _, prev } => {
+            SpellModifierNode::Node {
+                id,
+                modifier: _,
+                prev,
+            } => {
                 write!(f, "SpellMod:{}", id)?;
 
                 if let Some(prev) = prev {
@@ -85,7 +89,11 @@ impl SpellModifierNode {
     fn apply(&self, entity: Entity, world: &mut World) {
         match self {
             SpellModifierNode::Root => {}
-            SpellModifierNode::Node { id : _ , modifier, prev } => {
+            SpellModifierNode::Node {
+                id: _,
+                modifier,
+                prev,
+            } => {
                 modifier(entity, world);
                 if let Some(ref prev) = prev {
                     prev.apply(entity, world);

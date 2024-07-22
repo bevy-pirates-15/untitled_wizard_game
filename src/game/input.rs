@@ -40,6 +40,7 @@ impl PlayerAction {
         input_map.insert(Self::Move, VirtualDPad::wasd());
         input_map.insert(Self::Look, VirtualDPad::arrow_keys());
         input_map.insert(Self::Shoot, MouseButton::Left);
+        input_map.insert(Self::Shoot, KeyCode::Space);
 
         input_map
     }
