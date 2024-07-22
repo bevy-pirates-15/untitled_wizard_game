@@ -9,6 +9,7 @@ pub mod audio;
 mod camera;
 mod enemy;
 mod input;
+mod levelling;
 mod movement;
 pub mod spawn;
 
@@ -22,5 +23,16 @@ pub(super) fn plugin(app: &mut App) {
         spawn::plugin,
         aiming::plugin,
         enemy::plugin,
+        levelling::plugin,
     ));
+
+    app.register_type::<Health>();
 }
+
+#[derive(Debug, Component, Reflect)]
+#[reflect(Component)]
+pub struct Health(pub f32);
+
+#[derive(Debug, Component, Reflect)]
+#[reflect(Component)]
+pub struct ItemDrop;
