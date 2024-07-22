@@ -9,7 +9,7 @@ pub mod audio;
 mod camera;
 mod enemy;
 mod input;
-mod levelling;
+pub mod levelling;
 mod movement;
 pub mod spawn;
 

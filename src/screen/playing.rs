@@ -1,17 +1,21 @@
 //! The screen state for the main game loop.
 
+use bevy::color::palettes::tailwind::GREEN_400;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use super::{GameState, Screen};
+use crate::game::levelling::PlayerLevel;
+use crate::game::spawn::player::Player;
 use crate::game::{audio::soundtrack::Soundtrack, spawn::map::SpawnLevel};
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), enter_playing);
+    app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_level_bar));
     app.add_systems(OnExit(Screen::Playing), exit_playing);
 
+    app.add_systems(Update, update_level_bar.run_if(in_state(Screen::Playing)));
     app.add_systems(
         Update,
-        toggle_game_pause
+        (toggle_game_pause)
             .run_if(in_state(Screen::Playing).and_then(input_just_pressed(KeyCode::Escape))),
     );
 }
@@ -26,7 +30,55 @@ fn exit_playing(mut commands: Commands) {
     commands.trigger(Soundtrack::Disable);
 }
 
+#[derive(Component)]
+struct LevelBar;
+
 // Probably add a level bar here somewhere
+fn spawn_level_bar(mut commands: Commands) {
+    // TODO: check if bar is already here
+    let ui_container = NodeBundle {
+        style: Style {
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Baseline,
+            justify_content: JustifyContent::FlexStart,
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
+            ..default()
+        },
+        ..default()
+    };
+
+    let level_bar = NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(10.),
+            ..default()
+        },
+        background_color: BackgroundColor(Color::from(GREEN_400)),
+        ..default()
+    };
+
+    let ui_container_entity = commands.spawn(ui_container).id();
+    let level_bar_entity = commands.spawn(level_bar).insert(LevelBar).id();
+
+    commands
+        .entity(ui_container_entity)
+        .push_children(&[level_bar_entity]);
+}
+
+fn update_level_bar (
+    mut level_bar_query: Query<&mut Style, With<LevelBar>>,
+    player_level_query: Query<&PlayerLevel, With<Player>>,
+) {
+    for mut style in &mut level_bar_query {
+        println!("we get here");
+        if let Ok(player_level) = player_level_query.get_single() {
+            let percent_fill = (player_level.level as f64 * 100. - player_level.exp_to_level_up) / player_level.exp_to_level_up * 10.;
+            info!("Percent fill: {}", percent_fill);
+            style.width = Val::Percent(percent_fill as f32);
+        };
+    }
+}
 
 fn toggle_game_pause(
     curr_pause_state: Res<State<GameState>>,

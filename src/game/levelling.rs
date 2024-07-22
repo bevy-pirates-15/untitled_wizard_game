@@ -18,8 +18,8 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct PlayerLevel {
-    level: usize, // usize is far too big but otherwise we cant index the EXP_LIST
-    exp_to_level_up: f64,
+    pub level: usize, // usize is far too big but otherwise we cant index the EXP_LIST
+    pub exp_to_level_up: f64,
     overflow: f64,
 }
 
