@@ -125,7 +125,7 @@ fn clear_dead_enemies(
                 ItemDrop,
                 MaterialMesh2dBundle {
                     //todo add texture
-                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(5., 5.))),
+                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
                     material: materials.add(Color::from(LIGHT_CORAL)),
                     transform: *pos,
                     ..default()
