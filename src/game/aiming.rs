@@ -27,7 +27,7 @@ fn wand_aiming(
             continue;
         }
 
-        let angle = -player_aim.0.x.atan2(player_aim.0.y);
+        let angle = -player_aim.0.x.atan2(-player_aim.0.y);
 
         transform.translation = player_transform.translation + Vec3::new(0.0, 0.0, 1.0);
         transform.rotation = Quaternion::from_rotation_z(angle);

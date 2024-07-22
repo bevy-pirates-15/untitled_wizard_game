@@ -6,9 +6,7 @@ use leafwing_input_manager::input_map::InputMap;
 use leafwing_input_manager::plugin::InputManagerPlugin;
 use leafwing_input_manager::prelude::{DualAxis, VirtualDPad};
 use leafwing_input_manager::Actionlike;
-
 use crate::AppSet;
-
 use super::spawn::player::Player;
 
 pub(super) fn plugin(app: &mut App) {
@@ -33,12 +31,12 @@ impl PlayerAction {
 
         // Default gamepad input bindings
         input_map.insert(Self::Move, DualAxis::left_stick());
-        input_map.insert(Self::Look, DualAxis::right_stick());
+        // input_map.insert(Self::Look, DualAxis::right_stick());
         input_map.insert(Self::Shoot, GamepadButtonType::RightTrigger);
 
         // Default kbm input bindings
         input_map.insert(Self::Move, VirtualDPad::wasd());
-        input_map.insert(Self::Look, VirtualDPad::arrow_keys());
+        // input_map.insert(Self::Look, VirtualDPad::arrow_keys());
         input_map.insert(Self::Shoot, MouseButton::Left);
         input_map.insert(Self::Shoot, KeyCode::Space);
 
@@ -54,9 +52,7 @@ fn player_mouse_look(
     mut action_state: ResMut<ActionState<PlayerAction>>,
 ) {
     let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
-    let Ok(player_transform) = player_query.get_single() else {
-        return;
-    };
+    let Ok(player_transform) = player_query.get_single() else { return; };
     let window = window_query
         .get_single()
         .expect("Need a single primary window");
@@ -70,12 +66,14 @@ fn player_mouse_look(
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
         .and_then(|ray| {
-            Some(ray).zip(ray.intersect_plane(player_position, InfinitePlane3d::new(Vec3::Y)))
+            Some(ray).zip(ray.intersect_plane(player_position, InfinitePlane3d::new(Vec3::Z)))
         })
         .map(|(ray, p)| ray.get_point(p))
     {
-        let diff = (p - player_position).xz();
-        if diff.length_squared() > 1e-3f32 {
+        println!("Looking at {}", p);
+        let diff = (p - player_position).xy();
+        println!("Diff: {}", diff);
+        if diff.length_squared() > 0.01 {
             // Get the mutable action data to set the axis
             let action_data = action_state.action_data_mut_or_default(&PlayerAction::Look);
 
