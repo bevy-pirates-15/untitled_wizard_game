@@ -18,8 +18,8 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct PlayerLevel {
-    level: u32,
-    exp_to_level_up: u32,
+    pub level: u32,
+    pub exp_to_level_up: u32,
     overflow: u32,
 }
 
@@ -27,7 +27,7 @@ impl Default for PlayerLevel {
     fn default() -> Self {
         PlayerLevel {
             level: 1,
-            exp_to_level_up: 100,
+            exp_to_level_up: compute_next_level(1),
             overflow: 0,
         }
     }
@@ -91,7 +91,7 @@ fn level_up(
     next_game_state.set(GameState::GemSelection);
 }
 
-fn compute_next_level(curr_level: u32) -> u32 {
+pub fn compute_next_level(curr_level: u32) -> u32 {
     match curr_level {
         n @ 1..=10 => 100 + (10 * n),
         n @ 11..=u32::MAX => 200 + (50 * n),
