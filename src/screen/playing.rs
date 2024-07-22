@@ -4,7 +4,7 @@ use bevy::color::palettes::tailwind::GREEN_400;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use super::{GameState, Screen};
-use crate::game::levelling::PlayerLevel;
+use crate::game::levelling::{compute_next_level, PlayerLevel};
 use crate::game::spawn::player::Player;
 use crate::game::{audio::soundtrack::Soundtrack, spawn::map::SpawnLevel};
 
@@ -58,7 +58,10 @@ fn spawn_level_bar(mut commands: Commands) {
         ..default()
     };
 
-    let ui_container_entity = commands.spawn(ui_container).id();
+    let ui_container_entity = commands
+        .spawn(ui_container)
+        .insert(StateScoped(Screen::Playing))
+        .id();
     let level_bar_entity = commands.spawn(level_bar).insert(LevelBar).id();
 
     commands
@@ -66,15 +69,16 @@ fn spawn_level_bar(mut commands: Commands) {
         .push_children(&[level_bar_entity]);
 }
 
-fn update_level_bar (
+fn update_level_bar(
     mut level_bar_query: Query<&mut Style, With<LevelBar>>,
     player_level_query: Query<&PlayerLevel, With<Player>>,
 ) {
     for mut style in &mut level_bar_query {
-        println!("we get here");
         if let Ok(player_level) = player_level_query.get_single() {
-            let percent_fill = (player_level.level as f64 * 100. - player_level.exp_to_level_up) / player_level.exp_to_level_up * 10.;
-            info!("Percent fill: {}", percent_fill);
+            let total_exp_in_level = compute_next_level(player_level.level);
+            let percent_fill = ((total_exp_in_level as f32 - player_level.exp_to_level_up as f32)
+                / total_exp_in_level as f32)
+                * 100.;
             style.width = Val::Percent(percent_fill as f32);
         };
     }
