@@ -1,7 +1,7 @@
 use avian2d::collision::CollidingEntities;
 use bevy::prelude::*;
 
-use crate::{config::LEVEL_EXP_LIST, screen::GameState};
+use crate::screen::GameState;
 
 use super::spawn::player::Player;
 
@@ -18,24 +18,24 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct PlayerLevel {
-    level: usize, // usize is far too big but otherwise we cant index the EXP_LIST
-    exp_to_level_up: f64,
-    overflow: f64,
+    level: u32,
+    exp_to_level_up: u32,
+    overflow: u32,
 }
 
 impl Default for PlayerLevel {
     fn default() -> Self {
         PlayerLevel {
             level: 1,
-            exp_to_level_up: LEVEL_EXP_LIST[0],
-            overflow: 0.,
+            exp_to_level_up: 100,
+            overflow: 0,
         }
     }
 }
 
 #[derive(Debug, Component, Copy, Clone, Reflect)]
 #[reflect(Component)]
-pub struct Experience(pub f64);
+pub struct Experience(pub u32);
 
 fn detect_player_experience_collision(
     mut commands: Commands,
@@ -45,14 +45,13 @@ fn detect_player_experience_collision(
     for (mut player_level, colliding_entities) in player_collision_query.iter_mut() {
         for &colliding_entity in colliding_entities.0.iter() {
             if let Ok((exp_entity, experience)) = exp_query.get(colliding_entity) {
-                let extra_exp = experience.0 - player_level.exp_to_level_up;
                 info!(
                     "Exp collected: {:?}, Exp until next level: {:?}",
-                    exp_entity, player_level.exp_to_level_up
+                    experience.0, player_level.exp_to_level_up
                 );
-                if extra_exp >= 0. {
-                    player_level.exp_to_level_up = LEVEL_EXP_LIST[player_level.level];
-                    player_level.overflow += extra_exp;
+                if experience.0 >= player_level.exp_to_level_up {
+                    player_level.overflow += experience.0 - player_level.exp_to_level_up;
+                    player_level.exp_to_level_up = compute_next_level(player_level.level);
                     commands.trigger(LevelUp)
                 } else {
                     player_level.exp_to_level_up -= experience.0;
@@ -82,13 +81,20 @@ fn level_up(
     info!("Player levels up to level {}", player.level);
     // todo do level up specifics here
 
-    let extra_overflow = player.overflow - player.exp_to_level_up;
-    if extra_overflow >= 0. {
-        player.exp_to_level_up = LEVEL_EXP_LIST[player.level];
-        player.overflow = extra_overflow;
+    if player.overflow >= player.exp_to_level_up {
+        player.exp_to_level_up = compute_next_level(player.level);
+        player.overflow -= player.exp_to_level_up;
         commands.trigger(LevelUp)
     } else {
         player.exp_to_level_up -= player.overflow;
     }
     next_game_state.set(GameState::GemSelection);
+}
+
+fn compute_next_level(curr_level: u32) -> u32 {
+    match curr_level {
+        n @ 1..=10 => 100 + (10 * n),
+        n @ 11..=u32::MAX => 200 + (50 * n),
+        _ => unreachable!("Level too small"),
+    }
 }
