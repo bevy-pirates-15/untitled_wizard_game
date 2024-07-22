@@ -8,9 +8,9 @@ use super::{spawn::player::Player, ItemDrop};
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
     app.add_systems(
-        Update, 
-        (detect_player_experience_collision)
-            .run_if(in_state(GameState::Running)));
+        Update,
+        (detect_player_experience_collision).run_if(in_state(GameState::Running)),
+    );
     app.register_type::<Experience>();
     app.register_type::<PlayerLevel>();
 }
@@ -46,7 +46,10 @@ fn detect_player_experience_collision(
         for &colliding_entity in colliding_entities.0.iter() {
             if let Ok((exp_entity, experience)) = exp_query.get(colliding_entity) {
                 let extra_exp = experience.0 - player_level.exp_to_level_up;
-                info!("Exp collected: {:?}, Exp until next level: {:?}", exp_entity, player_level.exp_to_level_up);
+                info!(
+                    "Exp collected: {:?}, Exp until next level: {:?}",
+                    exp_entity, player_level.exp_to_level_up
+                );
                 if extra_exp >= 0. {
                     player_level.exp_to_level_up = LEVEL_EXP_LIST[player_level.level];
                     player_level.overflow += extra_exp;
@@ -72,7 +75,7 @@ fn level_up(
     if player_query.is_empty() {
         return;
     }
-    
+
     let mut player = player_query.single_mut();
 
     player.level += 1;
