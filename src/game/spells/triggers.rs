@@ -1,59 +1,43 @@
-// triggers for casting attached spells
-
-// player trigger (used for attaching to players wand)
-// repeat trigger (casts its spell repeatedly, X amount of times)
-// timer trigger (casts its spell after a certain delay)
-// collision trigger (casts its spell when it collides with something)
-// expiration trigger (casts its spell before it expires)
-
-use crate::game::input::PlayerAction;
-use crate::game::spells::{SpellEffect, SpellTriggerEvent};
-use bevy::prelude::{Commands, Component, Entity, Query, Res, Timer};
-use bevy::time::Time;
-use leafwing_input_manager::action_state::ActionState;
 use std::sync::Arc;
 
-pub type TriggeredSpells = Arc<Vec<Arc<dyn SpellEffect>>>;
+use bevy::app::{App, Update};
+use bevy::prelude::{Commands, Component, Entity, Event, IntoSystemConfigs, Query, Res, Timer};
+use bevy::time::Time;
 
-#[derive(Component, Debug, Clone)]
-pub struct PlayerSpellTrigger {
-    pub to_trigger: TriggeredSpells,
+use crate::game::spells::casting::SpellCastContext;
+use crate::game::spells::SpellEffect;
+use crate::AppSet;
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(
+        Update,
+        (
+            tick_timer_trigger.in_set(AppSet::TickTimers),
+            do_timer_trigger,
+            //todo: more triggers
+        ),
+    );
 }
-pub fn do_player_trigger(
-    action_state: Res<ActionState<PlayerAction>>,
-    player_trig: Query<(Entity, &PlayerSpellTrigger)>,
-    mut commands: Commands,
-) {
-    if action_state.pressed(&PlayerAction::Shoot) {
-        for (entity, trigger) in player_trig.iter() {
-            commands.trigger_targets(SpellTriggerEvent::new(trigger.to_trigger.clone()), entity);
-        }
+
+#[derive(Clone, Debug)]
+pub struct ToTrigger {
+    pub spells: Arc<Vec<Arc<dyn SpellEffect>>>,
+    pub context: SpellCastContext,
+}
+impl ToTrigger {
+    pub fn new(spells: Arc<Vec<Arc<dyn SpellEffect>>>, context: SpellCastContext) -> Self {
+        ToTrigger { spells, context }
     }
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct RepeatSpellTrigger {
-    pub to_trigger: TriggeredSpells,
-    pub counter: Option<u32>,
-}
-pub fn do_repeat_trigger(
-    repeat_trigger: Query<(Entity, &RepeatSpellTrigger)>,
-    mut commands: Commands,
-) {
-    for (entity, trigger) in repeat_trigger.iter() {
-        if let Some(mut counter) = trigger.counter {
-            if counter <= 0 {
-                continue;
-            }
-            counter -= 1;
-        }
-        commands.trigger_targets(SpellTriggerEvent::new(trigger.to_trigger.clone()), entity)
-    }
+#[derive(Event, Debug, Clone)]
+pub struct SpellTriggerEvent {
+    pub to_trigger: ToTrigger,
 }
 
 #[derive(Component, Debug, Clone)]
 pub struct TimerSpellTrigger {
-    pub to_trigger: TriggeredSpells,
+    pub to_trigger: ToTrigger,
     pub timer: Timer,
 }
 pub fn tick_timer_trigger(time: Res<Time>, mut timer_trigger: Query<&mut TimerSpellTrigger>) {
@@ -65,9 +49,10 @@ pub fn do_timer_trigger(
     timer_trigger: Query<(Entity, &TimerSpellTrigger)>,
     mut commands: Commands,
 ) {
-    for (entity, mut trigger) in timer_trigger.iter() {
-        if trigger.timer.finished() {
-            commands.trigger_targets(SpellTriggerEvent::new(trigger.to_trigger.clone()), entity)
+    for (entity, trigger) in timer_trigger.iter() {
+        if trigger.timer.just_finished() {
+            let to_trigger = trigger.to_trigger.clone();
+            commands.trigger_targets(SpellTriggerEvent { to_trigger }, entity);
         }
     }
 }

@@ -8,10 +8,10 @@ use bevy::prelude::{
 };
 use leafwing_input_manager::action_state::ActionState;
 
-use crate::AppSet;
 use crate::game::input::PlayerAction;
-use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
 use crate::game::spells::triggers::ToTrigger;
+use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(

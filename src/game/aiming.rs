@@ -1,4 +1,5 @@
 use crate::AppSet;
+use avian2d::math::Quaternion;
 use bevy::prelude::*;
 
 use super::spawn::player::Player;
@@ -22,12 +23,13 @@ fn wand_aiming(
         return;
     };
     for (player_aim, mut transform) in &mut aim_query {
-        let player_translation = Vec2::new(
-            player_transform.translation.x,
-            player_transform.translation.y,
-        );
-        // How far away the wand is from player
-        let radius = 100.;
-        transform.translation = (player_translation + radius * player_aim.0).extend(3.0);
+        if player_aim.0.length_squared() < 0.01 {
+            continue;
+        }
+
+        let angle = -player_aim.0.x.atan2(player_aim.0.y);
+
+        transform.translation = player_transform.translation + Vec3::new(0.0, 0.0, 1.0);
+        transform.rotation = Quaternion::from_rotation_z(angle);
     }
 }

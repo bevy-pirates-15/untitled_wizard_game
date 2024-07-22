@@ -7,13 +7,13 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use crate::{game::aiming::PlayerAim, screen::Screen};
-use crate::game::spells::{SpellEffect, SpellModifierNode};
 use crate::game::spells::casting::{
     PlayerSpellTrigger, SequentialCaster, SpellCastContext, SpellCastEvent,
 };
 use crate::game::spells::examples::{TriggerSpell, ZapSpell};
 use crate::game::spells::triggers::ToTrigger;
+use crate::game::spells::{SpellEffect, SpellModifierNode};
+use crate::{game::aiming::PlayerAim, screen::Screen};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_wand);
@@ -35,12 +35,19 @@ fn spawn_wand(
         Name::new("Wand"),
         Wand,
         MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
-            transform: Transform::default().with_scale(Vec2::new(20., 70.).extend(2.0)),
+            mesh: Mesh2dHandle(
+                meshes.add(
+                    Rectangle::new(20., 70.)
+                        .mesh()
+                        .build()
+                        .translated_by(Vec3::new(0.0, 35.0, 0.0)),
+                ),
+            ),
+            // transform: Transform::default().with_scale(Vec2::new(20., 70.).extend(2.0)),
             material: materials.add(Color::from(BROWN)),
             ..default()
         },
-        PlayerAim::default(),
+        PlayerAim(Vec2::new(0.0, 1.0)),
         StateScoped(Screen::Playing),
     ));
 
