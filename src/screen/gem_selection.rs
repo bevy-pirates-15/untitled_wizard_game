@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::ui::interaction::InteractionQuery;
+use crate::ui::{interaction::InteractionQuery, GemPickUpButtonSound, GemPlaceButtonSound};
 
 use super::GameState;
 
@@ -151,6 +151,7 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
+            .insert(GemPickUpButtonSound)
             .insert(LevelUpAction::Selected(gem_entity))
             .id();
         commands
@@ -205,6 +206,7 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         let select_wand_button_entitiy = commands
             .spawn(select_wand_button)
+            .insert(GemPlaceButtonSound)
             .insert(LevelUpAction::Place(slot_container_entity))
             .push_children(&[slot_container_entity])
             .id();
