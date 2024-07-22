@@ -1,3 +1,4 @@
+use avian2d::collision::{CollidingEntities, Collisions};
 use bevy::prelude::*;
 
 use crate::{config::LEVEL_EXP_LIST, screen::GameState};
@@ -6,7 +7,10 @@ use super::{spawn::player::Player, ItemDrop};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
-    app.add_systems(Update, (collect_xp,).run_if(in_state(GameState::Running)));
+    app.add_systems(
+        Update, 
+        (detect_player_experience_collision)
+            .run_if(in_state(GameState::Running)));
     app.register_type::<Experience>();
     app.register_type::<PlayerLevel>();
 }
@@ -33,30 +37,25 @@ impl Default for PlayerLevel {
 #[reflect(Component)]
 pub struct Experience(pub f64);
 
-fn collect_xp(
+fn detect_player_experience_collision(
     mut commands: Commands,
-    mut player_query: Query<(&Transform, &mut PlayerLevel), With<Player>>,
-    xp_drops_query: Query<(&Transform, &Experience, Entity), With<ItemDrop>>,
+    mut player_collision_query: Query<(&mut PlayerLevel, &CollidingEntities), With<Player>>,
+    exp_query: Query<(Entity, &Experience), With<Experience>>,
 ) {
-    if player_query.is_empty() || xp_drops_query.is_empty() {
-        return;
-    }
-
-    let (player_pos, mut player_level) = player_query.single_mut();
-
-    for (xp_pos, xp_amount, xp) in xp_drops_query.iter() {
-        if xp_pos == player_pos {
-            // Player is 'on' the xp drop
-            let extra_xp = xp_amount.0 - player_level.exp_to_level_up;
-            if extra_xp >= 0. {
-                // player_level.level += 1;
-                player_level.exp_to_level_up = LEVEL_EXP_LIST[player_level.level];
-                player_level.overflow += extra_xp;
-                commands.trigger(LevelUp)
-            } else {
-                player_level.exp_to_level_up -= xp_amount.0;
+    for (mut player_level, colliding_entities) in player_collision_query.iter_mut() {
+        for &colliding_entity in colliding_entities.0.iter() {
+            if let Ok((exp_entity, experience)) = exp_query.get(colliding_entity) {
+                let extra_exp = experience.0 - player_level.exp_to_level_up;
+                info!("Exp collected: {:?}, Exp until next level: {:?}", exp_entity, player_level.exp_to_level_up);
+                if extra_exp >= 0. {
+                    player_level.exp_to_level_up = LEVEL_EXP_LIST[player_level.level];
+                    player_level.overflow += extra_exp;
+                    commands.trigger(LevelUp)
+                } else {
+                    player_level.exp_to_level_up -= experience.0;
+                }
+                commands.entity(exp_entity).despawn();
             }
-            commands.entity(xp).despawn();
         }
     }
 }
@@ -68,14 +67,16 @@ fn level_up(
     _trigger: Trigger<LevelUp>,
     mut commands: Commands,
     mut player_query: Query<&mut PlayerLevel, With<Player>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if player_query.is_empty() {
         return;
     }
+    
     let mut player = player_query.single_mut();
 
     player.level += 1;
-
+    info!("Player levels up to level {}", player.level);
     // todo do level up specifics here
 
     let extra_overflow = player.overflow - player.exp_to_level_up;
@@ -86,4 +87,5 @@ fn level_up(
     } else {
         player.exp_to_level_up -= player.overflow;
     }
+    next_game_state.set(GameState::GemSelection);
 }
