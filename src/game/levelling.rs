@@ -1,9 +1,9 @@
-use avian2d::collision::{CollidingEntities, Collisions};
+use avian2d::collision::CollidingEntities;
 use bevy::prelude::*;
 
 use crate::{config::LEVEL_EXP_LIST, screen::GameState};
 
-use super::{spawn::player::Player, ItemDrop};
+use super::spawn::player::Player;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
