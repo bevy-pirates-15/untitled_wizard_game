@@ -26,6 +26,7 @@ pub(super) fn plugin(app: &mut App) {
         spawn::plugin,
         aiming::plugin,
         enemy::plugin,
+        spells::plugin,
         levelling::plugin,
     ));
 
