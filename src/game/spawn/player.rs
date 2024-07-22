@@ -6,11 +6,11 @@ use bevy::prelude::*;
 use crate::{
     config::{PLAYER_HEALTH, PLAYER_SPEED},
     game::{
-        Health,
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
         levelling::PlayerLevel,
         movement::{Movement, PlayerMovement},
+        Health,
     },
     screen::Screen,
 };
