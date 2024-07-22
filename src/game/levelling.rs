@@ -1,5 +1,3 @@
-use std::u32::MAX;
-
 use avian2d::collision::CollidingEntities;
 use bevy::prelude::*;
 
@@ -96,7 +94,7 @@ fn level_up(
 fn compute_next_level(curr_level: u32) -> u32 {
     match curr_level {
         n @ 1..=10 => 100 + (10 * n),
-        n @ 11..=MAX => 200 + (50 * n),
+        n @ 11..=u32::MAX => 200 + (50 * n),
         _ => unreachable!("Level too small"),
     }
 }
