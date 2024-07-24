@@ -29,6 +29,7 @@ pub(super) fn plugin(app: &mut App) {
         spells::plugin,
         levelling::plugin,
         projectiles::plugin,
+        physics::plugin,
     ));
 
     app.register_type::<Health>();
