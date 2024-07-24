@@ -3,6 +3,7 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
 
+use crate::game::physics::GameLayer;
 use crate::{
     config::{PLAYER_HEALTH, PLAYER_SPEED},
     game::{
@@ -64,6 +65,15 @@ fn spawn_player(
         LockedAxes::ROTATION_LOCKED,
         RigidBody::Dynamic,
         Collider::ellipse(8., 10.),
+        CollisionLayers::new(
+            GameLayer::Player,
+            [
+                GameLayer::Border,
+                GameLayer::Environment,
+                GameLayer::Enemy,
+                GameLayer::EnemyProjectile,
+            ],
+        ),
         LinearVelocity::default(),
         StateScoped(Screen::Playing),
     ));
