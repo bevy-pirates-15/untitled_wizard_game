@@ -1,11 +1,16 @@
-use crate::game::projectiles::ProjectileDamage;
-use crate::game::spells::casting::SpellCastContext;
-use crate::game::spells::helpers::spawn_player_projectile;
-use crate::game::spells::triggers::{SpellTriggerEvent, TimerSpellTrigger, ToTrigger};
-use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
-use bevy::prelude::{Commands, Entity, Reflect, Timer, TimerMode, Trigger, World};
 use std::slice::Iter;
 use std::sync::Arc;
+use std::time::Duration;
+
+use bevy::log::{info, warn};
+use bevy::math::Vec2;
+use bevy::prelude::{Entity, Reflect, Timer, TimerMode, World};
+
+use crate::game::projectiles::ProjectileDamage;
+use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
+use crate::game::spells::casting::{CasterTargeter, InstantCaster, SpellCastContext, SpellCaster};
+use crate::game::spells::helpers::spawn_spell_projectile;
+use crate::game::spells::triggers::TimerSpellTrigger;
 
 /////////////////////////////
 // EXAMPLE IMPLEMENTATIONS //
@@ -37,14 +42,20 @@ impl SpellEffect for ZapSpell {
     }
 
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
-        let Some(spell_entity) =
-            spawn_player_projectile(context, world, 50.0, 1000.0, self.base_damage)
-        else {
-            println!("Failed to spawn zap spell entity");
+        let Some(spell_entity) = spawn_spell_projectile(
+            context,
+            world,
+            50.0,
+            500.0,
+            self.base_damage,
+            1,
+            Duration::from_secs_f32(2.0),
+        ) else {
+            warn!("Failed to spawn zap spell entity");
             return;
         };
         let spell_damage = world.get::<ProjectileDamage>(spell_entity).unwrap().damage;
-        println!("Cast Zap - DMG: {}", spell_damage);
+        info!("Cast Zap - DMG: {}", spell_damage);
     }
 }
 
@@ -95,36 +106,27 @@ impl SpellEffect for TriggerSpell {
     }
 
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
-        let to_trigger = self.spells_triggered.clone();
+        let spells = self.spells_triggered.clone();
         let new_context = context.fresh_clone();
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
             let mut spell_context = new_context.clone();
             spell_context.caster = e;
-            mod_world
-                .entity_mut(e)
-                .insert(TimerSpellTrigger {
-                    to_trigger: ToTrigger::new(to_trigger.clone(), spell_context),
+            mod_world.entity_mut(e).insert((
+                SpellCaster::Instant(InstantCaster::new()),
+                TimerSpellTrigger {
+                    values: spell_context.values.clone(),
                     timer: Timer::from_seconds(1.0, TimerMode::Once),
-                })
-                .observe(
-                    |trigger: Trigger<SpellTriggerEvent>, mut commands: Commands| {
-                        let spells = trigger.event().to_trigger.spells.clone();
-                        let context = trigger.event().to_trigger.context.clone();
-                        commands.add(move |w: &mut World| {
-                            for spell in spells.iter() {
-                                println!("Triggering spell: {}", spell.get_name());
-                                spell.cast(&mut context.fresh_clone(), w);
-                            }
-                        });
-                    },
-                );
+                    spells: spells.clone(),
+                },
+                CasterTargeter::VelocityBased(Vec2::new(0.0, 1.0)),
+            ));
         });
 
         //when we multicast, we need to clone the context instead of passing it down,
         // this is because each spell in the multicast chain needs to have its own context
 
         context.add_modifier("TEST-TriggerMod", modifier);
-        println!(
+        info!(
             "Added Trigger to {} - triggering: {}",
             self.trigger_spell.get_name(),
             self.spells_triggered

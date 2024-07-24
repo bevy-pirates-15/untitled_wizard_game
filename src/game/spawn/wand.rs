@@ -1,5 +1,4 @@
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::sync::Arc;
 
 use bevy::{
     color::palettes::css::BROWN,
@@ -8,10 +7,10 @@ use bevy::{
 };
 
 use crate::game::spells::casting::{
-    PlayerSpellTrigger, SequentialCaster, SpellCastContext, SpellCastEvent,
+    CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster,
 };
 use crate::game::spells::examples::{TriggerSpell, ZapSpell};
-use crate::game::spells::triggers::ToTrigger;
+use crate::game::spells::triggers::PlayerSpellTrigger;
 use crate::game::spells::{SpellEffect, SpellModifierNode};
 use crate::{game::aiming::PlayerAim, screen::Screen};
 
@@ -51,41 +50,36 @@ fn spawn_wand(
         StateScoped(Screen::Playing),
     ));
 
-    let wand_spell_context = SpellCastContext {
-        caster: e.id(),
-        spell_delay: Arc::new(Mutex::new(Duration::from_secs_f32(0.2))),
-        spread: 0.0,
-        modifiers: Arc::new(SpellModifierNode::Root),
-    };
+    // let wand_spell_context = SpellCastContext {
+    //     caster: e.id(),
+    //     spell_vec: Vec2::new(0.0, 1.0),
+    //     spell_delay: Arc::new(Mutex::new(Duration::from_secs_f32(0.2))),
+    //     spread: 0.0,
+    //     modifiers: Arc::new(SpellModifierNode::Root),
+    // };
 
     let wand_spells: Arc<Vec<Arc<dyn SpellEffect>>> = Arc::new(vec![
-        Arc::new(ZapSpell { base_damage: 1.0 }),
-        Arc::new(ZapSpell { base_damage: 2.0 }),
+        Arc::new(ZapSpell { base_damage: 81.0 }),
+        Arc::new(ZapSpell { base_damage: 82.0 }),
         Arc::new(TriggerSpell {
-            trigger_spell: Arc::new(ZapSpell { base_damage: 3.0 }),
+            trigger_spell: Arc::new(ZapSpell { base_damage: 83.0 }),
             spells_triggered: Arc::new(vec![
-                Arc::new(ZapSpell { base_damage: 4.0 }),
-                Arc::new(ZapSpell { base_damage: 5.0 }),
+                Arc::new(ZapSpell { base_damage: 84.0 }),
+                Arc::new(ZapSpell { base_damage: 85.0 }),
             ]),
         }),
+        Arc::new(ZapSpell { base_damage: 86.0 }),
     ]);
 
     e.insert((
-        SequentialCaster::new(),
+        SpellCaster::Sequential(SequentialCaster::new()),
         PlayerSpellTrigger {
-            to_trigger: ToTrigger::new(wand_spells, wand_spell_context),
+            values: SpellCastValues {
+                spread: 10.0,
+                modifiers: Arc::new(SpellModifierNode::Root),
+            },
+            spells: wand_spells,
         },
+        CasterTargeter::RotationBased(Vec2::new(0.0, 1.0)),
     ));
-
-    e.observe(
-        |trigger: Trigger<SpellCastEvent>, mut q: Query<&mut SequentialCaster>| {
-            println!("Wand triggered");
-            let Ok(mut seq_caster) = q.get_mut(trigger.entity()) else {
-                println!("Failed to get sequential caster");
-                return;
-            };
-
-            seq_caster.try_cast(trigger.event().to_trigger.clone());
-        },
-    );
 }

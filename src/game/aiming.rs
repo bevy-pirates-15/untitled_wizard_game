@@ -1,6 +1,8 @@
-use crate::AppSet;
 use avian2d::math::Quaternion;
 use bevy::prelude::*;
+
+use crate::AppSet;
+use crate::game::input::player_mouse_look;
 
 use super::spawn::player::Player;
 
@@ -8,7 +10,12 @@ pub(super) fn plugin(app: &mut App) {
     // Record where player aims
     app.register_type::<PlayerAim>();
     // Apply wand aim
-    app.add_systems(Update, wand_aiming.in_set(AppSet::RecordInput));
+    app.add_systems(
+        Update,
+        wand_aiming
+            .after(player_mouse_look)
+            .in_set(AppSet::RecordInput),
+    );
 }
 
 #[derive(Component, Reflect, Default)]
@@ -27,7 +34,7 @@ fn wand_aiming(
             continue;
         }
 
-        let angle = -player_aim.0.x.atan2(-player_aim.0.y);
+        let angle = -player_aim.0.x.atan2(player_aim.0.y);
 
         transform.translation = player_transform.translation + Vec3::new(0.0, 0.0, 1.0);
         transform.rotation = Quaternion::from_rotation_z(angle);

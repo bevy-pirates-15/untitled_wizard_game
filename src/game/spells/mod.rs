@@ -11,7 +11,7 @@ use crate::game::spells::SpellModifierNode::Node;
 
 pub mod casting;
 pub mod examples;
-mod helpers;
+pub mod helpers;
 pub mod triggers;
 
 pub(super) fn plugin(app: &mut App) {
@@ -26,13 +26,12 @@ pub struct SpellComponent {
 }
 
 pub trait SpellData {
-    //use arc as spell effects can be easily cloned into children,
-    //and they persist when the main spell is modified
     fn build(&self, iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>>;
     // fn get_desc(&self) -> String; //todo, build description in the data so it can use the numbers
 
     // fn can_upgrade(&self) -> bool; //todo
     // fn upgrade(&self); //todo
+    // fn get_upgrade_desc(&self) -> String; //todo
 }
 
 pub trait SpellEffect: Send + Sync + Debug {

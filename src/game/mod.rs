@@ -11,8 +11,9 @@ mod enemy;
 pub mod input;
 pub mod levelling;
 mod movement;
-pub mod spawn;
+pub mod physics;
 pub mod projectiles;
+pub mod spawn;
 pub mod spells;
 
 pub(super) fn plugin(app: &mut App) {
@@ -27,6 +28,7 @@ pub(super) fn plugin(app: &mut App) {
         enemy::plugin,
         spells::plugin,
         levelling::plugin,
+        projectiles::plugin,
     ));
 
     app.register_type::<Health>();
