@@ -54,7 +54,7 @@ fn detect_enemy_player_collsion(
         }
 
         for &colliding_entity in colliding_entities.0.iter() {
-            if let Ok(_) = enemy_query.get(colliding_entity) {
+            if enemy_query.get(colliding_entity).is_ok() {
                 player_health.0 -= 1.0;
                 println!("Player hit! Health: {:?}", player_health.0);
                 if player_health.0 <= 0. {
