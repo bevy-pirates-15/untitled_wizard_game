@@ -29,6 +29,9 @@ impl Invincibility {
 }
 
 // Detect enemy and player collide, take health away from player
+// idk why clippy gets mad here, but i have to do this
+// otherwise it broken sadge
+#[allow(clippy::assign_op_pattern)]
 fn detect_enemy_player_collsion(
     mut commands: Commands,
     mut death_state: ResMut<NextState<GameState>>,
@@ -49,9 +52,7 @@ fn detect_enemy_player_collsion(
         if invincibility.is_some() {
             continue;
         }
-        // idk why clippy gets mad here, but i have to do this
-        // otherwise it broken sadge
-        #[allow(clippy::assign_op_pattern)]
+
         for &colliding_entity in colliding_entities.0.iter() {
             if enemy_query.contains(colliding_entity) {
                 player_health.0 = player_health.0 - 1.0;
