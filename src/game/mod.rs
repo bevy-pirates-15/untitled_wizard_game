@@ -2,7 +2,6 @@
 
 use bevy::prelude::*;
 
-
 mod animation;
 pub mod assets;
 pub mod audio;
@@ -11,10 +10,10 @@ mod enemy;
 pub mod input;
 pub mod levelling;
 pub mod physics;
+pub mod player_mods;
 pub mod projectiles;
 pub mod spawn;
 pub mod spells;
-pub mod player_mods;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((

@@ -6,13 +6,13 @@ use crate::ui::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         OnEnter(GameState::Death),
-        enter_death.run_if(in_state(GameState::Death))
+        enter_death.run_if(in_state(GameState::Death)),
     );
 
     app.register_type::<DeathAction>();
     app.add_systems(
         Update,
-        handle_death_action.run_if(in_state(GameState::Death))
+        handle_death_action.run_if(in_state(GameState::Death)),
     );
 }
 
@@ -23,14 +23,12 @@ enum DeathAction {
 }
 
 fn enter_death(mut commands: Commands) {
-    commands.ui_root()
+    commands
+        .ui_root()
         .insert(StateScoped(GameState::Death))
         .with_children(|children| {
-            children
-                .label("You Died.");
-            children
-                .button("Main Menu")
-                .insert(DeathAction::Menu);
+            children.label("You Died.");
+            children.button("Main Menu").insert(DeathAction::Menu);
         });
 }
 

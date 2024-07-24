@@ -6,12 +6,16 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use crate::{game::{player_mods::aiming::{AttachToPlayer, PlayerAim}, spells::casting::{
-    CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster,
-}}, screen::Screen};
 use crate::game::spells::examples::{TriggerSpell, ZapSpell};
 use crate::game::spells::triggers::PlayerSpellTrigger;
 use crate::game::spells::{SpellEffect, SpellModifierNode};
+use crate::{
+    game::{
+        player_mods::aiming::{AttachToPlayer, PlayerAim},
+        spells::casting::{CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster},
+    },
+    screen::Screen,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_wand);
