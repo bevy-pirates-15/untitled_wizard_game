@@ -35,7 +35,8 @@ pub(super) fn plugin(app: &mut App) {
 /// values passed down the spell chain, modified by modifiers, and used on spell cast
 #[derive(Debug, Clone)]
 pub struct SpellCastValues {
-    #[allow(dead_code)] pub spread: f32,                       //used for multicasting/multishot spells
+    #[allow(dead_code)]
+    pub spread: f32, //used for multicasting/multishot spells
     pub modifiers: Arc<SpellModifierNode>, //modifiers to apply to the spell
 }
 
@@ -232,8 +233,10 @@ pub fn do_caster(
 pub enum CasterTargeter {
     VelocityBased(Vec2),
     RotationBased(Vec2),
-    #[allow(dead_code)] Random(Vec2),
-    #[allow(dead_code)] NearestHostile(Vec2, ProjectileTeam),
+    #[allow(dead_code)]
+    Random(Vec2),
+    #[allow(dead_code)]
+    NearestHostile(Vec2, ProjectileTeam),
 }
 impl CasterTargeter {
     pub fn get_spell_vec(&self) -> Vec2 {

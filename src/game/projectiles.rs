@@ -26,14 +26,17 @@ pub(super) fn plugin(app: &mut App) {
 
 #[derive(Event, Debug, Clone)]
 pub struct ProjectileCollisionEvent {
-    #[allow(dead_code)] pub target: Entity,
+    #[allow(dead_code)]
+    pub target: Entity,
 }
 
 #[derive(Clone, Debug)]
 pub enum ProjectileTeam {
     Player,
-    #[allow(dead_code)] Enemy,
-    #[allow(dead_code)] Neither,
+    #[allow(dead_code)]
+    Enemy,
+    #[allow(dead_code)]
+    Neither,
 }
 
 #[derive(Component)]
