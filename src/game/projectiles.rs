@@ -9,6 +9,8 @@ use crate::game::spawn::player::Player;
 use crate::game::Health;
 use crate::AppSet;
 
+use super::audio::sfx::Sfx;
+
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
@@ -106,6 +108,9 @@ fn detect_projectile_collisions(
             projectile_dmg.hits_remaining -= 1;
 
             //todo: OnHitTrigger
+            // Because enemies don't have projectiles, we just assume that the hit
+            // was an enemy
+            commands.trigger(Sfx::EnemyCollision);
             commands.trigger_targets(
                 ProjectileCollisionEvent {
                     target: colliding_entity,

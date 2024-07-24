@@ -4,7 +4,7 @@ use avian2d::prelude::CollidingEntities;
 use bevy::prelude::*;
 
 use crate::{
-    game::{enemy::Enemy, spawn::player::Player, Health},
+    game::{audio::sfx::Sfx, enemy::Enemy, spawn::player::Player, Health},
     screen::GameState,
 };
 
@@ -57,6 +57,7 @@ fn detect_enemy_player_collsion(
                 if player_health.0 <= 0. {
                     death_state.set(GameState::Death);
                 }
+                commands.trigger(Sfx::WizardGetsHit);
                 commands
                     .entity(player_entity)
                     .insert(Invincibility::new(5.0));

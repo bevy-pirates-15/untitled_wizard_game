@@ -8,9 +8,14 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
     let source = match event {
         Sfx::ButtonHover => &sfxs[&SfxAsset::ButtonHover],
         Sfx::ButtonPress => &sfxs[&SfxAsset::ButtonPress],
+        Sfx::EnemyCollision => &sfxs[&SfxAsset::EnemyCollision],
+        Sfx::LevelUp => &sfxs[&SfxAsset::LevelUp],
+        Sfx::PickUpExperience => &sfxs[&SfxAsset::PickUpExperience],
         Sfx::PickUpGem => &sfxs[&SfxAsset::PickUpGem],
         Sfx::PlaceGem => &sfxs[&SfxAsset::PlaceGem],
         Sfx::Step => random_step(&sfxs),
+        Sfx::WizardDies => &sfxs[&SfxAsset::WizardDies],
+        Sfx::WizardGetsHit => &sfxs[&SfxAsset::WizardGetsHit],
     }
     .clone_weak();
     let settings = PlaybackSettings {
@@ -25,9 +30,14 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
 pub enum Sfx {
     ButtonHover,
     ButtonPress,
+    EnemyCollision,
+    LevelUp,
+    PickUpExperience,
     PickUpGem,
     PlaceGem,
     Step,
+    WizardDies,
+    WizardGetsHit,
 }
 
 fn random_step(sfxs: &SfxAssets) -> &Handle<AudioSource> {
