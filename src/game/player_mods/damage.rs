@@ -54,8 +54,8 @@ fn detect_enemy_player_collsion(
         }
 
         for &colliding_entity in colliding_entities.0.iter() {
-            if enemy_query.contains(colliding_entity) {
-                player_health.0 = player_health.0 - 1.0;
+            if let Ok(_) = enemy_query.get(colliding_entity) {
+                player_health.0 -= 1.0;
                 println!("Player hit! Health: {:?}", player_health.0);
                 if player_health.0 <= 0. {
                     death_state.set(GameState::Death);
@@ -79,6 +79,7 @@ fn handle_invincibility(
         invincibility.timer.tick(time.delta());
 
         if invincibility.timer.finished() {
+            info!("Invincibility Removed");
             commands.entity(entity).remove::<Invincibility>();
         }
     }
