@@ -31,7 +31,7 @@ impl Invincibility {
 // Detect enemy and player collide, take health away from player
 // idk why clippy gets mad here, but i have to do this
 // otherwise it broken sadge
-#[allow(clippy::assign_op_pattern)]
+#[allow(clippy::never_loop)]
 fn detect_enemy_player_collsion(
     mut commands: Commands,
     mut death_state: ResMut<NextState<GameState>>,
