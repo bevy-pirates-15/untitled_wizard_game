@@ -1,13 +1,13 @@
 use avian2d::collision::CollidingEntities;
 use bevy::prelude::{
-    App, Commands, Component, Entity, Event, IntoSystemConfigs, Query, Res, Time, Timer,
-    Update, With, Without,
+    App, Commands, Component, Entity, Event, IntoSystemConfigs, Query, Res, Time, Timer, Update,
+    With, Without,
 };
 
-use crate::AppSet;
 use crate::game::enemy::Enemy;
-use crate::game::Health;
 use crate::game::spawn::player::Player;
+use crate::game::Health;
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -48,10 +48,7 @@ pub struct ProjectileLifetime {
     pub lifetime: Timer,
 }
 
-fn tick_projectile_lifetime(
-    time: Res<Time>,
-    mut projectile_query: Query<&mut ProjectileLifetime>,
-) {
+fn tick_projectile_lifetime(time: Res<Time>, mut projectile_query: Query<&mut ProjectileLifetime>) {
     for mut projectile_data in projectile_query.iter_mut() {
         projectile_data.lifetime.tick(time.delta());
     }
@@ -106,9 +103,12 @@ fn detect_projectile_collisions(
             projectile_dmg.hits_remaining -= 1;
 
             //todo: OnHitTrigger
-            commands.trigger_targets(ProjectileCollisionEvent {
-                target: colliding_entity,
-            },e);
+            commands.trigger_targets(
+                ProjectileCollisionEvent {
+                    target: colliding_entity,
+                },
+                e,
+            );
         }
     }
 }

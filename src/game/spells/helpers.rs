@@ -1,12 +1,10 @@
 use std::time::Duration;
 
-use avian2d::prelude::{
-    Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor,
-};
+use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
 use bevy::asset::Assets;
 use bevy::color::Color;
-use bevy::log::{warn};
-use bevy::math::{Vec3};
+use bevy::log::warn;
+use bevy::math::Vec3;
 use bevy::prelude::{Circle, Entity, GlobalTransform, Mesh, Timer, TimerMode, Transform, World};
 use bevy::sprite::{ColorMaterial, MaterialMesh2dBundle, Mesh2dHandle};
 

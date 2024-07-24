@@ -7,10 +7,10 @@ use bevy::math::Vec2;
 use bevy::prelude::{Entity, Reflect, Timer, TimerMode, World};
 
 use crate::game::projectiles::ProjectileDamage;
-use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 use crate::game::spells::casting::{CasterTargeter, InstantCaster, SpellCastContext, SpellCaster};
 use crate::game::spells::helpers::spawn_spell_projectile;
 use crate::game::spells::triggers::TimerSpellTrigger;
+use crate::game::spells::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 
 /////////////////////////////
 // EXAMPLE IMPLEMENTATIONS //

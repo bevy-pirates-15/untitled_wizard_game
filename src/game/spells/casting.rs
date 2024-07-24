@@ -9,9 +9,9 @@ use bevy::prelude::{
     TimerMode, Vec2, World,
 };
 
-use crate::AppSet;
 use crate::game::projectiles::ProjectileTeam;
 use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(

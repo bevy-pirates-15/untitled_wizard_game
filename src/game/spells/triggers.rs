@@ -9,11 +9,11 @@ use bevy::prelude::{Component, IntoSystemConfigs, Query, Res, Timer, Trigger};
 use bevy::time::Time;
 use leafwing_input_manager::action_state::ActionState;
 
-use crate::AppSet;
 use crate::game::input::PlayerAction;
 use crate::game::projectiles::ProjectileCollisionEvent;
-use crate::game::spells::casting::{SpellCaster, SpellCastValues};
+use crate::game::spells::casting::{SpellCastValues, SpellCaster};
 use crate::game::spells::SpellEffect;
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
