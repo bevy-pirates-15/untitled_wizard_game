@@ -4,13 +4,13 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 
 use crate::game::physics::GameLayer;
+use crate::game::player_mods::movement::{Movement, PlayerMovement};
 use crate::{
     config::{PLAYER_HEALTH, PLAYER_SPEED},
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
         levelling::PlayerLevel,
-        movement::{Movement, PlayerMovement},
         Health,
     },
     screen::Screen,

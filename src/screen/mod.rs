@@ -7,6 +7,7 @@ mod pause;
 mod playing;
 mod splash;
 mod title;
+mod death;
 
 use bevy::prelude::*;
 
@@ -23,6 +24,7 @@ pub(super) fn plugin(app: &mut App) {
         playing::plugin,
         pause::plugin,
         gem_selection::plugin,
+        death::plugin,
     ));
 }
 
@@ -45,4 +47,5 @@ pub enum GameState {
     Running,
     Paused,
     GemSelection,
+    Death,
 }

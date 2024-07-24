@@ -9,7 +9,7 @@ pub const BORDER_THICKNESS: f32 = 100.0;
 
 // Player
 pub const PLAYER_SPEED: f32 = 21000.;
-pub const PLAYER_HEALTH: f32 = 100.0;
+pub const PLAYER_HEALTH: f32 = 5.;
 
 // Enemy
 pub const MAX_ENEMIES: usize = 1500;
