@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::{GameState, Screen};
-use crate::ui::prelude::*;
+use crate::{game::audio::sfx::Sfx, ui::prelude::*};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -23,6 +23,7 @@ enum DeathAction {
 }
 
 fn enter_death(mut commands: Commands) {
+    commands.trigger(Sfx::WizardDies);
     commands
         .ui_root()
         .insert(StateScoped(GameState::Death))

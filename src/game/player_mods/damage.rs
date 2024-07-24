@@ -4,7 +4,7 @@ use avian2d::prelude::CollidingEntities;
 use bevy::prelude::*;
 
 use crate::{
-    game::{enemy::Enemy, spawn::player::Player, Health},
+    game::{audio::sfx::Sfx, enemy::Enemy, spawn::player::Player, Health},
     screen::GameState,
 };
 
@@ -29,6 +29,9 @@ impl Invincibility {
 }
 
 // Detect enemy and player collide, take health away from player
+// idk why clippy gets mad here, but i have to do this
+// otherwise it broken sadge
+#[allow(clippy::never_loop)]
 fn detect_enemy_player_collsion(
     mut commands: Commands,
     mut death_state: ResMut<NextState<GameState>>,
@@ -50,17 +53,19 @@ fn detect_enemy_player_collsion(
             continue;
         }
 
-        if let Some(&colliding_entity) = colliding_entities.0.iter().next() {
-            if enemy_query.contains(colliding_entity) {
+        for &colliding_entity in colliding_entities.0.iter() {
+            if enemy_query.get(colliding_entity).is_ok() {
                 player_health.0 -= 1.0;
                 println!("Player hit! Health: {:?}", player_health.0);
                 if player_health.0 <= 0. {
                     death_state.set(GameState::Death);
                 }
+                commands.trigger(Sfx::WizardGetsHit);
                 commands
                     .entity(player_entity)
                     .insert(Invincibility::new(5.0));
             }
+            break;
         }
     }
 }
@@ -74,6 +79,7 @@ fn handle_invincibility(
         invincibility.timer.tick(time.delta());
 
         if invincibility.timer.finished() {
+            info!("Invincibility Removed");
             commands.entity(entity).remove::<Invincibility>();
         }
     }
