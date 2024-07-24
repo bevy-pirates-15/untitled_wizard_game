@@ -35,7 +35,7 @@ pub(super) fn plugin(app: &mut App) {
 /// values passed down the spell chain, modified by modifiers, and used on spell cast
 #[derive(Debug, Clone)]
 pub struct SpellCastValues {
-    pub spread: f32,                       //used for multicasting/multishot spells
+    #[allow(dead_code)] pub spread: f32,                       //used for multicasting/multishot spells
     pub modifiers: Arc<SpellModifierNode>, //modifiers to apply to the spell
 }
 
@@ -162,7 +162,7 @@ impl SequentialCaster {
             return None;
         }
 
-        return spell;
+        spell
     }
 
     fn add_spell_delay(&mut self, delay: Duration) {
@@ -232,16 +232,16 @@ pub fn do_caster(
 pub enum CasterTargeter {
     VelocityBased(Vec2),
     RotationBased(Vec2),
-    Random(Vec2),
-    NearestHostile(Vec2, ProjectileTeam),
+    #[allow(dead_code)] Random(Vec2),
+    #[allow(dead_code)] NearestHostile(Vec2, ProjectileTeam),
 }
 impl CasterTargeter {
     pub fn get_spell_vec(&self) -> Vec2 {
         match self {
-            Self::VelocityBased(vec) => vec.clone(),
-            Self::RotationBased(vec) => vec.clone(),
-            Self::Random(vec) => vec.clone(),
-            Self::NearestHostile(vec, _) => vec.clone(),
+            Self::VelocityBased(vec) => *vec,
+            Self::RotationBased(vec) => *vec,
+            Self::Random(vec) => *vec,
+            Self::NearestHostile(vec, _) => *vec,
         }
     }
 }

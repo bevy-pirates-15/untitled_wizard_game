@@ -20,9 +20,9 @@ pub struct ZapSpellData {
 }
 impl SpellData for ZapSpellData {
     fn build(&self, _iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
-        return Some(Arc::new(ZapSpell {
+        Some(Arc::new(ZapSpell {
             base_damage: self.base_damage,
-        }));
+        }))
     }
 
     // fn build(&self) -> Arc<dyn SpellEffect> {
@@ -63,8 +63,8 @@ pub struct TriggerSpellData {
     pub spells_triggered: usize,
 }
 impl SpellData for TriggerSpellData {
-    fn build(&self, mut iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
-        let trigger_spell = iter.next()?.data.build(&mut iter)?;
+    fn build(&self, iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
+        let trigger_spell = iter.next()?.data.build(iter)?;
         let mut spells_triggered: Vec<Arc<dyn SpellEffect>> = Vec::new();
 
         for _ in 0..self.spells_triggered {
@@ -72,7 +72,7 @@ impl SpellData for TriggerSpellData {
                 break;
             }; //no more spells left to add to this trigger
 
-            let Some(spell) = next.data.build(&mut iter) else {
+            let Some(spell) = next.data.build(iter) else {
                 break;
             }; //failed to build child spell
 

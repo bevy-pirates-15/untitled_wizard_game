@@ -62,12 +62,14 @@ pub fn do_timer_trigger(mut timer_trigger: Query<(&mut SpellCaster, &TimerSpellT
 }
 
 #[derive(Component, Debug, Clone)]
+#[allow(dead_code)]
 pub struct CollisionSpellTrigger {
     pub values: SpellCastValues,
     pub spells: Arc<Vec<Arc<dyn SpellEffect>>>,
 }
 /// Function to trigger spells when a projectile collides with something.
 /// has to be added via observers.
+#[allow(dead_code)]
 pub fn do_collision_trigger(
     trigger: Trigger<ProjectileCollisionEvent>,
     mut collision_triggers: Query<(&CollisionSpellTrigger, &mut SpellCaster)>,
@@ -80,6 +82,7 @@ pub fn do_collision_trigger(
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct ExpirationSpellTrigger {
     pub values: SpellCastValues,
     pub spells: Arc<Vec<Arc<dyn SpellEffect>>>,

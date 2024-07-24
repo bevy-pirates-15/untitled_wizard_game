@@ -34,7 +34,6 @@ pub fn spawn_spell_projectile(
 
     let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
     let mesh = meshes.add(Circle { radius });
-    drop(meshes);
 
     let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
     let mat = materials.add(ColorMaterial::from(Color::hsv(
@@ -42,8 +41,6 @@ pub fn spawn_spell_projectile(
         1.0,
         1.0,
     )));
-    // Color::srgb(0.0, 0.0, 1.0)));
-    drop(materials);
 
     //create new spell entity:
     let spell = world
@@ -79,5 +76,5 @@ pub fn spawn_spell_projectile(
     //apply modifiers:
     context.values.modifiers.apply(spell, world);
 
-    return Some(spell);
+    Some(spell)
 }
