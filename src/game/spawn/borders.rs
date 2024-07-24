@@ -10,6 +10,7 @@ use bevy::prelude::*;
 
 use crate::config::{BORDER_THICKNESS, MAP_HEIGHT, MAP_WIDTH};
 use crate::game::physics::GameLayer;
+use crate::screen::Screen;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_box_borders);
@@ -63,6 +64,7 @@ fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
             RigidBody::Static,
             Collider::rectangle(scale.x, scale.y),
             CollisionLayers::new(GameLayer::Border, [GameLayer::Player]),
+            StateScoped(Screen::Playing),
         ));
     }
 }
