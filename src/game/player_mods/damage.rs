@@ -50,9 +50,9 @@ fn detect_enemy_player_collsion(
             continue;
         }
 
-        for &colliding_entity in colliding_entities.0.iter() {
+        if let Some(&colliding_entity) = colliding_entities.0.iter().next() {
             if enemy_query.contains(colliding_entity) {
-                player_health.0 = player_health.0 - 1.0;
+                player_health.0 -= 1.0;
                 println!("Player hit! Health: {:?}", player_health.0);
                 if player_health.0 <= 0. {
                     death_state.set(GameState::Death);
@@ -61,7 +61,6 @@ fn detect_enemy_player_collsion(
                     .entity(player_entity)
                     .insert(Invincibility::new(5.0));
             }
-            break;
         }
     }
 }
