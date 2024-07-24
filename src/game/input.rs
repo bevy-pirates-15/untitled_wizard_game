@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
-use leafwing_input_manager::Actionlike;
 use leafwing_input_manager::plugin::InputManagerPlugin;
 use leafwing_input_manager::prelude::{DualAxis, InputMap, VirtualDPad};
+use leafwing_input_manager::Actionlike;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(InputManagerPlugin::<PlayerAction>::default());
