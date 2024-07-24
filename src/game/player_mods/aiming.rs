@@ -2,7 +2,7 @@ use avian2d::math::Quaternion;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
-use super::spawn::player::Player;
+use crate::game::spawn::player::Player;
 use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {

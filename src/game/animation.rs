@@ -8,8 +8,9 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use super::{audio::sfx::Sfx, movement::PlayerMovement};
 use crate::{screen::GameState, AppSet};
+
+use super::{audio::sfx::Sfx, player_mods::movement::PlayerMovement};
 
 pub(super) fn plugin(app: &mut App) {
     // Animate and play sound effects based on controls.

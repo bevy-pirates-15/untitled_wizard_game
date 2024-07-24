@@ -149,6 +149,7 @@ fn clear_dead_enemies(
                     ..default()
                 },
                 Collider::circle(20.),
+                StateScoped(Screen::Playing),
             ));
             // todo xp drops should only live for a short while
         }
