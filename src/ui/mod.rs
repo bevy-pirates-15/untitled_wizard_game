@@ -20,3 +20,14 @@ use bevy::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(interaction::plugin);
 }
+
+/// Insert into button to play the default interaction sounds
+/// All buttons created from widgets.rs have this component
+#[derive(Component, Debug)]
+pub struct DefaultButtonSound;
+
+#[derive(Component, Debug)]
+pub struct GemPickUpButtonSound;
+
+#[derive(Component, Debug)]
+pub struct GemPlaceButtonSound;

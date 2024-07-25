@@ -1,11 +1,11 @@
 //! Gets the transform of the WorldBox and creates borders
 //! based off its tranform
 
-use bevy::{
-    color::palettes::css::WHITE,
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+use avian2d::{
+    collision::Collider,
+    prelude::{LockedAxes, RigidBody},
 };
+use bevy::prelude::*;
 
 use crate::config::{BORDER_THICKNESS, MAP_HEIGHT, MAP_WIDTH};
 
@@ -20,32 +20,27 @@ pub struct SpawnBorders;
 #[reflect(Component)]
 pub struct Border;
 
-fn spawn_box_borders(
-    _trigger: Trigger<SpawnBorders>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
     let borders = [
         // Right border
         (
             Vec3::new(MAP_WIDTH / 2. + BORDER_THICKNESS / 2., 0., 0.),
-            Vec2::new(BORDER_THICKNESS, MAP_HEIGHT).extend(0.0),
+            Vec2::new(BORDER_THICKNESS, MAP_HEIGHT),
         ),
         // Left border
         (
             Vec3::new(-(MAP_WIDTH / 2. + BORDER_THICKNESS / 2.), 0., 0.),
-            Vec2::new(BORDER_THICKNESS, MAP_HEIGHT).extend(0.0),
+            Vec2::new(BORDER_THICKNESS, MAP_HEIGHT),
         ),
         // Top border
         (
             Vec3::new(0., MAP_HEIGHT / 2. + BORDER_THICKNESS / 2., 0.),
-            Vec2::new(MAP_WIDTH + BORDER_THICKNESS * 2., BORDER_THICKNESS).extend(0.0),
+            Vec2::new(MAP_WIDTH + BORDER_THICKNESS * 2., BORDER_THICKNESS),
         ),
         // Bottom border
         (
-            Vec3::new(0., -(MAP_HEIGHT / 2. + BORDER_THICKNESS / 2.), 0.),
-            Vec2::new(MAP_WIDTH + BORDER_THICKNESS * 2., BORDER_THICKNESS).extend(0.0),
+            Vec3::new(0., -(MAP_HEIGHT / 2. + BORDER_THICKNESS / 2.), 3.),
+            Vec2::new(MAP_WIDTH + BORDER_THICKNESS * 2., BORDER_THICKNESS),
         ),
     ];
 
@@ -53,12 +48,18 @@ fn spawn_box_borders(
         commands.spawn((
             Name::new("Border"),
             Border,
-            MaterialMesh2dBundle {
-                mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
-                transform: Transform::from_translation(*position).with_scale(*scale),
-                material: materials.add(Color::from(WHITE)),
+            SpriteBundle {
+                sprite: Sprite {
+                    color: Color::srgb(0.7, 0.7, 0.8),
+                    custom_size: Some(*scale),
+                    ..default()
+                },
+                transform: Transform::from_xyz(position.x, position.y, position.z),
                 ..default()
             },
+            LockedAxes::ROTATION_LOCKED,
+            RigidBody::Static,
+            Collider::rectangle(scale.x, scale.y),
         ));
     }
 }

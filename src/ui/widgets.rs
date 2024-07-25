@@ -2,7 +2,7 @@
 
 use bevy::{ecs::system::EntityCommands, prelude::*, ui::Val::*};
 
-use super::{interaction::InteractionPalette, palette::*};
+use super::{interaction::InteractionPalette, palette::*, DefaultButtonSound};
 
 /// An extension trait for spawning UI widgets.
 pub trait Widgets {
@@ -22,8 +22,8 @@ impl<T: Spawn> Widgets for T {
             Name::new("Button"),
             ButtonBundle {
                 style: Style {
-                    width: Px(200.0),
-                    height: Px(65.0),
+                    width: Percent(40.0),
+                    height: Percent(20.0),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -36,6 +36,7 @@ impl<T: Spawn> Widgets for T {
                 hovered: BUTTON_HOVERED_BACKGROUND,
                 pressed: BUTTON_PRESSED_BACKGROUND,
             },
+            DefaultButtonSound,
         ));
         entity.with_children(|children| {
             children.spawn((
@@ -43,7 +44,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: 40.0,
+                        font_size: *UiScale(90.),
                         color: BUTTON_TEXT,
                         ..default()
                     },

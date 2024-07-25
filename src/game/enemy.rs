@@ -1,24 +1,33 @@
 // Handles the logic for a wave of enemies attacking the player
 
+use avian2d::collision::Collider;
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
 
 use bevy::{
+    app::App,
+    color::palettes::css::LIGHT_CORAL,
+    math::vec3,
     prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
     time::common_conditions::on_timer,
-    {app::App, math::vec3, prelude::Event},
 };
 
 use crate::{
     config::*,
-    game::assets::{ImageAsset, ImageAssets},
-    game::spawn::{player::Player, Health},
-    screen::Screen,
+    game::{
+        assets::{ImageAsset, ImageAssets},
+        levelling::Experience,
+        spawn::player::Player,
+        Health,
+    },
+    screen::{GameState, Screen},
 };
 
+use super::ItemDrop;
+
 pub(super) fn plugin(app: &mut App) {
-    app.observe(start_wave);
     app.observe(clear_wave);
     app.register_type::<Enemy>();
     app.add_systems(
@@ -28,14 +37,9 @@ pub(super) fn plugin(app: &mut App) {
             chase_player,
             clear_dead_enemies,
         )
-            .run_if(in_state(Screen::Playing)),
+            .run_if(in_state(GameState::Running)),
     );
 }
-
-#[derive(Event, Debug)]
-pub struct StartWave;
-
-fn start_wave(_trigger: Trigger<StartWave>) {}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
@@ -62,9 +66,10 @@ fn spawn_enemies(
             Name::new("Enemy"),
             Enemy,
             Health(ENEMY_HEALTH),
+            Experience(BASE_ENEMY_XP),
             SpriteBundle {
                 texture: images[&ImageAsset::Ducky].clone_weak(),
-                transform: Transform::from_translation(vec3(x, y, 1.0)),
+                transform: Transform::from_translation(vec3(x, y, 2.0)),
                 ..default()
             },
             StateScoped(Screen::Playing),
@@ -104,15 +109,31 @@ fn chase_player(
 
 fn clear_dead_enemies(
     mut commands: Commands,
-    enemy_query: Query<(&Health, Entity), (With<Enemy>, Without<Player>)>,
+    enemy_query: Query<(&Health, &Transform, &Experience, Entity), (With<Enemy>, Without<Player>)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if enemy_query.is_empty() {
         return;
     }
 
-    for (health, enemy) in enemy_query.iter() {
+    for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.0 <= 0.0 {
             commands.entity(enemy).despawn();
+            commands.spawn((
+                Name::new("Xp drop"),
+                *xp,
+                ItemDrop,
+                MaterialMesh2dBundle {
+                    //todo add texture
+                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
+                    material: materials.add(Color::from(LIGHT_CORAL)),
+                    transform: *pos,
+                    ..default()
+                },
+                Collider::circle(20.),
+            ));
+            // todo xp drops should only live for a short while
         }
     }
 }
