@@ -129,10 +129,6 @@ fn spawn_camera(mut commands: Commands, camera_targets: Res<CameraTargets>) {
         scale: CAMERA_SCALE,
         near: -2000.0,
         far: 2000.0,
-        scaling_mode: ScalingMode::Fixed {
-            width: 640.,
-            height: 360.,
-        },
         ..default()
     };
 

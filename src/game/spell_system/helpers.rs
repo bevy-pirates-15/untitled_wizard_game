@@ -8,6 +8,7 @@ use bevy::math::Vec3;
 use bevy::prelude::{Circle, Entity, GlobalTransform, Mesh, Timer, TimerMode, Transform, World};
 use bevy::render::view::RenderLayers;
 use bevy::sprite::{ColorMaterial, MaterialMesh2dBundle, Mesh2dHandle};
+use bevy_magic_light_2d::gi::render_layer::ALL_LAYERS;
 use bevy_magic_light_2d::prelude::{OmniLightSource2D, CAMERA_LAYER_OBJECTS};
 
 use crate::game::physics::GameLayer;
@@ -37,12 +38,10 @@ pub fn spawn_spell_projectile(
     let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
     let mesh = meshes.add(Circle { radius });
 
+    let col = Color::hsv(rand::random::<f32>() * 360., 1.0, 1.0);
+
     let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
-    let mat = materials.add(ColorMaterial::from(Color::hsv(
-        rand::random::<f32>() * 360.,
-        1.0,
-        1.0,
-    )));
+    let mat = materials.add(ColorMaterial::from(col));
 
     //create new spell entity:
     let spell = world
@@ -73,7 +72,14 @@ pub fn spawn_spell_projectile(
                 lifetime: Timer::new(lifetime, TimerMode::Once),
             },
         ))
-        .insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS))
+        .insert(RenderLayers::from_layers(ALL_LAYERS))
+        .insert(OmniLightSource2D {
+            intensity: 4.5,
+            color: col,
+            jitter_intensity: 2.5,
+            jitter_translation: 3.0,
+            falloff: Vec3::new(50.0, 20.0, 0.05),
+        })
         .id();
 
     //apply modifiers:
