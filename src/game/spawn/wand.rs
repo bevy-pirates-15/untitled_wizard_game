@@ -3,8 +3,10 @@ use std::sync::Arc;
 use bevy::{
     color::palettes::css::BROWN,
     prelude::*,
+    render::view::RenderLayers,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use bevy_magic_light_2d::prelude::CAMERA_LAYER_OBJECTS;
 
 use crate::game::spell_system::storage::RebuildWand;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
@@ -53,6 +55,7 @@ fn spawn_wand(
         StateScoped(Screen::Playing),
         AttachToPlayer,
     ));
+    e.insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS));
 
     // wand_inventory.rebuild_effects();
     e.insert((

@@ -3,8 +3,10 @@
 use bevy::{
     color::palettes::css::GREEN,
     prelude::*,
+    render::view::RenderLayers,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use bevy_magic_light_2d::prelude::CAMERA_LAYER_FLOOR;
 
 use crate::screen::Screen;
 
@@ -29,21 +31,23 @@ fn spawn_level(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // Spawn level box here, change to very pretty art later
-    commands.spawn((
-        Name::new("World Box"),
-        WorldBox,
-        MaterialMesh2dBundle {
-            // IMPORTANT: The mesh itself needs to be {1.0, 1.0} (default)
-            // Only use "Transform" to manipulate tranform
-            // Otherwise, the math is all off :(
-            mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
-            transform: Transform::default()
-                .with_scale(Vec2::new(MAP_WIDTH, MAP_HEIGHT).extend(0.0)),
-            material: materials.add(Color::from(GREEN)),
-            ..default()
-        },
-        StateScoped(Screen::Playing),
-    ));
+    commands
+        .spawn((
+            Name::new("World Box"),
+            WorldBox,
+            MaterialMesh2dBundle {
+                // IMPORTANT: The mesh itself needs to be {1.0, 1.0} (default)
+                // Only use "Transform" to manipulate tranform
+                // Otherwise, the math is all off :(
+                mesh: Mesh2dHandle(meshes.add(Rectangle::default())),
+                transform: Transform::default()
+                    .with_scale(Vec2::new(MAP_WIDTH, MAP_HEIGHT).extend(0.0)),
+                material: materials.add(Color::from(GREEN)),
+                ..default()
+            },
+            StateScoped(Screen::Playing),
+        ))
+        .insert(RenderLayers::from_layers(CAMERA_LAYER_FLOOR));
     // The only thing we have in our level is a player,
     // but add things like walls etc. here.
     commands.trigger(SpawnBorders);

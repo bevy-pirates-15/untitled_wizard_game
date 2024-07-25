@@ -154,20 +154,22 @@ fn clear_dead_enemies(
     for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.health <= 0.0 {
             commands.entity(enemy).despawn();
-            commands.spawn((
-                Name::new("Xp drop"),
-                *xp,
-                ItemDrop,
-                MaterialMesh2dBundle {
-                    //todo add texture
-                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
-                    material: materials.add(Color::from(LIGHT_CORAL)),
-                    transform: *pos,
-                    ..default()
-                },
-                Collider::circle(20.),
-                StateScoped(Screen::Playing),
-            ));
+            commands
+                .spawn((
+                    Name::new("Xp drop"),
+                    *xp,
+                    ItemDrop,
+                    MaterialMesh2dBundle {
+                        //todo add texture
+                        mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
+                        material: materials.add(Color::from(LIGHT_CORAL)),
+                        transform: *pos,
+                        ..default()
+                    },
+                    Collider::circle(20.),
+                    StateScoped(Screen::Playing),
+                ))
+                .insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS));
             // todo xp drops should only live for a short while
         }
     }

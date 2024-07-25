@@ -1,7 +1,4 @@
-use bevy::{
-    color::palettes::css::YELLOW, prelude::*, render::view::RenderLayers,
-    sprite::MaterialMesh2dBundle,
-};
+use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_magic_light_2d::{gi::render_layer::ALL_LAYERS, prelude::*};
 
 use crate::game::player_mods::aiming::AttachToPlayer;
@@ -33,23 +30,4 @@ fn spawn_light(
         },
         Name::new("global_skylight"),
     ));
-
-    commands
-        .spawn(SpatialBundle {
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 1000.0),
-                scale: Vec3::splat(8.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(Name::new("cursor_light"))
-        .insert(OmniLightSource2D {
-            intensity: 10.0,
-            color: Color::srgb_u8(254, 100, 34),
-            falloff: Vec3::new(5.0, 5.0, 0.05),
-            ..default()
-        })
-        .insert(RenderLayers::from_layers(ALL_LAYERS))
-        .insert(AttachToPlayer);
 }

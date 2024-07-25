@@ -6,7 +6,9 @@ use bevy::color::Color;
 use bevy::log::warn;
 use bevy::math::Vec3;
 use bevy::prelude::{Circle, Entity, GlobalTransform, Mesh, Timer, TimerMode, Transform, World};
+use bevy::render::view::RenderLayers;
 use bevy::sprite::{ColorMaterial, MaterialMesh2dBundle, Mesh2dHandle};
+use bevy_magic_light_2d::prelude::{OmniLightSource2D, CAMERA_LAYER_OBJECTS};
 
 use crate::game::physics::GameLayer;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
@@ -71,6 +73,7 @@ pub fn spawn_spell_projectile(
                 lifetime: Timer::new(lifetime, TimerMode::Once),
             },
         ))
+        .insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS))
         .id();
 
     //apply modifiers:
