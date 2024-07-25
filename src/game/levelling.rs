@@ -1,9 +1,9 @@
 use avian2d::collision::CollidingEntities;
 use bevy::prelude::*;
 
-use crate::screen::GameState;
+use crate::{game::audio::sfx::Sfx, screen::GameState};
 
-use super::spawn::player::Player;
+use super::{enemy::Enemy, spawn::player::Player};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
@@ -40,7 +40,7 @@ pub struct Experience(pub u32);
 fn detect_player_experience_collision(
     mut commands: Commands,
     mut player_collision_query: Query<(&mut PlayerLevel, &CollidingEntities), With<Player>>,
-    exp_query: Query<(Entity, &Experience), With<Experience>>,
+    exp_query: Query<(Entity, &Experience), (With<Experience>, Without<Enemy>)>,
 ) {
     for (mut player_level, colliding_entities) in player_collision_query.iter_mut() {
         for &colliding_entity in colliding_entities.0.iter() {
@@ -49,6 +49,7 @@ fn detect_player_experience_collision(
                     "Exp collected: {:?}, Exp until next level: {:?}",
                     experience.0, player_level.exp_to_level_up
                 );
+                commands.trigger(Sfx::PickUpExperience);
                 if experience.0 >= player_level.exp_to_level_up {
                     player_level.overflow += experience.0 - player_level.exp_to_level_up;
                     player_level.exp_to_level_up = compute_next_level(player_level.level);
@@ -88,6 +89,7 @@ fn level_up(
     } else {
         player.exp_to_level_up -= player.overflow;
     }
+    commands.trigger(Sfx::LevelUp);
     next_game_state.set(GameState::GemSelection);
 }
 

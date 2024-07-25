@@ -92,6 +92,6 @@ fn toggle_game_pause(
         GameState::Paused => next_pause_state.set(GameState::Running),
         GameState::Running => next_pause_state.set(GameState::Paused),
         // Unable to pause game when in Gem Selection
-        GameState::GemSelection => {}
+        _ => {}
     }
 }

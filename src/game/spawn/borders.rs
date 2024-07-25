@@ -1,6 +1,7 @@
 //! Gets the transform of the WorldBox and creates borders
 //! based off its tranform
 
+use avian2d::prelude::CollisionLayers;
 use avian2d::{
     collision::Collider,
     prelude::{LockedAxes, RigidBody},
@@ -8,6 +9,8 @@ use avian2d::{
 use bevy::prelude::*;
 
 use crate::config::{BORDER_THICKNESS, MAP_HEIGHT, MAP_WIDTH};
+use crate::game::physics::GameLayer;
+use crate::screen::Screen;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_box_borders);
@@ -60,6 +63,8 @@ fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
             LockedAxes::ROTATION_LOCKED,
             RigidBody::Static,
             Collider::rectangle(scale.x, scale.y),
+            CollisionLayers::new(GameLayer::Border, [GameLayer::Player]),
+            StateScoped(Screen::Playing),
         ));
     }
 }

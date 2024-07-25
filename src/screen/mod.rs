@@ -1,6 +1,7 @@
 //! The game's main screen states and transitions between them.
 
 mod credits;
+mod death;
 mod gem_selection;
 mod loading;
 mod pause;
@@ -23,6 +24,7 @@ pub(super) fn plugin(app: &mut App) {
         playing::plugin,
         pause::plugin,
         gem_selection::plugin,
+        death::plugin,
     ));
 }
 
@@ -45,4 +47,5 @@ pub enum GameState {
     Running,
     Paused,
     GemSelection,
+    Death,
 }
