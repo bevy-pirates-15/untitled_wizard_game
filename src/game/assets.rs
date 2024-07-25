@@ -70,11 +70,11 @@ impl SfxAssets {
 
         assets.insert(
             SfxAsset::ButtonHover,
-            asset_server.load("audio/sfx/button_hover.ogg"),
+            asset_server.load("audio/sfx/button_hover.wav"),
         );
         assets.insert(
             SfxAsset::ButtonPress,
-            asset_server.load("audio/sfx/button_press.ogg"),
+            asset_server.load("audio/sfx/button_press.wav"),
         );
         assets.insert(
             SfxAsset::EnemyCollision,
@@ -119,7 +119,6 @@ impl SfxAssets {
 #[derive(PartialEq, Eq, Hash, Reflect)]
 pub enum SoundtrackAsset {
     MainMenu,
-    Credits,
     Gameplay,
 }
 
@@ -132,10 +131,6 @@ impl SoundtrackAssets {
         assets.insert(
             SoundtrackAsset::MainMenu,
             asset_server.load("audio/soundtracks/Minutes To Midnight.mp3"),
-        );
-        assets.insert(
-            SoundtrackAsset::Credits,
-            asset_server.load("audio/soundtracks/Monkeys Spinning Monkeys.ogg"),
         );
         assets.insert(
             SoundtrackAsset::Gameplay,

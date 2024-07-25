@@ -4,10 +4,11 @@ use bevy::prelude::*;
 
 use super::{GameState, Screen};
 use crate::{game::audio::soundtrack::Soundtrack, ui::prelude::*};
+use crate::game::audio::soundtrack::SoundtrackMarker;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Title), enter_title);
-    app.add_systems(OnExit(Screen::Title), exit_title);
+    app.add_systems(OnExit(Screen::Title), exit_title.run_if(in_state(Screen::Playing)));
 
     app.register_type::<TitleAction>();
     app.add_systems(Update, handle_title_action.run_if(in_state(Screen::Title)));
@@ -23,8 +24,13 @@ enum TitleAction {
     Exit,
 }
 
-fn enter_title(mut commands: Commands) {
-    commands.trigger(Soundtrack::MainMenu);
+fn enter_title(
+    mut commands: Commands,
+    query: Query<Entity, With<SoundtrackMarker>>,
+) {
+    if query.is_empty() {
+        commands.trigger(Soundtrack::MainMenu);
+    }
     commands
         .ui_root()
         .insert(StateScoped(Screen::Title))

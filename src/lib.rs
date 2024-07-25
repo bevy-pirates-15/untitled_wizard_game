@@ -7,7 +7,7 @@ mod ui;
 
 use avian2d::PhysicsPlugins;
 use bevy::{
-    asset::AssetMetaCheck,
+    asset::{load_internal_binary_asset, AssetMetaCheck},
     audio::{AudioPlugin, Volume},
     prelude::*,
     render::camera::ScalingMode,
@@ -57,6 +57,14 @@ impl Plugin for AppPlugin {
                     ..default()
                 }),
         );
+        
+        load_internal_binary_asset!(
+            app,
+            TextStyle::default().font,
+            "../assets/fonts/IGS_VGA_8x16.ttf",
+            |bytes: &[u8], _path: String| { Font::try_from_bytes(bytes.to_vec()).unwrap() }
+        );
+
         // Add physics
         app.add_plugins(PhysicsPlugins::default().with_length_unit(20.));
 

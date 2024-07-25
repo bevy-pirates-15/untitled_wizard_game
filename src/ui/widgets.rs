@@ -26,9 +26,12 @@ impl<T: Spawn> Widgets for T {
                     height: Percent(20.0),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
+                    border: UiRect::all(Val::Percent(0.5)),
                     ..default()
                 },
-                background_color: BackgroundColor(NODE_BACKGROUND),
+                border_color: BorderColor(NODE_BACKGROUND.1),
+                border_radius: BorderRadius::all(Val::Percent(10.)),
+                background_color: BackgroundColor(NODE_BACKGROUND.0),
                 ..default()
             },
             InteractionPalette {
@@ -59,13 +62,16 @@ impl<T: Spawn> Widgets for T {
             Name::new("Header"),
             NodeBundle {
                 style: Style {
-                    width: Px(500.0),
-                    height: Px(65.0),
+                    width: Percent(40.0),
+                    height: Percent(15.0),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
+                    border: UiRect::all(Val::Percent(0.5)),
                     ..default()
                 },
-                background_color: BackgroundColor(NODE_BACKGROUND),
+                border_color: BorderColor(NODE_BACKGROUND.1),
+                border_radius: BorderRadius::all(Val::Percent(10.)),
+                background_color: BackgroundColor(NODE_BACKGROUND.0),
                 ..default()
             },
         ));
@@ -75,7 +81,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: 40.0,
+                        font_size: *UiScale(60.),
                         color: HEADER_TEXT,
                         ..default()
                     },
@@ -90,8 +96,8 @@ impl<T: Spawn> Widgets for T {
             Name::new("Label"),
             NodeBundle {
                 style: Style {
-                    width: Px(500.0),
-                    height: Px(30.0),
+                    width: Percent(90.0),
+                    height: Percent(10.0),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -105,7 +111,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: 24.0,
+                        font_size: *UiScale(50.),
                         color: LABEL_TEXT,
                         ..default()
                     },
