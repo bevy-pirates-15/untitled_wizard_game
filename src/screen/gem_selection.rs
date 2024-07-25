@@ -1,7 +1,12 @@
 use bevy::{color::palettes::css::BLUE, prelude::*};
+use palette::*;
+use prelude::{InteractionPalette, InteractionQuery};
 
 use crate::{
-    game::spell_system::{storage::SpellPool, SpellComponent},
+    game::spell_system::{
+        storage::{RebuildWand, SpellInventory, SpellPool},
+        SpellComponent,
+    },
     ui::*,
 };
 
@@ -11,7 +16,8 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::GemSelection), gem_menu);
     app.add_systems(
         Update,
-        handle_gem_select_action.run_if(in_state(GameState::GemSelection)),
+        (handle_gem_select_action, handle_gem_placement_action)
+            .run_if(in_state(GameState::GemSelection)),
     );
 }
 
@@ -96,23 +102,31 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>, pool: ResMut
         ..default()
     };
 
-    let wand_container = NodeBundle {
+    let continue_button = ButtonBundle {
         style: Style {
-            width: Val::Percent(100.0),
+            width: Val::Percent(40.0),
             height: Val::Percent(20.0),
-            flex_direction: FlexDirection::Row,
-            align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            margin: UiRect {
-                left: Val::Px(0.0),
-                right: Val::Px(0.0),
-                top: Val::Percent(5.0),
-                bottom: Val::Percent(5.0),
-            },
+            align_items: AlignItems::Center,
+            border: UiRect::all(Val::Percent(0.5)),
             ..default()
         },
+        border_color: BorderColor(NODE_BACKGROUND.1),
+        border_radius: BorderRadius::all(Val::Percent(10.)),
+        background_color: BackgroundColor(NODE_BACKGROUND.0),
         ..default()
     };
+
+    let continue_button_entity = commands
+        .spawn(continue_button)
+        .insert(InteractionPalette {
+            none: NODE_BACKGROUND,
+            hovered: BUTTON_HOVERED_BACKGROUND,
+            pressed: BUTTON_PRESSED_BACKGROUND,
+        })
+        .insert(GemPlaceButtonSound)
+        .insert(LevelUpAction::Placed)
+        .id();
 
     // Only ui_container has to be scoped, as everything else
     // is a child of it
@@ -121,11 +135,10 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>, pool: ResMut
         .insert(StateScoped(GameState::GemSelection))
         .id();
     let gem_container_entity = commands.spawn(gem_container).id();
-    let wand_container_entity = commands.spawn(wand_container).id();
 
     commands
         .entity(ui_container_entity)
-        .push_children(&[gem_container_entity, wand_container_entity]);
+        .push_children(&[gem_container_entity, continue_button_entity]);
 
     // Idea: make a separate function that spawns the gems
     // and puts them in a table to be retrieved.
@@ -188,21 +201,20 @@ fn handle_gem_select_action(
     }
 }
 
-// fn handle_gem_placement_action(
-//     mut commands: Commands,
-//     mut button_query: InteractionQuery<&LevelUpAction>,
-//     selected_gem_query: Query<(&SpellComponent), With<SelectedGem>>,
-// ) {
-//     for (interaction, action) in &mut button_query.iter_mut() {
-//         if matches!(interaction, Interaction::Pressed) {
-//             match action {
-//                 LevelUpAction::Placed => {
-//                     if let Ok(spell) = selected_gem_query.get_single() {
-
-//                     }
-//                 },
-//                 _ => ()
-//             }
-//         }
-//     }
-// }
+fn handle_gem_placement_action(
+    mut commands: Commands,
+    mut button_query: InteractionQuery<&LevelUpAction>,
+    mut spell_inventory: ResMut<SpellInventory>,
+    mut next_gamestate: ResMut<NextState<GameState>>,
+    selected_gem_query: Query<&SpellComponent, With<SelectedGem>>,
+) {
+    for (interaction, action) in &mut button_query.iter_mut() {
+        if matches!(interaction, Interaction::Pressed) && action == &LevelUpAction::Placed {
+            if let Ok(spell) = selected_gem_query.get_single() {
+                spell_inventory.push_spell(spell.clone());
+                commands.trigger(RebuildWand);
+                next_gamestate.set(GameState::Running);
+            }
+        }
+    }
+}
