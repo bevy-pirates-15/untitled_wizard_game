@@ -12,13 +12,17 @@ pub type InteractionQuery<'w, 's, T> =
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct InteractionPalette {
-    pub none: ( Color, Color ),
-    pub hovered: ( Color, Color ),
-    pub pressed: ( Color, Color ),
+    pub none: (Color, Color),
+    pub hovered: (Color, Color),
+    pub pressed: (Color, Color),
 }
 
 fn apply_interaction_palette(
-    mut palette_query: InteractionQuery<(&InteractionPalette, &mut BackgroundColor, &mut BorderColor)>,
+    mut palette_query: InteractionQuery<(
+        &InteractionPalette,
+        &mut BackgroundColor,
+        &mut BorderColor,
+    )>,
 ) {
     for (interaction, (palette, mut background, mut border)) in &mut palette_query {
         *border = match interaction {

@@ -14,11 +14,10 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_playing_gui));
     app.add_systems(OnExit(Screen::Playing), exit_playing);
 
-    app.add_systems(Update, 
-        (
-            update_level_bar, 
-            update_health_bar,
-        ).run_if(in_state(Screen::Playing)));
+    app.add_systems(
+        Update,
+        (update_level_bar, update_health_bar).run_if(in_state(Screen::Playing)),
+    );
     app.add_systems(
         Update,
         (toggle_game_pause)
@@ -88,7 +87,7 @@ fn spawn_playing_gui(mut commands: Commands) {
             TextStyle {
                 font_size: *UiScale(60.),
                 ..default()
-            }
+            },
         ),
         ..default()
     };
@@ -101,9 +100,11 @@ fn spawn_playing_gui(mut commands: Commands) {
     let health_bar_entity = commands.spawn(health_bar).insert(HealthBar).id();
     let level_text_entity = commands.spawn(level_text).insert(LevelText).id();
 
-    commands
-        .entity(ui_container_entity)
-        .push_children(&[level_bar_entity, health_bar_entity, level_text_entity]);
+    commands.entity(ui_container_entity).push_children(&[
+        level_bar_entity,
+        health_bar_entity,
+        level_text_entity,
+    ]);
 }
 
 fn update_level_bar(

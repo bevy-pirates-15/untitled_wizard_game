@@ -4,7 +4,7 @@ use std::slice::Iter;
 use std::sync::Arc;
 
 use bevy::app::App;
-use bevy::prelude::{Entity, World};
+use bevy::prelude::*;
 
 use crate::game::spell_system::casting::SpellCastContext;
 use crate::game::spell_system::SpellModifierNode::Node;
@@ -25,9 +25,9 @@ pub(super) fn plugin(app: &mut App) {
     ));
 }
 
-#[derive(Clone)]
+#[derive(Clone, Component)]
 pub struct SpellComponent {
-    data: Box<dyn SpellData>,
+    pub data: Box<dyn SpellData>,
     // pub icon: String, //todo
     // pub tier: u32, //todo
 }

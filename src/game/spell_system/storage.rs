@@ -30,7 +30,7 @@ pub struct SpellPool {
     pub spells: Vec<SpellComponent>,
 }
 impl SpellPool {
-    fn get_random_spell_component(&self) -> &SpellComponent {
+    pub fn get_random_spell_component(&self) -> &SpellComponent {
         let index = rand::random::<usize>() % self.spells.len();
         &self.spells[index]
     }

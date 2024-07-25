@@ -57,7 +57,7 @@ impl Plugin for AppPlugin {
                     ..default()
                 }),
         );
-        
+
         load_internal_binary_asset!(
             app,
             TextStyle::default().font,

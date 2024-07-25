@@ -1,9 +1,9 @@
-use bevy::{
-    color::palettes::css::{BLACK, BLUE, BROWN},
-    prelude::*,
-};
+use bevy::{color::palettes::css::BLUE, prelude::*};
 
-use crate::ui::{interaction::InteractionQuery, GemPickUpButtonSound, GemPlaceButtonSound};
+use crate::{
+    game::spell_system::{storage::SpellPool, SpellComponent},
+    ui::*,
+};
 
 use super::GameState;
 
@@ -11,15 +11,15 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::GemSelection), gem_menu);
     app.add_systems(
         Update,
-        handle_level_action.run_if(in_state(GameState::GemSelection)),
+        handle_gem_select_action.run_if(in_state(GameState::GemSelection)),
     );
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
 #[reflect(Component)]
 enum LevelUpAction {
-    Selected(Entity),
-    Place(Entity),
+    Selected,
+    Placed,
 }
 
 #[derive(Component)]
@@ -27,9 +27,16 @@ struct SelectedGem;
 
 // TODO: Make spawn_gem be what takes arguments, make separate
 // "random_gem" function that then calls spawn_gem
-fn spawn_gem(commands: &mut Commands, asset_server: &AssetServer, index: i32) -> (Entity, Entity) {
+fn spawn_gem(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    index: i32,
+    pool: &ResMut<SpellPool>,
+) -> (Entity, Entity, SpellComponent) {
     // For spawning the actual gem image
     let gem_image = asset_server.load("images/gem.png");
+    let gem = pool.get_random_spell_component().clone();
+    let gem_description = gem.data.get_desc();
     let gem_image_entity = commands
         .spawn((
             ImageBundle {
@@ -47,28 +54,25 @@ fn spawn_gem(commands: &mut Commands, asset_server: &AssetServer, index: i32) ->
         ))
         .id();
 
-    let text_entity = commands.spawn(TextBundle {
-        style: Style {
-            width: Val::Percent(80.0),
-            height: Val::Percent(45.0),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::FlexStart,
-            margin: UiRect::all(Val::Px(5.0)),
-            ..default()
-        },
-        text: Text::from_section(
-            "Cat ipsum dolor sit amet, kitty poochy yet cat slap dog in face. Eat and than sleep on your face prance along on top of the garden fence, annoy the neighbor's dog and make it bark and run in circles, scream at teh bath.",
-            TextStyle {
+    let text_entity = commands
+        .spawn(TextBundle {
+            style: Style {
+                width: Val::Percent(80.0),
+                height: Val::Percent(45.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::FlexStart,
+                margin: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-        ),
-        ..default()
-    }).id();
+            text: Text::from_section(gem_description, TextStyle { ..default() }),
+            ..default()
+        })
+        .id();
 
-    (gem_image_entity, text_entity)
+    (gem_image_entity, text_entity, gem)
 }
 
-fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>, pool: ResMut<SpellPool>) {
     let ui_container = NodeBundle {
         style: Style {
             width: Val::Percent(100.0),
@@ -147,12 +151,14 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             background_color: Color::from(BLUE).into(),
             ..default()
         };
-        let (gem_entity, text_entity) = spawn_gem(&mut commands, &asset_server, gem_index);
+        let (gem_entity, text_entity, spell) =
+            spawn_gem(&mut commands, &asset_server, gem_index, &pool);
 
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
             .insert(GemPickUpButtonSound)
-            .insert(LevelUpAction::Selected(gem_entity))
+            .insert(LevelUpAction::Selected)
+            .insert(spell)
             .id();
         commands
             .entity(gem_container_entity)
@@ -161,98 +167,42 @@ fn gem_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             .entity(select_gem_button_entity)
             .push_children(&[gem_entity, text_entity]);
     }
-
-    // The Wand
-    // TODO for player: Make a wand component for player that is
-    // a table that stores how many "pieces" the player has, with
-    // what gems are in each piece, and render that here.
-    for _ in 1..=3 {
-        let select_wand_button = ButtonBundle {
-            style: Style {
-                width: Val::Percent(10.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                margin: UiRect {
-                    left: Val::Px(2.0),
-                    right: Val::Px(2.0),
-                    top: Val::Px(2.0),
-                    bottom: Val::Px(2.0),
-                },
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            border_radius: BorderRadius::px(2.0, 2.0, 2.0, 2.0),
-            border_color: BLACK.into(),
-            background_color: Color::from(BROWN).into(),
-            ..default()
-        };
-
-        let slot_container = NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            ..default()
-        };
-
-        // TODO: Read data to see if there is already a gem there, then render with
-        // spawn_gem
-
-        let slot_container_entity = commands.spawn(slot_container).id();
-
-        let select_wand_button_entitiy = commands
-            .spawn(select_wand_button)
-            .insert(GemPlaceButtonSound)
-            .insert(LevelUpAction::Place(slot_container_entity))
-            .push_children(&[slot_container_entity])
-            .id();
-
-        commands
-            .entity(wand_container_entity)
-            .push_children(&[select_wand_button_entitiy]);
-    }
 }
 
-fn handle_level_action(
+fn handle_gem_select_action(
     mut commands: Commands,
-    mut next_pause_state: ResMut<NextState<GameState>>,
-    mut button_query: InteractionQuery<&LevelUpAction>,
-    selected_gem_query: Query<(Entity, &Name), With<SelectedGem>>,
+    mut button_query: Query<
+        (&Interaction, &LevelUpAction, &SpellComponent, Entity),
+        Changed<Interaction>,
+    >,
+    selected_gem_query: Query<(Entity, &SpellComponent), With<SelectedGem>>,
 ) {
-    for (interaction, action) in &mut button_query.iter_mut() {
-        if matches!(interaction, Interaction::Pressed) {
-            match action {
-                // Entity in selected is the physcial image entity
-                LevelUpAction::Selected(gem_entity) => {
-                    info!("Selected");
-                    // Check if player has already selected anything
-                    if let Ok((selected_gem_entity, name)) = selected_gem_query.get_single() {
-                        info!("{} is the currently selected gem", name);
-                        commands.entity(selected_gem_entity).remove::<SelectedGem>();
-                    }
-                    commands.entity(*gem_entity).insert(SelectedGem);
-                    //TODO: Change color of selected gem button
-                    info!("current gem selected: {}", gem_entity);
-                }
-                LevelUpAction::Place(slot) => {
-                    // Check to see if a gem is selected
-                    if let Ok((selected_gem_entity, _)) = selected_gem_query.get_single() {
-                        // Clear children
-                        commands.entity(*slot).despawn_descendants();
-                        // Place the selected gem into the wand
-                        commands.entity(*slot).push_children(&[selected_gem_entity]);
-                        // probably here we put a component in the slot to be read?
-                        // or in a player table for later rendering
-                        commands.entity(selected_gem_entity).remove::<SelectedGem>();
-                        // TODO: make it so that no other gems can be selected/ placed
-                        next_pause_state.set(GameState::Running)
-                    }
-                }
+    for (interaction, action, _spell, entity) in &mut button_query.iter_mut() {
+        if matches!(interaction, Interaction::Pressed) && action == &LevelUpAction::Selected {
+            // Entity in selected is the physcial image entity
+            if let Ok((entity, _)) = selected_gem_query.get_single() {
+                commands.entity(entity).remove::<SelectedGem>();
             }
+            commands.entity(entity).insert(SelectedGem);
         }
     }
 }
+
+// fn handle_gem_placement_action(
+//     mut commands: Commands,
+//     mut button_query: InteractionQuery<&LevelUpAction>,
+//     selected_gem_query: Query<(&SpellComponent), With<SelectedGem>>,
+// ) {
+//     for (interaction, action) in &mut button_query.iter_mut() {
+//         if matches!(interaction, Interaction::Pressed) {
+//             match action {
+//                 LevelUpAction::Placed => {
+//                     if let Ok(spell) = selected_gem_query.get_single() {
+
+//                     }
+//                 },
+//                 _ => ()
+//             }
+//         }
+//     }
+// }

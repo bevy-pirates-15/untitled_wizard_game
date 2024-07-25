@@ -30,7 +30,7 @@ fn enter_credits(mut commands: Commands) {
             children.label("Ryn Easterbrook - Programming, Art, Game design");
             children.label("Kain Dean - Programming, GUI");
             children.label("Kathir Aroun - Programming, Game Design");
-            children.label("Molive - Programming, Lighting");
+            children.label("John Hunter - Technical Art");
             children.label("Paul Greyski - Music, Sfx");
 
             children.header("Assets");
