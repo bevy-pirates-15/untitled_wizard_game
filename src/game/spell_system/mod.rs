@@ -6,36 +6,61 @@ use std::sync::Arc;
 use bevy::app::App;
 use bevy::prelude::{Entity, World};
 
-use crate::game::spells::casting::SpellCastContext;
-use crate::game::spells::SpellModifierNode::Node;
+use crate::game::spell_system::casting::SpellCastContext;
+use crate::game::spell_system::SpellModifierNode::Node;
 
 pub mod casting;
 pub mod examples;
 pub mod helpers;
+pub mod spells;
+pub mod storage;
 pub mod triggers;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((casting::plugin, triggers::plugin));
+    app.add_plugins((
+        casting::plugin,
+        triggers::plugin,
+        storage::plugin,
+        spells::plugin,
+    ));
 }
 
 #[derive(Clone)]
 pub struct SpellComponent {
-    data: Arc<dyn SpellData>,
+    data: Box<dyn SpellData>,
     // pub icon: String, //todo
     // pub tier: u32, //todo
 }
 
-pub trait SpellData {
+pub trait SpellData: Send + Sync + CloneBoxSpellData {
     fn build(&self, iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>>;
-    // fn get_desc(&self) -> String; //todo, build description in the data so it can use the numbers
+    fn get_name(&self) -> String;
+    fn get_desc(&self) -> String;
 
+    // fn get_desc(&self) -> String; //todo, build description in the data so it can use the numbers
     // fn can_upgrade(&self) -> bool; //todo
     // fn upgrade(&self); //todo
     // fn get_upgrade_desc(&self) -> String; //todo
 }
 
+pub trait CloneBoxSpellData {
+    fn clone_box(&self) -> Box<dyn SpellData>;
+}
+impl<T> CloneBoxSpellData for T
+where
+    T: 'static + SpellData + Clone,
+{
+    fn clone_box(&self) -> Box<dyn SpellData> {
+        Box::new(self.clone())
+    }
+}
+impl Clone for Box<dyn SpellData> {
+    fn clone(&self) -> Box<dyn SpellData> {
+        self.clone_box()
+    }
+}
+
 pub trait SpellEffect: Send + Sync + Debug {
-    fn get_name(&self) -> &str;
     fn cast(&self, context: &mut SpellCastContext, world: &mut World);
 }
 

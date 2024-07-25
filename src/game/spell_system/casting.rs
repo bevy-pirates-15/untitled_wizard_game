@@ -10,7 +10,7 @@ use bevy::prelude::{
 };
 
 use crate::game::projectiles::ProjectileTeam;
-use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
+use crate::game::spell_system::{SpellEffect, SpellModifier, SpellModifierNode};
 use crate::screen::GameState;
 use crate::AppSet;
 
@@ -39,7 +39,7 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Debug, Clone)]
 pub struct SpellCastValues {
     #[allow(dead_code)]
-    pub spread: f32, //used for multicasting/multishot spells
+    pub spread: f32, //used for multicasting/multishot spell_system
     pub modifiers: Arc<SpellModifierNode>, //modifiers to apply to the spell
 }
 
@@ -49,7 +49,7 @@ pub struct SpellCastContext {
     pub caster: Entity,
     pub direction: Vec2,
     inherit_direction: bool,
-    //can be increased/decreases as spells are cast, and is accessed to add a delay post-cast
+    //can be increased/decreases as spell_system are cast, and is accessed to add a delay post-cast
     pub spell_delay: Arc<Mutex<Duration>>,
     pub values: SpellCastValues,
 }
@@ -158,12 +158,11 @@ impl SequentialCaster {
         };
 
         let spell = data.1.pop();
-        if spell.is_none() || data.1.is_empty() {
+        if data.1.is_empty() {
             self.cast_data = None;
             let delay = self.base_caster_delay;
             self.caster_delay.set_duration(delay);
             self.caster_delay.reset();
-            return None;
         }
 
         spell
@@ -206,10 +205,15 @@ impl InstantCaster {
 }
 
 pub fn do_caster(
-    mut q_caster: Query<(Entity, &mut SpellCaster, &CasterTargeter)>,
+    mut q_caster: Query<(
+        Entity,
+        &mut SpellCaster,
+        &CasterTargeter,
+        Option<&DeleteOnCast>,
+    )>,
     mut commands: Commands,
 ) {
-    for (ent, mut caster, targeter) in q_caster.iter_mut() {
+    for (ent, mut caster, targeter, delete) in q_caster.iter_mut() {
         let Some((values, spells)) = caster.get_next_casts() else {
             continue;
         };
@@ -229,6 +233,10 @@ pub fn do_caster(
             });
         }
         caster.add_spell_delay(*context.spell_delay.lock().unwrap());
+
+        if delete.is_some() {
+            commands.entity(ent).despawn();
+        }
     }
 }
 
@@ -275,6 +283,9 @@ pub fn update_rotation_based_targeter(
         }
     }
 }
+
+#[derive(Component, Debug, Clone)]
+pub struct DeleteOnCast;
 
 // pub fn update_random_targeter(mut q_targeter: Query<(&mut CasterTargeter)>) {
 //     todo!();

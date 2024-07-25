@@ -6,8 +6,10 @@ use bevy::{
 
 #[derive(PartialEq, Eq, Hash, Reflect)]
 pub enum ImageAsset {
-    Ducky,
-    EvilDucky,
+    // Ducky,
+    // EvilDucky,
+    Wizard,
+    BasicEnemy,
 }
 
 #[derive(Resource, Reflect, Deref, DerefMut)]
@@ -18,18 +20,18 @@ impl ImageAssets {
         let mut assets = HashMap::new();
 
         assets.insert(
-            ImageAsset::Ducky,
+            ImageAsset::Wizard,
             asset_server.load_with_settings(
-                "images/ducky.png",
+                "images/wizard.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
         );
         assets.insert(
-            ImageAsset::EvilDucky,
+            ImageAsset::BasicEnemy,
             asset_server.load_with_settings(
-                "images/evil_ducky.png",
+                "images/basic_enemy.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },

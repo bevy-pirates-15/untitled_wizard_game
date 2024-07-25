@@ -6,13 +6,13 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use crate::game::spells::examples::{TriggerSpell, ZapSpell};
-use crate::game::spells::triggers::PlayerSpellTrigger;
-use crate::game::spells::{SpellEffect, SpellModifierNode};
+use crate::game::spell_system::storage::RebuildWand;
+use crate::game::spell_system::triggers::PlayerSpellTrigger;
+use crate::game::spell_system::SpellModifierNode;
 use crate::{
     game::{
         player_mods::aiming::{AttachToPlayer, PlayerAim},
-        spells::casting::{CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster},
+        spell_system::casting::{CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster},
     },
     screen::Screen,
 };
@@ -54,27 +54,7 @@ fn spawn_wand(
         AttachToPlayer,
     ));
 
-    // let wand_spell_context = SpellCastContext {
-    //     caster: e.id(),
-    //     spell_vec: Vec2::new(0.0, 1.0),
-    //     spell_delay: Arc::new(Mutex::new(Duration::from_secs_f32(0.2))),
-    //     spread: 0.0,
-    //     modifiers: Arc::new(SpellModifierNode::Root),
-    // };
-
-    let wand_spells: Arc<Vec<Arc<dyn SpellEffect>>> = Arc::new(vec![
-        Arc::new(ZapSpell { base_damage: 81.0 }),
-        Arc::new(ZapSpell { base_damage: 82.0 }),
-        Arc::new(TriggerSpell {
-            trigger_spell: Arc::new(ZapSpell { base_damage: 83.0 }),
-            spells_triggered: Arc::new(vec![
-                Arc::new(ZapSpell { base_damage: 84.0 }),
-                Arc::new(ZapSpell { base_damage: 85.0 }),
-            ]),
-        }),
-        Arc::new(ZapSpell { base_damage: 86.0 }),
-    ]);
-
+    // wand_inventory.rebuild_effects();
     e.insert((
         SpellCaster::Sequential(SequentialCaster::new()),
         PlayerSpellTrigger {
@@ -82,8 +62,10 @@ fn spawn_wand(
                 spread: 10.0,
                 modifiers: Arc::new(SpellModifierNode::Root),
             },
-            spells: wand_spells,
+            spells: Arc::new(vec![]),
         },
         CasterTargeter::RotationBased(Vec2::new(0.0, 1.0)),
     ));
+
+    commands.trigger(RebuildWand);
 }
