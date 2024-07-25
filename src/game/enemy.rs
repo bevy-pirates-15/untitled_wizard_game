@@ -51,7 +51,7 @@ fn spawn_enemies(
     images: Res<ImageAssets>,
     player_query: Query<&Transform, With<Player>>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    // mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let curr_enemies = enemy_query.iter().len();
     let enemy_spawn_count = (MAX_ENEMIES - curr_enemies).min(SPAWN_RATE_PER_SECOND);
@@ -59,9 +59,6 @@ fn spawn_enemies(
     if curr_enemies >= MAX_ENEMIES || player_query.is_empty() {
         return;
     }
-
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 6, 2, Some(UVec2::splat(1)), None);
-    let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let player_pos = player_query.single().translation.truncate();
     for _ in 0..enemy_spawn_count {
@@ -78,13 +75,9 @@ fn spawn_enemies(
             },
             Experience(BASE_ENEMY_XP),
             SpriteBundle {
-                texture: images[&ImageAsset::EvilDucky].clone_weak(),
+                texture: images[&ImageAsset::BasicEnemy].clone_weak(),
                 transform: Transform::from_translation(vec3(x, y, 2.0)),
                 ..default()
-            },
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: 1,
             },
             StateScoped(Screen::Playing),
             Collider::circle(12.),

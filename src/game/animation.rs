@@ -94,13 +94,14 @@ pub struct PlayerAnimation {
 pub enum PlayerAnimationState {
     Idling,
     Walking,
+    Death,
 }
 
 impl PlayerAnimation {
     /// The number of idle frames.
-    const IDLE_FRAMES: usize = 2;
+    const IDLE_FRAMES: usize = 4;
     /// The duration of each idle frame.
-    const IDLE_INTERVAL: Duration = Duration::from_millis(500);
+    const IDLE_INTERVAL: Duration = Duration::from_millis(200);
 
     fn idling() -> Self {
         Self {
@@ -111,15 +112,29 @@ impl PlayerAnimation {
     }
 
     /// The number of walking frames.
-    const WALKING_FRAMES: usize = 6;
+    const WALKING_FRAMES: usize = 8;
     /// The duration of each walking frame.
-    const WALKING_INTERVAL: Duration = Duration::from_millis(50);
+    const WALKING_INTERVAL: Duration = Duration::from_millis(100);
 
     fn walking() -> Self {
         Self {
             timer: Timer::new(Self::WALKING_INTERVAL, TimerMode::Repeating),
             frame: 0,
             state: PlayerAnimationState::Walking,
+        }
+    }
+
+    /// The number of walking frames.
+    #[allow(dead_code)]
+    const DEATH_FRAMES: usize = 4;
+    /// The duration of each walking frame.
+    const DEATH_INTERVAL: Duration = Duration::from_millis(100);
+
+    fn death() -> Self {
+        Self {
+            timer: Timer::new(Self::DEATH_INTERVAL, TimerMode::Once),
+            frame: 0,
+            state: PlayerAnimationState::Death,
         }
     }
 
@@ -137,6 +152,7 @@ impl PlayerAnimation {
             % match self.state {
                 PlayerAnimationState::Idling => Self::IDLE_FRAMES,
                 PlayerAnimationState::Walking => Self::WALKING_FRAMES,
+                PlayerAnimationState::Death => Self::WALKING_FRAMES,
             };
     }
 
@@ -146,6 +162,7 @@ impl PlayerAnimation {
             match state {
                 PlayerAnimationState::Idling => *self = Self::idling(),
                 PlayerAnimationState::Walking => *self = Self::walking(),
+                PlayerAnimationState::Death => *self = Self::death(),
             }
         }
     }
@@ -159,7 +176,8 @@ impl PlayerAnimation {
     pub fn get_atlas_index(&self) -> usize {
         match self.state {
             PlayerAnimationState::Idling => self.frame,
-            PlayerAnimationState::Walking => 6 + self.frame,
+            PlayerAnimationState::Walking => 8 + self.frame,
+            PlayerAnimationState::Death => 16 + self.frame,
         }
     }
 }

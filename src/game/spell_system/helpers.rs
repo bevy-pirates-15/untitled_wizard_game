@@ -10,7 +10,7 @@ use bevy::sprite::{ColorMaterial, MaterialMesh2dBundle, Mesh2dHandle};
 
 use crate::game::physics::GameLayer;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
-use crate::game::spells::casting::SpellCastContext;
+use crate::game::spell_system::casting::SpellCastContext;
 
 pub fn spawn_spell_projectile(
     context: &mut SpellCastContext,

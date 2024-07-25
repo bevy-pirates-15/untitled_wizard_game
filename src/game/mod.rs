@@ -15,7 +15,7 @@ pub mod physics;
 pub mod player_mods;
 pub mod projectiles;
 pub mod spawn;
-pub mod spells;
+pub mod spell_system;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
@@ -25,7 +25,7 @@ pub(super) fn plugin(app: &mut App) {
         audio::plugin,
         spawn::plugin,
         enemy::plugin,
-        spells::plugin,
+        spell_system::plugin,
         levelling::plugin,
         projectiles::plugin,
         physics::plugin,

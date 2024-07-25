@@ -1,18 +1,23 @@
 /// Module for spell triggers.
 ///
-/// Triggers are components that are added to entities to trigger spells.
+/// Triggers are components that are added to entities to trigger spell_system.
 /// They require some sort of SpellCaster to also be present on the entity
 use std::sync::Arc;
 
 use bevy::app::{App, Update};
-use bevy::prelude::{in_state, Component, IntoSystemConfigs, Query, Res, Timer, Trigger};
+use bevy::log::info;
+use bevy::prelude::{
+    in_state, Commands, Component, Entity, IntoSystemConfigs, Query, Res, Timer, Trigger,
+};
 use bevy::time::Time;
 use leafwing_input_manager::action_state::ActionState;
 
 use crate::game::input::PlayerAction;
 use crate::game::projectiles::ProjectileCollisionEvent;
-use crate::game::spells::casting::{SpellCastValues, SpellCaster};
-use crate::game::spells::SpellEffect;
+use crate::game::spell_system::casting::{
+    do_caster, CasterTargeter, DeleteOnCast, SpellCastValues, SpellCaster,
+};
+use crate::game::spell_system::SpellEffect;
 use crate::screen::GameState;
 use crate::AppSet;
 
@@ -70,18 +75,40 @@ pub struct CollisionSpellTrigger {
     pub values: SpellCastValues,
     pub spells: Arc<Vec<Arc<dyn SpellEffect>>>,
 }
-/// Function to trigger spells when a projectile collides with something.
+/// Function to trigger spell_system when a projectile collides with something.
 /// has to be added via observers.
 #[allow(dead_code)]
 pub fn do_collision_trigger(
     trigger: Trigger<ProjectileCollisionEvent>,
-    mut collision_triggers: Query<(&CollisionSpellTrigger, &mut SpellCaster)>,
+    // mut collision_triggers: Query<(&CollisionSpellTrigger, &mut SpellCaster)>,
+    mut collision_triggers: Query<(
+        &CollisionSpellTrigger,
+        Entity,
+        &mut SpellCaster,
+        &CasterTargeter,
+        Option<&DeleteOnCast>,
+    )>,
+    commands: Commands,
 ) {
+    info!("do_collision_trigger");
     let proj_entity = trigger.entity();
-    let Ok((trigger, mut caster)) = collision_triggers.get_mut(proj_entity) else {
+    let Ok((trigger, _, mut caster, _, _)) = collision_triggers.get_mut(proj_entity) else {
+        info!("dead");
         return;
     };
     caster.try_cast(trigger.values.clone(), trigger.spells.clone());
+
+    do_caster(
+        collision_triggers
+            .transmute_lens::<(
+                Entity,
+                &mut SpellCaster,
+                &CasterTargeter,
+                Option<&DeleteOnCast>,
+            )>()
+            .query(),
+        commands,
+    );
 }
 
 #[derive(Debug, Clone)]
@@ -99,7 +126,7 @@ pub struct ExpirationSpellTrigger {
 //                 let trigger = world.get_entity_mut(entity).unwrap().get::<ExpirationSpellTrigger>().unwrap();
 //                 let spell_cast_event = SpellCastEvent {
 //                     to_trigger_values: trigger.values.clone(),
-//                     to_trigger_spells: trigger.spells.clone(),
+//                     to_trigger_spells: trigger.spell_system.clone(),
 //                 };
 //                 world.commands().trigger_targets(spell_cast_event,entity);
 //             },
