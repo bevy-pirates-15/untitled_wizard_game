@@ -4,6 +4,8 @@ use std::time::Duration;
 
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use bevy::render::view::RenderLayers;
+use bevy_magic_light_2d::prelude::CAMERA_LAYER_OBJECTS;
 
 use crate::game::physics::GameLayer;
 use crate::game::player_mods::damage::player_hit_by_projectile;
@@ -85,6 +87,8 @@ fn spawn_player(
         LinearVelocity::default(),
         StateScoped(Screen::Playing),
     ));
+
+    p.insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS));
 
     p.observe(player_hit_by_projectile);
 }

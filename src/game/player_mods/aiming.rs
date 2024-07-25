@@ -1,6 +1,7 @@
 use avian2d::math::Quaternion;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_magic_light_2d::ObjectsCamera;
 
 use crate::game::spawn::player::Player;
 use crate::AppSet;
@@ -43,7 +44,7 @@ pub struct PlayerAim(pub Vec2);
 
 pub fn player_mouse_look(
     mut aim_query: Query<(&mut PlayerAim, &mut Transform, &GlobalTransform)>,
-    camera_query: Query<(&GlobalTransform, &Camera)>,
+    camera_query: Query<(&GlobalTransform, &Camera), With<ObjectsCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");

@@ -8,7 +8,7 @@ use bevy::{
 
 use crate::screen::Screen;
 
-use super::{borders::SpawnBorders, player::SpawnPlayer, wand::SpawnWand};
+use super::{borders::SpawnBorders, lighting::SpawnLight, player::SpawnPlayer, wand::SpawnWand};
 use crate::config::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -49,5 +49,6 @@ fn spawn_level(
     commands.trigger(SpawnBorders);
     commands.trigger(SpawnPlayer);
     commands.trigger(SpawnWand);
+    commands.trigger(SpawnLight);
     // commands.trigger(StartWave);
 }

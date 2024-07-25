@@ -7,6 +7,8 @@ use avian2d::{
     prelude::{LockedAxes, RigidBody},
 };
 use bevy::prelude::*;
+use bevy::render::view::RenderLayers;
+use bevy_magic_light_2d::prelude::CAMERA_LAYER_WALLS;
 
 use crate::config::{BORDER_THICKNESS, MAP_HEIGHT, MAP_WIDTH};
 use crate::game::physics::GameLayer;
@@ -48,23 +50,25 @@ fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
     ];
 
     for (position, scale) in borders.iter() {
-        commands.spawn((
-            Name::new("Border"),
-            Border,
-            SpriteBundle {
-                sprite: Sprite {
-                    color: Color::srgb(0.7, 0.7, 0.8),
-                    custom_size: Some(*scale),
+        commands
+            .spawn((
+                Name::new("Border"),
+                Border,
+                SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::srgb(0.7, 0.7, 0.8),
+                        custom_size: Some(*scale),
+                        ..default()
+                    },
+                    transform: Transform::from_xyz(position.x, position.y, position.z),
                     ..default()
                 },
-                transform: Transform::from_xyz(position.x, position.y, position.z),
-                ..default()
-            },
-            LockedAxes::ROTATION_LOCKED,
-            RigidBody::Static,
-            Collider::rectangle(scale.x, scale.y),
-            CollisionLayers::new(GameLayer::Border, [GameLayer::Player]),
-            StateScoped(Screen::Playing),
-        ));
+                LockedAxes::ROTATION_LOCKED,
+                RigidBody::Static,
+                Collider::rectangle(scale.x, scale.y),
+                CollisionLayers::new(GameLayer::Border, [GameLayer::Player]),
+                StateScoped(Screen::Playing),
+            ))
+            .insert(RenderLayers::from_layers(CAMERA_LAYER_WALLS));
     }
 }

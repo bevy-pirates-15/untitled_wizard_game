@@ -2,6 +2,7 @@
 
 use avian2d::collision::Collider;
 use avian2d::prelude::{CollisionLayers, LinearVelocity, LockedAxes, RigidBody};
+use bevy::render::view::RenderLayers;
 use bevy::{
     app::App,
     color::palettes::css::LIGHT_CORAL,
@@ -10,6 +11,7 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
     time::common_conditions::on_timer,
 };
+use bevy_magic_light_2d::prelude::CAMERA_LAYER_OBJECTS;
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
@@ -64,41 +66,43 @@ fn spawn_enemies(
     for _ in 0..enemy_spawn_count {
         let (x, y) = get_random_pos_around(player_pos);
 
-        commands.spawn((
-            Name::new("Enemy"),
-            Enemy,
-            Damageable {
-                max_health: ENEMY_HEALTH,
-                health: ENEMY_HEALTH,
-                team: ProjectileTeam::Enemy,
-                invincibility_timer: Duration::from_secs_f32(0.1),
-            },
-            Experience(BASE_ENEMY_XP),
-            SpriteBundle {
-                texture: images[&ImageAsset::BasicEnemy].clone_weak(),
-                transform: Transform::from_translation(vec3(x, y, 2.0)),
-                ..default()
-            },
-            StateScoped(Screen::Playing),
-            Collider::circle(12.),
-            CollisionLayers::new(
-                GameLayer::Enemy,
-                [
+        commands
+            .spawn((
+                Name::new("Enemy"),
+                Enemy,
+                Damageable {
+                    max_health: ENEMY_HEALTH,
+                    health: ENEMY_HEALTH,
+                    team: ProjectileTeam::Enemy,
+                    invincibility_timer: Duration::from_secs_f32(0.1),
+                },
+                Experience(BASE_ENEMY_XP),
+                SpriteBundle {
+                    texture: images[&ImageAsset::BasicEnemy].clone_weak(),
+                    transform: Transform::from_translation(vec3(x, y, 2.0)),
+                    ..default()
+                },
+                StateScoped(Screen::Playing),
+                Collider::circle(12.),
+                CollisionLayers::new(
                     GameLayer::Enemy,
-                    GameLayer::Environment,
-                    GameLayer::Player,
-                    GameLayer::PlayerProjectile,
-                ],
-            ),
-            LockedAxes::ROTATION_LOCKED,
-            RigidBody::Dynamic,
-            LinearVelocity::default(),
-            ProjectileDamage {
-                team: ProjectileTeam::Enemy,
-                damage: 1.0,
-                hits_remaining: 1000,
-            },
-        ));
+                    [
+                        GameLayer::Enemy,
+                        GameLayer::Environment,
+                        GameLayer::Player,
+                        GameLayer::PlayerProjectile,
+                    ],
+                ),
+                LockedAxes::ROTATION_LOCKED,
+                RigidBody::Dynamic,
+                LinearVelocity::default(),
+                ProjectileDamage {
+                    team: ProjectileTeam::Enemy,
+                    damage: 1.0,
+                    hits_remaining: 1000,
+                },
+            ))
+            .insert(RenderLayers::from_layers(CAMERA_LAYER_OBJECTS));
     }
 }
 

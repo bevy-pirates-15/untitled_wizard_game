@@ -15,10 +15,8 @@ fn camera_follow_player(
     let Ok(player_transform) = player.get_single() else {
         return;
     };
-    let Ok((mut camera_transform, _camera)) = camera.get_single_mut() else {
-        return;
-    };
-
-    camera_transform.translation.x = player_transform.translation.x;
-    camera_transform.translation.y = player_transform.translation.y;
+    for (mut camera_transform, _camera) in camera.iter_mut() {
+        camera_transform.translation.x = player_transform.translation.x;
+        camera_transform.translation.y = player_transform.translation.y;
+    }
 }
