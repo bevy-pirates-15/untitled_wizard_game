@@ -23,6 +23,9 @@ pub struct PlayerLevel {
     overflow: u32,
 }
 
+#[derive(Component)]
+pub struct LevelText;
+
 impl Default for PlayerLevel {
     fn default() -> Self {
         PlayerLevel {
@@ -70,6 +73,7 @@ fn level_up(
     _trigger: Trigger<LevelUp>,
     mut commands: Commands,
     mut player_query: Query<&mut PlayerLevel, With<Player>>,
+    mut level_text_query: Query<&mut Text, With<LevelText>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if player_query.is_empty() {
@@ -90,6 +94,8 @@ fn level_up(
         player.exp_to_level_up -= player.overflow;
     }
     commands.trigger(Sfx::LevelUp);
+    let mut text = level_text_query.single_mut();
+    text.sections[0].value = format!("Level {:?}", player.level);
     next_game_state.set(GameState::GemSelection);
 }
 

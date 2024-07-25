@@ -46,11 +46,11 @@ impl SpellData for TriggerSpellData {
     }
 
     fn get_name(&self) -> String {
-        todo!()
+        "Collision Trigger".to_string()
     }
 
     fn get_desc(&self) -> String {
-        todo!()
+        "When the following spell's projectiles collide with something, they cast the immediately following spell.".to_string()
     }
 }
 #[derive(Debug, Clone)]

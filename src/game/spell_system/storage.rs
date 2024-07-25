@@ -14,7 +14,7 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(
             Startup,
             (|mut spell_inventory: ResMut<SpellInventory>, pool: ResMut<SpellPool>| {
-                for _ in 0..6 {
+                for _ in 0..2 {
                     spell_inventory.push_spell(pool.get_random_spell_component().clone());
                 }
                 spell_inventory.rebuild_effects()
@@ -30,7 +30,7 @@ pub struct SpellPool {
     pub spells: Vec<SpellComponent>,
 }
 impl SpellPool {
-    fn get_random_spell_component(&self) -> &SpellComponent {
+    pub fn get_random_spell_component(&self) -> &SpellComponent {
         let index = rand::random::<usize>() % self.spells.len();
         &self.spells[index]
     }
@@ -45,7 +45,7 @@ pub struct SpellInventory {
     pub spell_effects: Vec<Arc<dyn SpellEffect>>,
 }
 impl SpellInventory {
-    fn push_spell(&mut self, spell: SpellComponent) {
+    pub(crate) fn push_spell(&mut self, spell: SpellComponent) {
         self.spells.push(spell);
         self.rebuild_effects();
     }
@@ -57,7 +57,7 @@ impl SpellInventory {
             self.spell_effects.push(effect);
         }
     }
-    fn insert_spell(&mut self, spell: SpellComponent, pos: SpellAddPos) {
+    pub(crate) fn insert_spell(&mut self, spell: SpellComponent, pos: SpellAddPos) {
         self.spells.insert(pos.get_index(&self.spells), spell);
         self.rebuild_effects();
     }

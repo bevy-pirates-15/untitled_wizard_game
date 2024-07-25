@@ -18,7 +18,6 @@ pub(super) fn play_soundtrack(
             return;
         }
         Soundtrack::MainMenu => &soundtracks[&SoundtrackAsset::MainMenu],
-        Soundtrack::Credits => &soundtracks[&SoundtrackAsset::Credits],
         Soundtrack::Gameplay => &soundtracks[&SoundtrackAsset::Gameplay],
     }
     .clone_weak();
@@ -32,7 +31,7 @@ pub(super) fn play_soundtrack(
 
 /// We mark our soundtrack entity so we can find it later.
 #[derive(Component)]
-pub(super) struct SoundtrackMarker;
+pub(crate) struct SoundtrackMarker;
 
 /// Play or disable the soundtrack.
 /// Playing a new soundtrack will overwrite the previous one.
@@ -40,7 +39,6 @@ pub(super) struct SoundtrackMarker;
 #[derive(Event)]
 pub enum Soundtrack {
     MainMenu,
-    Credits,
     Gameplay,
     Disable,
 }

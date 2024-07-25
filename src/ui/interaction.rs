@@ -12,19 +12,29 @@ pub type InteractionQuery<'w, 's, T> =
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct InteractionPalette {
-    pub none: Color,
-    pub hovered: Color,
-    pub pressed: Color,
+    pub none: (Color, Color),
+    pub hovered: (Color, Color),
+    pub pressed: (Color, Color),
 }
 
 fn apply_interaction_palette(
-    mut palette_query: InteractionQuery<(&InteractionPalette, &mut BackgroundColor)>,
+    mut palette_query: InteractionQuery<(
+        &InteractionPalette,
+        &mut BackgroundColor,
+        &mut BorderColor,
+    )>,
 ) {
-    for (interaction, (palette, mut background)) in &mut palette_query {
+    for (interaction, (palette, mut background, mut border)) in &mut palette_query {
+        *border = match interaction {
+            Interaction::None => palette.none.1,
+            Interaction::Hovered => palette.hovered.1,
+            Interaction::Pressed => palette.pressed.1,
+        }
+        .into();
         *background = match interaction {
-            Interaction::None => palette.none,
-            Interaction::Hovered => palette.hovered,
-            Interaction::Pressed => palette.pressed,
+            Interaction::None => palette.none.0,
+            Interaction::Hovered => palette.hovered.0,
+            Interaction::Pressed => palette.pressed.0,
         }
         .into();
     }

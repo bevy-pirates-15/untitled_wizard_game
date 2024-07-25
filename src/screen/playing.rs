@@ -1,18 +1,23 @@
 //! The screen state for the main game loop.
 
+use bevy::color::palettes::css::RED;
 use bevy::color::palettes::tailwind::GREEN_400;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use super::{GameState, Screen};
-use crate::game::levelling::{compute_next_level, PlayerLevel};
+use crate::game::levelling::{compute_next_level, LevelText, PlayerLevel};
 use crate::game::spawn::player::Player;
+use crate::game::Damageable;
 use crate::game::{audio::soundtrack::Soundtrack, spawn::map::SpawnLevel};
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_level_bar));
+    app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_playing_gui));
     app.add_systems(OnExit(Screen::Playing), exit_playing);
 
-    app.add_systems(Update, update_level_bar.run_if(in_state(Screen::Playing)));
+    app.add_systems(
+        Update,
+        (update_level_bar, update_health_bar).run_if(in_state(Screen::Playing)),
+    );
     app.add_systems(
         Update,
         (toggle_game_pause)
@@ -33,8 +38,10 @@ fn exit_playing(mut commands: Commands) {
 #[derive(Component)]
 struct LevelBar;
 
-// Probably add a level bar here somewhere
-fn spawn_level_bar(mut commands: Commands) {
+#[derive(Component)]
+struct HealthBar;
+
+fn spawn_playing_gui(mut commands: Commands) {
     // TODO: check if bar is already here
     let ui_container = NodeBundle {
         style: Style {
@@ -51,10 +58,37 @@ fn spawn_level_bar(mut commands: Commands) {
     let level_bar = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
-            height: Val::Percent(10.),
+            height: Val::Percent(5.),
             ..default()
         },
         background_color: BackgroundColor(Color::from(GREEN_400)),
+        ..default()
+    };
+
+    let health_bar = NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(2.),
+            ..default()
+        },
+        background_color: BackgroundColor(Color::from(RED)),
+        ..default()
+    };
+
+    let level_text = TextBundle {
+        style: Style {
+            width: Val::Percent(50.),
+            height: Val::Percent(20.),
+            margin: UiRect::all(Val::Percent(2.0)),
+            ..default()
+        },
+        text: Text::from_section(
+            "Level 1",
+            TextStyle {
+                font_size: *UiScale(60.),
+                ..default()
+            },
+        ),
         ..default()
     };
 
@@ -63,10 +97,14 @@ fn spawn_level_bar(mut commands: Commands) {
         .insert(StateScoped(Screen::Playing))
         .id();
     let level_bar_entity = commands.spawn(level_bar).insert(LevelBar).id();
+    let health_bar_entity = commands.spawn(health_bar).insert(HealthBar).id();
+    let level_text_entity = commands.spawn(level_text).insert(LevelText).id();
 
-    commands
-        .entity(ui_container_entity)
-        .push_children(&[level_bar_entity]);
+    commands.entity(ui_container_entity).push_children(&[
+        level_bar_entity,
+        health_bar_entity,
+        level_text_entity,
+    ]);
 }
 
 fn update_level_bar(
@@ -80,6 +118,18 @@ fn update_level_bar(
                 / total_exp_in_level as f32)
                 * 100.;
             style.width = Val::Percent(percent_fill as f32);
+        };
+    }
+}
+
+fn update_health_bar(
+    mut health_bar_query: Query<&mut Style, With<HealthBar>>,
+    player_health_query: Query<&Damageable, With<Player>>,
+) {
+    for mut style in &mut health_bar_query {
+        if let Ok(player_health) = player_health_query.get_single() {
+            let percent_fill = (player_health.health / player_health.max_health) * 100.;
+            style.width = Val::Percent(percent_fill);
         };
     }
 }
