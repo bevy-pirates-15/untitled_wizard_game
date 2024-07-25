@@ -5,19 +5,22 @@ use avian2d::prelude::LinearVelocity;
 use bevy::app::{App, Update};
 use bevy::math::EulerRot;
 use bevy::prelude::{
-    Commands, Component, Entity, GlobalTransform, IntoSystemConfigs, Query, Res, Time, Timer,
-    TimerMode, Vec2, World,
+    in_state, Commands, Component, Entity, GlobalTransform, IntoSystemConfigs, Query, Res, Time,
+    Timer, TimerMode, Vec2, World,
 };
 
 use crate::game::projectiles::ProjectileTeam;
 use crate::game::spells::{SpellEffect, SpellModifier, SpellModifierNode};
+use crate::screen::GameState;
 use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            tick_sequential_caster.in_set(AppSet::TickTimers),
+            tick_sequential_caster
+                .in_set(AppSet::TickTimers)
+                .run_if(in_state(GameState::Running)),
             do_caster.in_set(AppSet::Update),
             (
                 update_rotation_based_targeter,

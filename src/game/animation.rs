@@ -18,7 +18,9 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            update_animation_timer.in_set(AppSet::TickTimers),
+            update_animation_timer
+                .in_set(AppSet::TickTimers)
+                .run_if(in_state(GameState::Running)),
             (
                 update_animation_movement,
                 update_animation_atlas,

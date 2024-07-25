@@ -1,17 +1,21 @@
 //! Spawn the player.
 
+use std::time::Duration;
+
 use avian2d::prelude::*;
 use bevy::prelude::*;
 
 use crate::game::physics::GameLayer;
+use crate::game::player_mods::damage::player_hit_by_projectile;
 use crate::game::player_mods::movement::{Movement, PlayerMovement};
+use crate::game::projectiles::ProjectileTeam;
 use crate::{
     config::{PLAYER_HEALTH, PLAYER_SPEED},
     game::{
         animation::PlayerAnimation,
         assets::{ImageAsset, ImageAssets},
         levelling::PlayerLevel,
-        Health,
+        Damageable,
     },
     screen::Screen,
 };
@@ -42,15 +46,19 @@ fn spawn_player(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_animation = PlayerAnimation::new();
 
-    commands.spawn((
+    let mut p = commands.spawn((
         Name::new("Wizard"),
         Player,
-        Health(PLAYER_HEALTH),
+        Damageable {
+            max_health: PLAYER_HEALTH,
+            health: PLAYER_HEALTH,
+            team: ProjectileTeam::Player,
+            invincibility_timer: Duration::from_secs_f32(0.5),
+        },
         PlayerLevel::default(),
         SpriteBundle {
             texture: images[&ImageAsset::Ducky].clone_weak(),
-            transform: Transform::from_scale(Vec3::splat(8.0))
-                .with_translation(Vec3::new(0., 0., 1.)),
+            transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
             ..Default::default()
         },
         TextureAtlas {
@@ -77,4 +85,6 @@ fn spawn_player(
         LinearVelocity::default(),
         StateScoped(Screen::Playing),
     ));
+
+    p.observe(player_hit_by_projectile);
 }

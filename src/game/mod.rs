@@ -1,6 +1,8 @@
 //! Game mechanics and content.
 
+use crate::game::projectiles::ProjectileTeam;
 use bevy::prelude::*;
+use std::time::Duration;
 
 mod animation;
 pub mod assets;
@@ -30,12 +32,17 @@ pub(super) fn plugin(app: &mut App) {
         player_mods::plugin,
     ));
 
-    app.register_type::<Health>();
+    app.register_type::<Damageable>();
 }
 
 #[derive(Debug, Component, Reflect)]
 #[reflect(Component)]
-pub struct Health(pub f32);
+pub struct Damageable {
+    pub max_health: f32,
+    pub health: f32,
+    pub team: ProjectileTeam,
+    pub invincibility_timer: Duration,
+}
 
 #[derive(Debug, Component, Reflect)]
 #[reflect(Component)]

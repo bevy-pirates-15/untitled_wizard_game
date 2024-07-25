@@ -45,7 +45,7 @@ impl SpellEffect for ZapSpell {
         let Some(spell_entity) = spawn_spell_projectile(
             context,
             world,
-            50.0,
+            10.,
             500.0,
             self.base_damage,
             1,

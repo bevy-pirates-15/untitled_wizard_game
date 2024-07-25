@@ -39,10 +39,10 @@ fn spawn_wand(
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(
                 meshes.add(
-                    Rectangle::new(20., 70.)
+                    Rectangle::new(5., 40.)
                         .mesh()
                         .build()
-                        .translated_by(Vec3::new(0.0, 35.0, 0.0)),
+                        .translated_by(Vec3::new(0.0, 10.0, 0.0)),
                 ),
             ),
             // transform: Transform::default().with_scale(Vec2::new(20., 70.).extend(2.0)),
