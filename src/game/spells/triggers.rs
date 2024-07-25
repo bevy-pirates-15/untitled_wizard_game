@@ -5,7 +5,7 @@
 use std::sync::Arc;
 
 use bevy::app::{App, Update};
-use bevy::prelude::{Component, IntoSystemConfigs, Query, Res, Timer, Trigger};
+use bevy::prelude::{in_state, Component, IntoSystemConfigs, Query, Res, Timer, Trigger};
 use bevy::time::Time;
 use leafwing_input_manager::action_state::ActionState;
 
@@ -13,13 +13,16 @@ use crate::game::input::PlayerAction;
 use crate::game::projectiles::ProjectileCollisionEvent;
 use crate::game::spells::casting::{SpellCastValues, SpellCaster};
 use crate::game::spells::SpellEffect;
+use crate::screen::GameState;
 use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            tick_timer_trigger.in_set(AppSet::TickTimers),
+            tick_timer_trigger
+                .in_set(AppSet::TickTimers)
+                .run_if(in_state(GameState::Running)),
             (do_timer_trigger, do_player_trigger).in_set(AppSet::Update),
             //todo: more triggers
         ),

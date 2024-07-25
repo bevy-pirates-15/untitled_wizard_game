@@ -102,6 +102,6 @@ fn attach_to_player(
     };
 
     for (_, mut transform) in query.iter_mut() {
-        transform.translation = player_transform.translation();
+        transform.translation = player_transform.translation() + Vec3::new(0.0, 0.0, 0.1);
     }
 }

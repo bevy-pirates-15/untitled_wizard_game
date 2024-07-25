@@ -85,8 +85,8 @@ enum AppSet {
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
     camera.projection.scaling_mode = ScalingMode::Fixed {
-        width: 1920.,
-        height: 1080.,
+        width: 640.,
+        height: 360.,
     };
 
     commands.spawn((Name::new("Camera"), camera));
