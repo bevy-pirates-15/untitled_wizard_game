@@ -42,7 +42,7 @@ fn spawn_player(
     // By attaching it to a [`SpriteBundle`] and providing an index, we can specify which section of the image we want to see.
     // We will use this to animate our player character. You can learn more about texture atlases in this example:
     // https://github.com/bevyengine/bevy/blob/latest/examples/2d/texture_atlas.rs
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 6, 2, Some(UVec2::splat(1)), None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(24), 8, 3, Some(UVec2::splat(0)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_animation = PlayerAnimation::new();
 
@@ -57,7 +57,7 @@ fn spawn_player(
         },
         PlayerLevel::default(),
         SpriteBundle {
-            texture: images[&ImageAsset::Ducky].clone_weak(),
+            texture: images[&ImageAsset::Wizard].clone_weak(),
             transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
             ..Default::default()
         },

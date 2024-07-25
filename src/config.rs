@@ -16,7 +16,7 @@ pub const MAX_ENEMIES: usize = 1500;
 pub const ENEMY_SPEED: f32 = 40.;
 pub const ENEMY_HEALTH: f32 = 75.0;
 // pub const ENEMY_DAMAGE: f32 = 10.0;
-pub const SPAWN_RATE_PER_SECOND: usize = 20;
+pub const SPAWN_RATE_PER_SECOND: usize = 4;
 pub const SPAWN_RADIUS: Range<f32> = 300.0..600.0;
 pub const ENEMY_SPAWN_PERIOD: f32 = 1.0;
 

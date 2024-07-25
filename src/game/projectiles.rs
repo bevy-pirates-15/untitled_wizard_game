@@ -94,32 +94,6 @@ fn despawn_projectiles_no_hits(
     }
 }
 
-// // code for only projectile hitting enemy
-// fn detect_projectile_collisions (
-//     mut commands: Commands,
-//     mut projectile_query: Query<(Entity, &mut ProjectileDamage, &CollidingEntities)>,
-//     mut enemy_query: Query<&mut Health, (With<Enemy>, Without<Player>)>,
-// ) {
-//     for (entity, mut projectile_damage, colliding_entities) in projectile_query.iter_mut() {
-//         for &colliding_entity in colliding_entities.0.iter() {
-//             if let Ok(mut health) = enemy_query.get_mut(colliding_entity) {
-//                 //do damage
-//                 health.0 -= projectile_damage.damage;
-
-//                 //reduce pierce counter
-//                 projectile_damage.hits_remaining -= 1;
-//                 commands.trigger(Sfx::EnemyCollision);
-//                 commands.trigger_targets(
-//                     ProjectileCollisionEvent {
-//                         target: colliding_entity,
-//                     },
-//                     entity,
-//                 );
-//             }
-//         }
-//     }
-// }
-
 // This breaks player/enemy collision donno why
 fn detect_projectile_collisions(
     mut collision_event_reader: EventReader<Collision>,
@@ -145,7 +119,7 @@ fn detect_projectile_collisions(
                 continue;
             };
 
-        let Ok((mut health, invinicibility)) = health_havers.get_mut(health_entity) else {
+        let Ok((mut health, invincibility)) = health_havers.get_mut(health_entity) else {
             return;
         };
 
@@ -159,7 +133,7 @@ fn detect_projectile_collisions(
         }
 
         //is this entity invulnerable
-        if invinicibility.is_some() {
+        if invincibility.is_some() {
             continue;
         }
 
