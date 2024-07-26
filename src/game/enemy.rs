@@ -51,7 +51,6 @@ fn spawn_enemies(
     images: Res<ImageAssets>,
     player_query: Query<&Transform, With<Player>>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
-    // mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let curr_enemies = enemy_query.iter().len();
     let enemy_spawn_count = (MAX_ENEMIES - curr_enemies).min(SPAWN_RATE_PER_SECOND);
@@ -80,7 +79,7 @@ fn spawn_enemies(
                 ..default()
             },
             StateScoped(Screen::Playing),
-            Collider::circle(12.),
+            Collider::circle(8.),
             CollisionLayers::new(
                 GameLayer::Enemy,
                 [
@@ -97,6 +96,7 @@ fn spawn_enemies(
                 team: ProjectileTeam::Enemy,
                 damage: 1.0,
                 hits_remaining: 1000,
+                knockback_force: 0.0,
             },
         ));
     }

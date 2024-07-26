@@ -135,7 +135,7 @@ fn tick_invincibility_timer(time: Res<Time>, mut query: Query<&mut Invincibility
 fn handle_invincibility(mut commands: Commands, mut query: Query<(Entity, &mut Invincibility)>) {
     for (entity, invincibility) in query.iter_mut() {
         if invincibility.timer.finished() {
-            info!("Invincibility Removed");
+            // info!("Invincibility Removed");
             commands.entity(entity).remove::<Invincibility>();
         }
     }

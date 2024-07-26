@@ -4,6 +4,7 @@
 use bevy::prelude::*;
 
 use super::Screen;
+use crate::game::assets::spell_gfx::SpellGFXAssets;
 use crate::{
     game::assets::{ImageAssets, SfxAssets, SoundtrackAssets},
     ui::prelude::*,
@@ -26,6 +27,7 @@ fn enter_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(ImageAssets::new(&asset_server));
     commands.insert_resource(SfxAssets::new(&asset_server));
     commands.insert_resource(SoundtrackAssets::new(&asset_server));
+    commands.insert_resource(SpellGFXAssets::new(&asset_server));
 }
 
 fn check_all_loaded(
@@ -34,11 +36,13 @@ fn check_all_loaded(
     images: Res<ImageAssets>,
     sfxs: Res<SfxAssets>,
     soundtracks: Res<SoundtrackAssets>,
+    spellgfx: Res<SpellGFXAssets>,
     mut next_screen: ResMut<NextState<Screen>>,
 ) {
     let all_loaded = images.all_loaded(&image_assets)
         && sfxs.all_loaded(&audio_assets)
-        && soundtracks.all_loaded(&audio_assets);
+        && soundtracks.all_loaded(&audio_assets)
+        && spellgfx.all_loaded(&image_assets);
     if all_loaded {
         next_screen.set(Screen::Title);
     }
