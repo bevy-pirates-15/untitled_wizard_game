@@ -9,7 +9,7 @@ use crate::game::spell_system::SpellModifierNode;
 use crate::{
     game::{
         player_mods::aiming::{AttachToPlayer, PlayerAim},
-        spell_system::casting::{CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster},
+        spell_system::casting::{SpellCastValues},
     },
     screen::Screen,
 };
@@ -41,15 +41,14 @@ fn spawn_wand(_trigger: Trigger<SpawnWand>, images: Res<ImageAssets>, mut comman
 
     // wand_inventory.rebuild_effects();
     e.insert((
-        SpellCaster::Sequential(SequentialCaster::new()),
         PlayerSpellTrigger {
+            current_caster: None,
             values: SpellCastValues {
                 spread: 10.0,
                 modifiers: Arc::new(SpellModifierNode::Root),
             },
             spells: Arc::new(vec![]),
         },
-        CasterTargeter::RotationBased(Vec2::new(0.0, 1.0)),
     ));
 
     commands.trigger(RebuildWand);

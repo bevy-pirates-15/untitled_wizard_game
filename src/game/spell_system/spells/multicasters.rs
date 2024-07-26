@@ -1,19 +1,21 @@
 use std::slice::Iter;
 use std::sync::Arc;
 
+use bevy::log::info;
 use bevy::math::Vec2;
 use bevy::prelude::{Entity, World};
+use log::warn;
 
-use crate::game::spell_system::casting::{
-    CasterTargeter, InstantCaster, SpellCastContext, SpellCaster,
-};
-use crate::game::spell_system::triggers::{do_collision_trigger, CollisionSpellTrigger};
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
+use crate::game::spell_system::casting::{
+    SpellCastContext, SpellCaster,
+};
+use crate::game::spell_system::triggers::{CollisionSpellTrigger, do_collision_trigger};
 
 pub(super) fn get_spells() -> Vec<SpellComponent> {
     vec![SpellComponent {
         data: Box::new(TriggerSpellData {
-            spells_triggered: 0,
+            spells_triggered: 1,
         }),
         icon_id: 24,
     }]
@@ -28,12 +30,15 @@ impl SpellData for TriggerSpellData {
         let trigger_spell = iter.next()?.data.build(iter)?;
         let mut spells_triggered: Vec<Arc<dyn SpellEffect>> = Vec::new();
 
+
         for _ in 0..self.spells_triggered {
             let Some(next) = iter.next() else {
+                warn!("Failed to build trigger's child spell, not enough spells in the list.");
                 break;
             }; //no more spell_system left to add to this trigger
 
             let Some(spell) = next.data.build(iter) else {
+                warn!("failed to build trigger's child spell, failed to build child spell");
                 break;
             }; //failed to build child spell
 
@@ -67,12 +72,10 @@ impl SpellEffect for TriggerSpell {
             let mut spell_context = new_context.clone();
             spell_context.caster = e;
             mod_world.entity_mut(e).insert((
-                SpellCaster::Instant(InstantCaster::new()),
                 CollisionSpellTrigger {
                     values: spell_context.values.clone(),
                     spells: spells.clone(),
                 },
-                CasterTargeter::VelocityBased(Vec2::new(0.0, 1.0)),
             ));
             mod_world.entity_mut(e).observe(do_collision_trigger);
         });
