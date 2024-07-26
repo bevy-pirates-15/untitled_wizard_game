@@ -22,14 +22,14 @@ pub(super) fn get_spells() -> Vec<SpellComponent> {
         SpellComponent {
             data: Box::new(BangSpellData {
                 base_damage: 40.0,
-                radius: 100.0,
+                radius: 50.0,
             }),
             icon_id: 3,
         },
         SpellComponent {
             data: Box::new(ArcaneArrowSpellData {
                 base_damage: 30.0,
-                speed: 500.0,
+                speed: 400.0,
                 num_hits: 3,
             }),
             icon_id: 1,
@@ -83,7 +83,7 @@ impl SpellEffect for ZapSpell {
             SpellModel::StaticSprite(SpellGFXAsset::Zap),
             ProjectileStats {
                 radius: 5.,
-                speed: 500.0,
+                speed: 200.0,
                 damage: self.base_damage,
                 num_hits: 1,
                 lifetime: Duration::from_secs_f32(2.0),

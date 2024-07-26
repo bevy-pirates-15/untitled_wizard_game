@@ -66,12 +66,14 @@ pub trait SpellEffect: Send + Sync + Debug {
 
 pub type SpellModifier = Box<dyn Fn(Entity, &mut World) + Send + Sync + 'static>;
 
+#[derive(Default)]
 pub enum SpellModifierNode {
     Node {
         id: String,
         modifier: SpellModifier,
         prev: Option<Arc<SpellModifierNode>>,
     },
+    #[default]
     Root,
 }
 impl Debug for SpellModifierNode {
