@@ -1,3 +1,5 @@
+pub mod spell_gfx;
+
 use bevy::{
     prelude::*,
     render::texture::{ImageLoaderSettings, ImageSampler},
@@ -10,6 +12,8 @@ pub enum ImageAsset {
     // EvilDucky,
     Wizard,
     BasicEnemy,
+    Wand,
+    SpellIcons,
 }
 
 #[derive(Resource, Reflect, Deref, DerefMut)]
@@ -35,6 +39,20 @@ impl ImageAssets {
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
+            ),
+        );
+        assets.insert(
+            ImageAsset::Wand,
+            asset_server
+                .load_with_settings("images/wand.png", |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest()
+                }),
+        );
+        assets.insert(
+            ImageAsset::SpellIcons,
+            asset_server.load_with_settings(
+                "images/spell_icons.png",
+                |settings: &mut ImageLoaderSettings| settings.sampler = ImageSampler::nearest(),
             ),
         );
 

@@ -1,11 +1,8 @@
 use std::sync::Arc;
 
-use bevy::{
-    color::palettes::css::BROWN,
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 
+use crate::game::assets::{ImageAsset, ImageAssets};
 use crate::game::spell_system::storage::RebuildWand;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
 use crate::game::spell_system::SpellModifierNode;
@@ -27,31 +24,19 @@ pub struct SpawnWand;
 #[derive(Component, Debug, Default)]
 pub struct Wand;
 
-fn spawn_wand(
-    _trigger: Trigger<SpawnWand>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn spawn_wand(_trigger: Trigger<SpawnWand>, images: Res<ImageAssets>, mut commands: Commands) {
     let mut e = commands.spawn((
         Name::new("Wand"),
         Wand,
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(
-                meshes.add(
-                    Rectangle::new(5., 40.)
-                        .mesh()
-                        .build()
-                        .translated_by(Vec3::new(0.0, 10.0, 0.0)),
-                ),
-            ),
-            // transform: Transform::default().with_scale(Vec2::new(20., 70.).extend(2.0)),
-            material: materials.add(Color::from(BROWN)),
+        SpriteBundle {
+            texture: images[&ImageAsset::Wand].clone_weak(),
             ..default()
         },
         PlayerAim(Vec2::new(0.0, 1.0)),
         StateScoped(Screen::Playing),
-        AttachToPlayer,
+        AttachToPlayer {
+            origin_offset: Vec3::new(0., -3.0, 0.1),
+        },
     ));
 
     // wand_inventory.rebuild_effects();

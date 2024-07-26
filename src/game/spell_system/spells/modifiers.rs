@@ -13,6 +13,7 @@ pub(super) fn get_spells() -> Vec<SpellComponent> {
         data: Box::new(DmgUpSpellModData {
             damage_increase: 0.5,
         }),
+        icon_id: 12,
     }]
 }
 
