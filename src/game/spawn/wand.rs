@@ -1,19 +1,18 @@
 use std::sync::Arc;
 
-use bevy::{
-    color::palettes::css::BROWN,
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 
-use crate::game::aiming::AttachToPlayer;
-use crate::game::spells::casting::{
-    CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster,
+use crate::game::assets::{ImageAsset, ImageAssets};
+use crate::game::spell_system::storage::RebuildWand;
+use crate::game::spell_system::triggers::PlayerSpellTrigger;
+use crate::game::spell_system::SpellModifierNode;
+use crate::{
+    game::{
+        player_mods::aiming::{AttachToPlayer, PlayerAim},
+        spell_system::casting::{CasterTargeter, SequentialCaster, SpellCastValues, SpellCaster},
+    },
+    screen::Screen,
 };
-use crate::game::spells::examples::{TriggerSpell, ZapSpell};
-use crate::game::spells::triggers::PlayerSpellTrigger;
-use crate::game::spells::{SpellEffect, SpellModifierNode};
-use crate::{game::aiming::PlayerAim, screen::Screen};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_wand);
@@ -25,54 +24,22 @@ pub struct SpawnWand;
 #[derive(Component, Debug, Default)]
 pub struct Wand;
 
-fn spawn_wand(
-    _trigger: Trigger<SpawnWand>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn spawn_wand(_trigger: Trigger<SpawnWand>, images: Res<ImageAssets>, mut commands: Commands) {
     let mut e = commands.spawn((
         Name::new("Wand"),
         Wand,
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(
-                meshes.add(
-                    Rectangle::new(20., 70.)
-                        .mesh()
-                        .build()
-                        .translated_by(Vec3::new(0.0, 35.0, 0.0)),
-                ),
-            ),
-            // transform: Transform::default().with_scale(Vec2::new(20., 70.).extend(2.0)),
-            material: materials.add(Color::from(BROWN)),
+        SpriteBundle {
+            texture: images[&ImageAsset::Wand].clone_weak(),
             ..default()
         },
         PlayerAim(Vec2::new(0.0, 1.0)),
         StateScoped(Screen::Playing),
-        AttachToPlayer,
+        AttachToPlayer {
+            origin_offset: Vec3::new(0., -3.0, 0.1),
+        },
     ));
 
-    // let wand_spell_context = SpellCastContext {
-    //     caster: e.id(),
-    //     spell_vec: Vec2::new(0.0, 1.0),
-    //     spell_delay: Arc::new(Mutex::new(Duration::from_secs_f32(0.2))),
-    //     spread: 0.0,
-    //     modifiers: Arc::new(SpellModifierNode::Root),
-    // };
-
-    let wand_spells: Arc<Vec<Arc<dyn SpellEffect>>> = Arc::new(vec![
-        Arc::new(ZapSpell { base_damage: 81.0 }),
-        Arc::new(ZapSpell { base_damage: 82.0 }),
-        Arc::new(TriggerSpell {
-            trigger_spell: Arc::new(ZapSpell { base_damage: 83.0 }),
-            spells_triggered: Arc::new(vec![
-                Arc::new(ZapSpell { base_damage: 84.0 }),
-                Arc::new(ZapSpell { base_damage: 85.0 }),
-            ]),
-        }),
-        Arc::new(ZapSpell { base_damage: 86.0 }),
-    ]);
-
+    // wand_inventory.rebuild_effects();
     e.insert((
         SpellCaster::Sequential(SequentialCaster::new()),
         PlayerSpellTrigger {
@@ -80,8 +47,10 @@ fn spawn_wand(
                 spread: 10.0,
                 modifiers: Arc::new(SpellModifierNode::Root),
             },
-            spells: wand_spells,
+            spells: Arc::new(vec![]),
         },
         CasterTargeter::RotationBased(Vec2::new(0.0, 1.0)),
     ));
+
+    commands.trigger(RebuildWand);
 }

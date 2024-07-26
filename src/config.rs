@@ -8,8 +8,8 @@ pub const MAP_WIDTH: f32 = 5000.0;
 pub const BORDER_THICKNESS: f32 = 100.0;
 
 // Player
-pub const PLAYER_SPEED: f32 = 21000.;
-pub const PLAYER_HEALTH: f32 = 100.0;
+pub const PLAYER_SPEED: f32 = 5000.;
+pub const PLAYER_HEALTH: f32 = 9.99;
 
 // Enemy
 pub const ENEMY_SPEED: f32 = 0.75;

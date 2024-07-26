@@ -1,7 +1,7 @@
 // Handles the logic for a wave of enemies attacking the player
 
 use avian2d::collision::Collider;
-use avian2d::prelude::CollisionLayers;
+use avian2d::prelude::{CollisionLayers, LinearVelocity, LockedAxes, RigidBody};
 use bevy::{
     app::App,
     color::palettes::css::LIGHT_CORAL,
@@ -16,13 +16,14 @@ use std::time::Duration;
 
 use super::ItemDrop;
 use crate::game::physics::GameLayer;
+use crate::game::projectiles::{ProjectileDamage, ProjectileTeam};
 use crate::{
     config::*,
     game::{
         assets::{ImageAsset, ImageAssets},
         levelling::Experience,
         spawn::player::Player,
-        Health,
+        Damageable,
     },
     screen::{GameState, Screen},
 };
@@ -136,15 +137,11 @@ fn spawn_enemies(
     images: Res<ImageAssets>,
     player_query: Query<&Transform, With<Player>>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let curr_enemies = enemy_query.iter().len();
     if curr_enemies >= wave.max_enemies || player_query.is_empty() {
         return;
     }
-
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 6, 2, Some(UVec2::splat(1)), None);
-    let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let player_pos = player_query.single().translation.truncate();
     let enemy_spawn_count = (wave.max_enemies - curr_enemies).min(wave.spawn_rate_per_sec);
@@ -154,27 +151,38 @@ fn spawn_enemies(
         commands.spawn((
             Name::new("Enemy"),
             Enemy,
-            Health(ENEMY_HEALTH * wave.number as f32),
+            Damageable {
+                max_health: ENEMY_HEALTH * wave.number as f32,
+                health: ENEMY_HEALTH * wave.number as f32,
+                team: ProjectileTeam::Enemy,
+                invincibility_timer: Duration::from_secs_f32(0.1),
+            },
             Experience(BASE_ENEMY_XP),
             SpriteBundle {
-                texture: images[&ImageAsset::Ducky].clone_weak(),
+                texture: images[&ImageAsset::BasicEnemy].clone_weak(),
                 transform: Transform::from_translation(vec3(x, y, 2.0)),
                 ..default()
-            },
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: 1,
             },
             StateScoped(Screen::Playing),
             Collider::circle(8.),
             CollisionLayers::new(
                 GameLayer::Enemy,
                 [
+                    GameLayer::Enemy,
                     GameLayer::Environment,
                     GameLayer::Player,
                     GameLayer::PlayerProjectile,
                 ],
             ),
+            LockedAxes::ROTATION_LOCKED,
+            RigidBody::Dynamic,
+            LinearVelocity::default(),
+            ProjectileDamage {
+                team: ProjectileTeam::Enemy,
+                damage: 1.0,
+                hits_remaining: 1000,
+                knockback_force: 0.0,
+            },
         ));
     }
 }
@@ -194,24 +202,29 @@ fn get_random_pos_around(pos: Vec2) -> (f32, f32) {
 }
 
 //Enemies will always follow the position of the player
-fn chase_player(
-    player_query: Query<&Transform, With<Player>>,
-    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Player>)>,
+pub fn chase_player(
+    player_query: Query<&GlobalTransform, With<Player>>,
+    mut enemy_query: Query<(&mut LinearVelocity, &GlobalTransform), (With<Enemy>, Without<Player>)>,
 ) {
     if player_query.is_empty() || enemy_query.is_empty() {
         return;
     }
 
-    let player_pos = player_query.single().translation;
-    for mut transform in enemy_query.iter_mut() {
-        let dir = (player_pos - transform.translation).normalize();
-        transform.translation += dir * ENEMY_SPEED;
+    let player_pos = player_query.single().translation();
+    for (mut lvelocity, gtransform) in enemy_query.iter_mut() {
+        let dir = (player_pos - gtransform.translation()).normalize();
+        let target_velocity = dir * ENEMY_SPEED;
+        //lerp velocity towards target velocity
+        lvelocity.0 = lvelocity.0.lerp(target_velocity.xy(), 0.1);
     }
 }
 
 fn clear_dead_enemies(
     mut commands: Commands,
-    enemy_query: Query<(&Health, &Transform, &Experience, Entity), (With<Enemy>, Without<Player>)>,
+    enemy_query: Query<
+        (&Damageable, &Transform, &Experience, Entity),
+        (With<Enemy>, Without<Player>),
+    >,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
@@ -220,7 +233,7 @@ fn clear_dead_enemies(
     }
 
     for (health, pos, xp, enemy) in enemy_query.iter() {
-        if health.0 <= 0.0 {
+        if health.health <= 0.0 {
             commands.entity(enemy).despawn();
             commands.spawn((
                 Name::new("Xp drop"),
@@ -234,6 +247,7 @@ fn clear_dead_enemies(
                     ..default()
                 },
                 Collider::circle(20.),
+                StateScoped(Screen::Playing),
             ));
             // todo xp drops should only live for a short while
         }
