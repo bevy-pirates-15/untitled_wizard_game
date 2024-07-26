@@ -1,16 +1,12 @@
 use std::slice::Iter;
 use std::sync::Arc;
 
-use bevy::log::info;
-use bevy::math::Vec2;
 use bevy::prelude::{Entity, World};
 use log::warn;
 
+use crate::game::spell_system::casting::SpellCastContext;
+use crate::game::spell_system::triggers::{do_collision_trigger, CollisionSpellTrigger};
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
-use crate::game::spell_system::casting::{
-    SpellCastContext, SpellCaster,
-};
-use crate::game::spell_system::triggers::{CollisionSpellTrigger, do_collision_trigger};
 
 pub(super) fn get_spells() -> Vec<SpellComponent> {
     vec![SpellComponent {
@@ -29,7 +25,6 @@ impl SpellData for TriggerSpellData {
     fn build(&self, iter: &mut Iter<SpellComponent>) -> Option<Arc<dyn SpellEffect>> {
         let trigger_spell = iter.next()?.data.build(iter)?;
         let mut spells_triggered: Vec<Arc<dyn SpellEffect>> = Vec::new();
-
 
         for _ in 0..self.spells_triggered {
             let Some(next) = iter.next() else {
@@ -71,12 +66,10 @@ impl SpellEffect for TriggerSpell {
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
             let mut spell_context = new_context.clone();
             spell_context.caster = e;
-            mod_world.entity_mut(e).insert((
-                CollisionSpellTrigger {
-                    values: spell_context.values.clone(),
-                    spells: spells.clone(),
-                },
-            ));
+            mod_world.entity_mut(e).insert((CollisionSpellTrigger {
+                values: spell_context.values.clone(),
+                spells: spells.clone(),
+            },));
             mod_world.entity_mut(e).observe(do_collision_trigger);
         });
         context.add_modifier("CollisionTrigger", modifier);

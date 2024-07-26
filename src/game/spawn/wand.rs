@@ -9,7 +9,7 @@ use crate::game::spell_system::SpellModifierNode;
 use crate::{
     game::{
         player_mods::aiming::{AttachToPlayer, PlayerAim},
-        spell_system::casting::{SpellCastValues},
+        spell_system::casting::SpellCastValues,
     },
     screen::Screen,
 };
@@ -40,16 +40,14 @@ fn spawn_wand(_trigger: Trigger<SpawnWand>, images: Res<ImageAssets>, mut comman
     ));
 
     // wand_inventory.rebuild_effects();
-    e.insert((
-        PlayerSpellTrigger {
-            current_caster: None,
-            values: SpellCastValues {
-                spread: 10.0,
-                modifiers: Arc::new(SpellModifierNode::Root),
-            },
-            spells: Arc::new(vec![]),
+    e.insert((PlayerSpellTrigger {
+        current_caster: None,
+        values: SpellCastValues {
+            spread: 10.0,
+            modifiers: Arc::new(SpellModifierNode::Root),
         },
-    ));
+        spells: Arc::new(vec![]),
+    },));
 
     commands.trigger(RebuildWand);
 }

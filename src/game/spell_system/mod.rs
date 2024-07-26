@@ -73,7 +73,8 @@ pub enum SpellModifierNode {
         modifier: SpellModifier,
         prev: Option<Arc<SpellModifierNode>>,
     },
-    #[default] Root,
+    #[default]
+    Root,
 }
 impl Debug for SpellModifierNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

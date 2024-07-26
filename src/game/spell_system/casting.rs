@@ -1,13 +1,14 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use avian2d::prelude::LinearVelocity;
 use bevy::app::{App, Update};
 use bevy::log::info;
 use bevy::math::EulerRot;
-use bevy::prelude::{in_state, Commands, Component, Entity, GlobalTransform, IntoSystemConfigs, Query, Res, Time, Timer, TimerMode, Vec2, World, DespawnRecursiveExt, Reflect};
+use bevy::prelude::{
+    in_state, Commands, Component, DespawnRecursiveExt, Entity, GlobalTransform, IntoSystemConfigs,
+    Query, Reflect, Res, Time, Timer, TimerMode, Vec2, World,
+};
 
-use crate::game::projectiles::ProjectileTeam;
 use crate::game::spell_system::{SpellEffect, SpellModifier, SpellModifierNode};
 use crate::screen::GameState;
 use crate::AppSet;
@@ -21,11 +22,10 @@ pub(super) fn plugin(app: &mut App) {
                 .run_if(in_state(GameState::Running)),
             do_caster.in_set(AppSet::Update),
         ),
-        )
-        .register_type::<SpellCaster>()
-        .register_type::<SequentialCaster>()
-        .register_type::<InstantCaster>()
-    ;
+    )
+    .register_type::<SpellCaster>()
+    .register_type::<SequentialCaster>()
+    .register_type::<InstantCaster>();
 }
 
 /////////////////////
@@ -78,10 +78,8 @@ pub enum SpellCaster {
 impl SpellCaster {
     pub fn get_next_casts(&mut self) -> (SpellCastValues, Vec<Arc<dyn SpellEffect>>) {
         match self {
-            Self::Sequential(caster) =>
-                (caster.cast_values.clone(), caster.get_next_cast() ),
-            Self::Instant(caster) =>
-                (caster.cast_values.clone(), caster.get_next_cast() ),
+            Self::Sequential(caster) => (caster.cast_values.clone(), caster.get_next_cast()),
+            Self::Instant(caster) => (caster.cast_values.clone(), caster.get_next_cast()),
         }
     }
     fn get_base_spell_delay(&self) -> Duration {
@@ -98,7 +96,11 @@ impl SpellCaster {
     }
     fn can_delete(&self) -> bool {
         match self {
-            Self::Sequential(caster) => caster.spell_queue.is_empty() && caster.caster_delay.finished() && caster.spell_delay.finished(),
+            Self::Sequential(caster) => {
+                caster.spell_queue.is_empty()
+                    && caster.caster_delay.finished()
+                    && caster.spell_delay.finished()
+            }
             Self::Instant(caster) => caster.spell_list.is_empty(),
         }
     }
@@ -149,7 +151,7 @@ impl SequentialCaster {
             self.caster_delay.reset();
         }
 
-        spell.map_or_else(|| vec![], |spell| vec![spell])
+        spell.map_or_else(Vec::new, |spell| vec![spell])
     }
 
     fn add_spell_delay(&mut self, delay: Duration) {
@@ -179,7 +181,7 @@ pub struct InstantCaster {
 impl InstantCaster {
     pub fn new(cast_values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) -> Self {
         Self {
-            spell_list : spells.to_vec(),
+            spell_list: spells.to_vec(),
             cast_values,
         }
     }
@@ -195,11 +197,7 @@ impl InstantCaster {
 }
 
 pub fn do_caster(
-    mut q_caster: Query<(
-        Entity,
-        &mut SpellCaster,
-        &GlobalTransform,
-    )>,
+    mut q_caster: Query<(Entity, &mut SpellCaster, &GlobalTransform)>,
     mut commands: Commands,
 ) {
     for (ent, mut caster, g_transform) in q_caster.iter_mut() {
@@ -216,9 +214,9 @@ pub fn do_caster(
         }
 
         let (z, _, _) = g_transform
-                        .compute_transform()
-                        .rotation
-                        .to_euler(EulerRot::ZXY);
+            .compute_transform()
+            .rotation
+            .to_euler(EulerRot::ZXY);
 
         //build new context from castvalues
         let context = SpellCastContext {

@@ -1,4 +1,3 @@
-use std::process::Child;
 /// Module for spell triggers.
 ///
 /// Triggers are components that are added to entities to trigger spell_system.
@@ -7,17 +6,21 @@ use std::sync::Arc;
 
 use bevy::app::{App, Update};
 use bevy::log::info;
-use bevy::math::Vec2;
-use bevy::prelude::{BuildChildren, Children, Commands, Component, Entity, GlobalTransform, in_state, IntoSystemConfigs, Query, Res, SpatialBundle, Timer, Transform, Trigger, With, Without};
+use bevy::prelude::{
+    in_state, BuildChildren, Commands, Component, Entity, GlobalTransform, IntoSystemConfigs,
+    Query, Res, SpatialBundle, Timer, Trigger, With,
+};
 use bevy::time::Time;
 use leafwing_input_manager::action_state::ActionState;
 
-use crate::AppSet;
 use crate::game::input::PlayerAction;
 use crate::game::projectiles::ProjectileCollisionEvent;
-use crate::game::spell_system::casting::{do_caster, InstantCaster, SequentialCaster, SpellCaster, SpellCastValues};
+use crate::game::spell_system::casting::{
+    InstantCaster, SequentialCaster, SpellCastValues, SpellCaster,
+};
 use crate::game::spell_system::SpellEffect;
 use crate::screen::GameState;
+use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -41,12 +44,12 @@ pub struct PlayerSpellTrigger {
 pub fn do_player_trigger(
     action_state: Res<ActionState<PlayerAction>>,
     mut player_trig: Query<(Entity, &mut PlayerSpellTrigger)>,
-    mut casters: Query<(),With<SpellCaster>>,
+    casters: Query<(), With<SpellCaster>>,
     mut commands: Commands,
 ) {
     if action_state.pressed(&PlayerAction::Shoot) {
         //spawn a spell caster on the trigger:
-        for (e,mut trigger) in player_trig.iter_mut() {
+        for (e, mut trigger) in player_trig.iter_mut() {
             //check child still exists
             if let Some(caster) = trigger.current_caster {
                 if casters.get(caster).is_ok() {
@@ -55,8 +58,6 @@ pub fn do_player_trigger(
                     trigger.current_caster = None;
                 }
             }
-
-
 
             let caster = commands.spawn((
                 SpellCaster::Sequential(SequentialCaster::new(
@@ -72,8 +73,6 @@ pub fn do_player_trigger(
             trigger.current_caster = Some(c_id);
         }
     }
-
-
 }
 
 #[derive(Component, Debug, Clone)]
@@ -89,7 +88,7 @@ pub fn tick_timer_trigger(time: Res<Time>, mut timer_trigger: Query<&mut TimerSp
 }
 pub fn do_timer_trigger(
     mut timer_trigger: Query<(&GlobalTransform, &TimerSpellTrigger)>,
-    mut commands: Commands
+    mut commands: Commands,
 ) {
     for (transform, trigger) in timer_trigger.iter_mut() {
         if trigger.timer.just_finished() {
