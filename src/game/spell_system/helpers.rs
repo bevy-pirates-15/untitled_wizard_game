@@ -1,27 +1,40 @@
 use std::time::Duration;
 
-use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
-use bevy::asset::Assets;
-use bevy::color::Color;
-use bevy::log::warn;
-use bevy::math::Vec3;
-use bevy::prelude::{Circle, Entity, GlobalTransform, Mesh, Timer, TimerMode, Transform, World};
-use bevy::sprite::{ColorMaterial, MaterialMesh2dBundle, Mesh2dHandle};
-
+use crate::game::assets::spell_gfx::{SpellGFXAsset, SpellGFXAssets};
 use crate::game::physics::GameLayer;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
 use crate::game::spell_system::casting::SpellCastContext;
+use crate::screen::Screen;
+use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
+use bevy::asset::Assets;
+use bevy::log::warn;
+use bevy::math::{Quat, Vec3};
+use bevy::prelude::{
+    Entity, GlobalTransform, Mesh, SpatialBundle, StateScoped, Timer, TimerMode, Transform, World,
+};
+use bevy::sprite::{ColorMaterial, Mesh2dHandle, Sprite};
+
+pub enum SpellModel {
+    // None,
+    StaticSprite(SpellGFXAsset),
+    MeshMat(Mesh, ColorMaterial),
+}
+
+pub struct ProjectileStats {
+    pub radius: f32,
+    pub speed: f32,
+    pub damage: f32,
+    pub num_hits: i32,
+    pub lifetime: Duration,
+    pub knockback_force: f32,
+}
 
 pub fn spawn_spell_projectile(
     context: &mut SpellCastContext,
     world: &mut World,
 
-    // stats:
-    radius: f32,
-    speed: f32,
-    damage: f32,
-    num_hits: i32,
-    lifetime: Duration,
+    spell_model: SpellModel,
+    stats: ProjectileStats,
 ) -> Option<Entity> {
     let Some(caster_transform) = world
         .entity(context.caster)
@@ -32,46 +45,56 @@ pub fn spawn_spell_projectile(
         return None;
     };
 
-    let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
-    let mesh = meshes.add(Circle { radius });
-
-    let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
-    let mat = materials.add(ColorMaterial::from(Color::hsv(
-        rand::random::<f32>() * 360.,
-        1.0,
-        1.0,
-    )));
-
     //create new spell entity:
     let spell = world
         .spawn((
-            MaterialMesh2dBundle {
-                mesh: Mesh2dHandle::from(mesh),
-                material: mat,
-                transform: Transform::from_translation(
-                    caster_transform.translation + Vec3::new(0.0, 0.0, 0.1),
-                ), // Transform::from_translation(.translation.with_z(4.0)).with
-                ..Default::default()
-            },
-            Collider::circle(radius),
+            Collider::circle(stats.radius),
             RigidBody::Kinematic,
             Sensor,
+            SpatialBundle {
+                transform: Transform::from_translation(
+                    caster_transform.translation + Vec3::new(0.0, 0.0, 0.1),
+                )
+                .with_rotation(Quat::from_rotation_z(
+                    context.direction.y.atan2(context.direction.x),
+                )),
+                ..Default::default()
+            },
             // LinearVelocity((spell_transform.rotation * Vec3::Y).truncate() * speed),
-            LinearVelocity(context.direction * speed),
+            LinearVelocity(context.direction * stats.speed),
             CollisionLayers::new(
                 GameLayer::PlayerProjectile,
                 [GameLayer::Environment, GameLayer::Enemy],
             ),
             ProjectileDamage {
-                damage,
-                hits_remaining: num_hits,
+                damage: stats.damage,
+                hits_remaining: stats.num_hits,
                 team: ProjectileTeam::Player,
+                knockback_force: stats.knockback_force,
             },
             ProjectileLifetime {
-                lifetime: Timer::new(lifetime, TimerMode::Once),
+                lifetime: Timer::new(stats.lifetime, TimerMode::Once),
             },
+            StateScoped(Screen::Playing),
         ))
         .id();
+
+    match spell_model {
+        // SpellModel::None => {}
+        SpellModel::StaticSprite(gfx) => {
+            let gfx_assets = world.get_resource::<SpellGFXAssets>().unwrap();
+            let sprite = gfx_assets[&gfx].clone_weak();
+            world.entity_mut(spell).insert((Sprite::default(), sprite));
+        }
+        SpellModel::MeshMat(mesh, mat) => {
+            let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
+            let h_mesh: Mesh2dHandle = meshes.add(mesh).into();
+            let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+            let h_mat = materials.add(mat);
+
+            world.entity_mut(spell).insert((h_mesh, h_mat));
+        }
+    }
 
     //apply modifiers:
     context.values.modifiers.apply(spell, world);

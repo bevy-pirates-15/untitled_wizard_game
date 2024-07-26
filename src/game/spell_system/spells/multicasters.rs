@@ -15,6 +15,7 @@ pub(super) fn get_spells() -> Vec<SpellComponent> {
         data: Box::new(TriggerSpellData {
             spells_triggered: 0,
         }),
+        icon_id: 24,
     }]
 }
 

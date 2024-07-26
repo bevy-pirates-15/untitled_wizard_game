@@ -28,7 +28,7 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Clone, Component)]
 pub struct SpellComponent {
     pub data: Box<dyn SpellData>,
-    // pub icon: String, //todo
+    pub icon_id: u32,
     // pub tier: u32, //todo
 }
 

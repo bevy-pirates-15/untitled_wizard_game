@@ -92,7 +92,9 @@ pub fn player_mouse_look(
 }
 
 #[derive(Component, Debug, Clone)]
-pub struct AttachToPlayer;
+pub struct AttachToPlayer {
+    pub origin_offset: Vec3,
+}
 fn attach_to_player(
     player_query: Query<&GlobalTransform, With<Player>>,
     mut query: Query<(&AttachToPlayer, &mut Transform)>,
@@ -101,7 +103,7 @@ fn attach_to_player(
         return;
     };
 
-    for (_, mut transform) in query.iter_mut() {
-        transform.translation = player_transform.translation() + Vec3::new(0.0, 0.0, 0.1);
+    for (attach, mut transform) in query.iter_mut() {
+        transform.translation = player_transform.translation() + attach.origin_offset
     }
 }

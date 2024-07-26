@@ -1,9 +1,10 @@
 use std::cmp::PartialEq;
 
-use avian2d::prelude::Collision;
+use avian2d::prelude::{Collision, LinearVelocity};
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::{
-    in_state, App, Commands, Component, Entity, Event, EventReader, IntoSystemConfigs, Query,
-    Reflect, Res, Time, Timer, TimerMode, Update,
+    in_state, App, Commands, Component, Entity, Event, EventReader, GlobalTransform,
+    IntoSystemConfigs, Query, Reflect, Res, Time, Timer, TimerMode, Update,
 };
 
 use crate::game::player_mods::damage::Invincibility;
@@ -57,6 +58,7 @@ pub struct ProjectileDamage {
     pub team: ProjectileTeam,
     pub damage: f32,
     pub hits_remaining: i32, //counter for how many enemies it can hit
+    pub knockback_force: f32,
 }
 
 #[derive(Component)]
@@ -98,8 +100,13 @@ fn despawn_projectiles_no_hits(
 fn detect_projectile_collisions(
     mut collision_event_reader: EventReader<Collision>,
     mut commands: Commands,
-    mut projectile_query: Query<&mut ProjectileDamage>,
-    mut health_havers: Query<(&mut Damageable, Option<&Invincibility>)>,
+    mut projectile_query: Query<(&GlobalTransform, &mut ProjectileDamage)>,
+    mut health_havers: Query<(
+        &GlobalTransform,
+        Option<&mut LinearVelocity>,
+        &mut Damageable,
+        Option<&Invincibility>,
+    )>,
 ) {
     //datastructure to keep track of hit entities, as they cant be hit more than once per frame
     let mut hit_entities = Vec::new();
@@ -119,11 +126,13 @@ fn detect_projectile_collisions(
                 continue;
             };
 
-        let Ok((mut health, invincibility)) = health_havers.get_mut(health_entity) else {
+        let Ok((h_transform, lv, mut health, invincibility)) = health_havers.get_mut(health_entity)
+        else {
             return;
         };
 
-        let Ok(mut projectile_dmg) = projectile_query.get_mut(projectile_entity) else {
+        let Ok((p_transform, mut projectile_dmg)) = projectile_query.get_mut(projectile_entity)
+        else {
             return;
         };
 
@@ -149,6 +158,15 @@ fn detect_projectile_collisions(
         commands.entity(health_entity).insert(Invincibility {
             timer: Timer::new(health.invincibility_timer, TimerMode::Once),
         });
+
+        // apply knockback to enemies when the player is hit
+        //get direction between projectile and health entity
+        let direction = (h_transform.translation() - p_transform.translation())
+            .xy()
+            .normalize();
+        if let Some(mut velocity) = lv {
+            velocity.0 = direction * projectile_dmg.knockback_force;
+        }
 
         //reduce projectile pierce counter
         projectile_dmg.hits_remaining -= 1;
