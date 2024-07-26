@@ -4,6 +4,7 @@ use bevy::color::palettes::tailwind::GREEN_400;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use super::{GameState, Screen};
+use crate::game::enemy::StartWave;
 use crate::game::levelling::{compute_next_level, PlayerLevel};
 use crate::game::spawn::player::Player;
 use crate::game::{audio::soundtrack::Soundtrack, spawn::map::SpawnLevel};
@@ -22,6 +23,7 @@ pub(super) fn plugin(app: &mut App) {
 
 fn enter_playing(mut commands: Commands) {
     commands.trigger(SpawnLevel);
+    commands.trigger(StartWave);
     commands.trigger(Soundtrack::Gameplay);
 }
 
