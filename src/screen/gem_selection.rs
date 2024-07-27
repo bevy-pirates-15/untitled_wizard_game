@@ -64,7 +64,7 @@ fn spawn_gem(
     let gem_description = gem.data.get_desc();
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 12, 4, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    
+
     let name_entity = commands
         .spawn(TextBundle {
             style: Style {
@@ -79,7 +79,7 @@ fn spawn_gem(
             ..default()
         })
         .id();
-    
+
     let gem_image_entity = commands
         .spawn((
             ImageBundle {
@@ -225,7 +225,6 @@ fn gem_menu(
         ..default()
     };
 
-    
     let text_place_front_button = TextBundle {
         style: Style {
             margin: UiRect::all(Val::Px(5.0)),
@@ -301,9 +300,19 @@ fn gem_menu(
         mid_section_container_entity,
         continue_button_entity,
     ]);
-    commands.entity(mid_section_container_entity).push_children(&[place_back_button_entity, scrolling_container_entity, place_front_button_entity]);
-    commands.entity(place_back_button_entity).push_children(&[text_place_back_button_entity]);
-    commands.entity(place_front_button_entity).push_children(&[text_place_front_button_entity]);
+    commands
+        .entity(mid_section_container_entity)
+        .push_children(&[
+            place_back_button_entity,
+            scrolling_container_entity,
+            place_front_button_entity,
+        ]);
+    commands
+        .entity(place_back_button_entity)
+        .push_children(&[text_place_back_button_entity]);
+    commands
+        .entity(place_front_button_entity)
+        .push_children(&[text_place_front_button_entity]);
     commands
         .entity(scrolling_container_entity)
         .push_children(&[moving_panel_entity]);
@@ -326,26 +335,26 @@ fn gem_menu(
         };
 
         let spell_image_entity = commands
-        .spawn((
-            ImageBundle {
-                image: UiImage {
-                    texture: images[&ImageAsset::SpellIcons].clone_weak(),
-                    ..Default::default()
-                },
-                style: Style {
-                    width: Val::Px(128.),
-                    height: Val::Px(128.),
-                    margin: UiRect::all(Val::Percent(0.5)),
+            .spawn((
+                ImageBundle {
+                    image: UiImage {
+                        texture: images[&ImageAsset::SpellIcons].clone_weak(),
+                        ..Default::default()
+                    },
+                    style: Style {
+                        width: Val::Px(128.),
+                        height: Val::Px(128.),
+                        margin: UiRect::all(Val::Percent(0.5)),
+                        ..default()
+                    },
                     ..default()
                 },
-                ..default()
-            },
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: spell.icon_id,
-            },
-        ))
-        .id();
+                TextureAtlas {
+                    layout: texture_atlas_layout.clone(),
+                    index: spell.icon_id,
+                },
+            ))
+            .id();
 
         let spell_name = TextBundle::from_section(
             spell.data.get_name(),
@@ -406,16 +415,24 @@ fn gem_menu(
         commands
             .entity(gem_container_entity)
             .push_children(&[select_gem_button_entity]);
-        commands
-            .entity(select_gem_button_entity)
-            .push_children(&[name_entity, gem_entity, text_entity]);
+        commands.entity(select_gem_button_entity).push_children(&[
+            name_entity,
+            gem_entity,
+            text_entity,
+        ]);
     }
 }
 
 fn handle_gem_select_action(
     mut commands: Commands,
     mut button_query: Query<
-        (&Interaction, &LevelUpAction, &SpellComponent, Entity, &mut BackgroundColor),
+        (
+            &Interaction,
+            &LevelUpAction,
+            &SpellComponent,
+            Entity,
+            &mut BackgroundColor,
+        ),
         (Changed<Interaction>, Without<SelectedGem>),
     >,
     mut selected_gem_query: Query<(Entity, &mut BackgroundColor), With<SelectedGem>>,
