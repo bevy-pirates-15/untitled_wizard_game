@@ -155,9 +155,11 @@ fn detect_projectile_collisions(
 
         //do damage + health.invincibility_timer)
         health.health -= projectile_dmg.damage;
-        commands.entity(health_entity).insert(Invincibility {
-            timer: Timer::new(health.invincibility_timer, TimerMode::Once),
-        });
+        if let Some(timer) = health.invincibility_timer {
+            commands.entity(health_entity).insert(Invincibility {
+                timer: Timer::new(timer, TimerMode::Once),
+            });
+        }
 
         // apply knockback to enemies when the player is hit
         //get direction between projectile and health entity

@@ -4,9 +4,9 @@ use bevy::app::{App, Startup};
 use bevy::prelude::{Event, IntoSystemConfigs, Query, ResMut, Resource, Trigger};
 use log::{debug, info};
 
+use crate::game::spell_system::{SpellComponent, SpellEffect};
 use crate::game::spell_system::spells::load_spells;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
-use crate::game::spell_system::{SpellComponent, SpellEffect};
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<SpellPool>()
@@ -15,6 +15,27 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(
             Startup,
             (|mut spell_inventory: ResMut<SpellInventory>, pool: ResMut<SpellPool>| {
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(TriggerSpellData {
+                //         spells_triggered: 1,
+                //     }),
+                //     icon_id: 24,
+                // });
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(BangSpellData {
+                //         base_damage: 40.0,
+                //         radius: 50.0,
+                //     }),
+                //     icon_id: 3,
+                // });
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(SplitterBoltsSpellData {
+                //         base_damage: 20.0,
+                //         projectile_count: 3,
+                //     }),
+                //     icon_id: 2,
+                // });
+
                 for _ in 0..2 {
                     spell_inventory.push_spell(pool.get_random_spell_component().clone());
                 }
