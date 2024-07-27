@@ -41,8 +41,9 @@ impl Plugin for AppPlugin {
                     primary_window: Window {
                         title: "wizard_game".to_string(),
                         canvas: Some("#bevy".to_string()),
-                        resolution: WindowResolution::new(1280., 720.)
+                        resolution: WindowResolution::new(1920., 1080.)
                             .with_scale_factor_override(1.0),
+                        resizable: false,
                         fit_canvas_to_parent: true,
                         prevent_default_event_handling: true,
                         ..default()
