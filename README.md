@@ -1,4 +1,4 @@
-# Game Jam Project Name Here
+# Spellforged Survival
 [Link to the game] [Optional]
 
 ## About the project

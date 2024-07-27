@@ -11,9 +11,11 @@ pub enum ImageAsset {
     // Ducky,
     // EvilDucky,
     Wizard,
-    BasicEnemy,
     Wand,
     SpellIcons,
+    BasicEnemy,
+    TankEnemy,
+    RangedEnemy,
 }
 
 #[derive(Resource, Reflect, Deref, DerefMut)]
@@ -33,15 +35,6 @@ impl ImageAssets {
             ),
         );
         assets.insert(
-            ImageAsset::BasicEnemy,
-            asset_server.load_with_settings(
-                "images/basic_enemy.png",
-                |settings: &mut ImageLoaderSettings| {
-                    settings.sampler = ImageSampler::nearest();
-                },
-            ),
-        );
-        assets.insert(
             ImageAsset::Wand,
             asset_server
                 .load_with_settings("images/wand.png", |settings: &mut ImageLoaderSettings| {
@@ -53,6 +46,35 @@ impl ImageAssets {
             asset_server.load_with_settings(
                 "images/spell_icons.png",
                 |settings: &mut ImageLoaderSettings| settings.sampler = ImageSampler::nearest(),
+            ),
+        );
+
+        // enemies
+        assets.insert(
+            ImageAsset::BasicEnemy,
+            asset_server.load_with_settings(
+                "images/basic_enemy.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+        assets.insert(
+            ImageAsset::TankEnemy,
+            asset_server.load_with_settings(
+                "images/tank_enemy.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+        assets.insert(
+            ImageAsset::RangedEnemy,
+            asset_server.load_with_settings(
+                "images/ranged_enemy.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
             ),
         );
 
