@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 /// Module for spell triggers.
 ///
 /// Triggers are components that are added to entities to trigger spell_system.
@@ -5,10 +6,10 @@
 use std::sync::Arc;
 
 use bevy::app::{App, Update};
-use bevy::log::info;
+use bevy::math::Quat;
 use bevy::prelude::{
     in_state, BuildChildren, Commands, Component, Entity, GlobalTransform, IntoSystemConfigs,
-    Query, Res, SpatialBundle, Timer, Trigger, With,
+    Query, Res, SpatialBundle, Timer, Transform, Trigger, With,
 };
 use bevy::time::Time;
 use leafwing_input_manager::action_state::ActionState;
@@ -116,21 +117,29 @@ pub fn do_collision_trigger(
     trigger: Trigger<ProjectileCollisionEvent>,
     // mut collision_triggers: Query<(&CollisionSpellTrigger, &mut SpellCaster)>,
     mut collision_triggers: Query<(&GlobalTransform, &CollisionSpellTrigger)>,
+    mut entity_hit: Query<&GlobalTransform>,
     mut commands: Commands,
 ) {
-    info!("do_collision_trigger");
     let proj_entity = trigger.entity();
-    let Ok((transform, trigger)) = collision_triggers.get_mut(proj_entity) else {
-        info!("dead");
+    let Ok((transform, col_trigger)) = collision_triggers.get_mut(proj_entity) else {
         return;
     };
 
+    let Ok(other_transform) = entity_hit.get_mut(trigger.event().target) else {
+        return;
+    };
+
+    //cast spell from other entity in vector between projectile and other entity
+    let cast_vec = (other_transform.translation() - transform.translation()).normalize();
+    let cast_transform = Transform::from_translation(other_transform.translation()).with_rotation(
+        Quat::from_rotation_z(cast_vec.y.atan2(cast_vec.x) - PI / 2.),
+    );
     commands.spawn((
         SpellCaster::Instant(InstantCaster::new(
-            trigger.values.clone(),
-            trigger.spells.clone(),
+            col_trigger.values.clone(),
+            col_trigger.spells.clone(),
         )),
-        SpatialBundle::from_transform(transform.compute_transform()),
+        SpatialBundle::from_transform(cast_transform),
     ));
 
     // do_caster(

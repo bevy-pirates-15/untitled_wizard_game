@@ -70,7 +70,7 @@ fn spawn_enemies(
                 max_health: ENEMY_HEALTH,
                 health: ENEMY_HEALTH,
                 team: ProjectileTeam::Enemy,
-                invincibility_timer: Duration::from_secs_f32(0.1),
+                invincibility_timer: None, //Duration::from_secs_f32(0.1),
             },
             Experience(BASE_ENEMY_XP),
             SpriteBundle {

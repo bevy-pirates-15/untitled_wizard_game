@@ -41,7 +41,7 @@ pub struct Damageable {
     pub max_health: f32,
     pub health: f32,
     pub team: ProjectileTeam,
-    pub invincibility_timer: Duration,
+    pub invincibility_timer: Option<Duration>,
 }
 
 #[derive(Debug, Component, Reflect)]
