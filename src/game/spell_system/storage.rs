@@ -4,9 +4,9 @@ use bevy::app::{App, Startup};
 use bevy::prelude::{Event, IntoSystemConfigs, Query, ResMut, Resource, Trigger};
 use log::{debug, info};
 
-use crate::game::spell_system::{SpellComponent, SpellEffect};
 use crate::game::spell_system::spells::load_spells;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
+use crate::game::spell_system::{SpellComponent, SpellEffect};
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<SpellPool>()
