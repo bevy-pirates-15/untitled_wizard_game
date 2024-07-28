@@ -13,6 +13,7 @@ pub enum ImageAsset {
     Wizard,
     Wand,
     SpellIcons,
+    FullScreen,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -46,6 +47,16 @@ impl ImageAssets {
             asset_server.load_with_settings(
                 "images/spell_icons.png",
                 |settings: &mut ImageLoaderSettings| settings.sampler = ImageSampler::nearest(),
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::FullScreen,
+            asset_server.load_with_settings(
+                "images/fullscreen.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
             ),
         );
 

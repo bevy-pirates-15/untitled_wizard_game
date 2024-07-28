@@ -166,7 +166,7 @@ fn gem_menu(
     let scrolling_container = NodeBundle {
         style: Style {
             flex_direction: FlexDirection::Row,
-            align_self: AlignSelf::Center,
+            align_self: AlignSelf::Stretch,
             width: Val::Percent(50.),
             height: Val::Percent(100.),
             margin: UiRect::all(Val::Percent(0.5)),
@@ -206,7 +206,7 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("place back", TextStyle { ..default() }),
+        text: Text::from_section("Place Back", TextStyle { ..default() }),
         ..default()
     };
 
@@ -230,7 +230,7 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("place front", TextStyle { ..default() }),
+        text: Text::from_section("Place Front", TextStyle { ..default() }),
         ..default()
     };
 
@@ -323,12 +323,13 @@ fn gem_menu(
     for spell in spell_inventory.spells.iter() {
         let spell_container = NodeBundle {
             style: Style {
-                width: Val::Percent(25.),
+                width: Val::Px(250.),
+                min_width: Val::Px(250.),
                 height: Val::Percent(90.0),
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(0.5)),
+                margin: UiRect::all(Val::Px(5.)),
                 ..default()
             },
             ..default()
@@ -475,7 +476,7 @@ fn handle_mouse_scroll(
 ) {
     for mouse_wheel_event in mouse_wheel_events.read() {
         for (mut scrolling_list, mut style, parent, list_node) in &mut query_list {
-            let items_width = list_node.size().x + 600.;
+            let items_width = list_node.size().x;
             let container_width = query_node.get(parent.get()).unwrap().size().x;
 
             let max_scroll = (items_width - container_width).max(0.);

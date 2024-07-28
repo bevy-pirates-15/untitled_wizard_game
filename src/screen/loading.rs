@@ -11,6 +11,7 @@ use crate::{
 };
 
 pub(super) fn plugin(app: &mut App) {
+    app.init_state::<LoadingState>();
     app.add_systems(OnEnter(Screen::Loading), enter_loading);
     app.add_systems(Update, check_all_loaded.run_if(in_state(Screen::Loading)));
 }
@@ -38,6 +39,7 @@ fn check_all_loaded(
     soundtracks: Res<SoundtrackAssets>,
     spellgfx: Res<SpellGFXAssets>,
     mut next_screen: ResMut<NextState<Screen>>,
+    mut next_load_state: ResMut<NextState<LoadingState>>,
 ) {
     let all_loaded = images.all_loaded(&image_assets)
         && sfxs.all_loaded(&audio_assets)
@@ -45,5 +47,13 @@ fn check_all_loaded(
         && spellgfx.all_loaded(&image_assets);
     if all_loaded {
         next_screen.set(Screen::Title);
+        next_load_state.set(LoadingState::Loaded);
     }
+}
+
+#[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default, Reflect)]
+pub enum LoadingState {
+    #[default]
+    Loading,
+    Loaded,
 }

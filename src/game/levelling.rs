@@ -1,7 +1,11 @@
 use avian2d::collision::CollidingEntities;
 use bevy::prelude::*;
 
-use crate::{game::audio::sfx::Sfx, screen::GameState};
+use crate::{
+    config::{EXPERIENCE_RADIUS, EXPERIENCE_SPEED},
+    game::audio::sfx::Sfx,
+    screen::GameState,
+};
 
 use super::{enemy::Enemy, spawn::player::Player};
 
@@ -9,7 +13,11 @@ pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
     app.add_systems(
         Update,
-        (detect_player_experience_collision).run_if(in_state(GameState::Running)),
+        (
+            detect_player_experience_collision,
+            move_experience_towards_player,
+        )
+            .run_if(in_state(GameState::Running)),
     );
     app.register_type::<Experience>();
     app.register_type::<PlayerLevel>();
@@ -61,6 +69,27 @@ fn detect_player_experience_collision(
                     player_level.exp_to_level_up -= experience.0;
                 }
                 commands.entity(exp_entity).despawn();
+            }
+        }
+    }
+}
+
+fn move_experience_towards_player(
+    time: Res<Time>,
+    mut experience_query: Query<&mut Transform, (With<Experience>, Without<Enemy>)>,
+    player_query: Query<&Transform, (With<Player>, Without<Experience>)>,
+) {
+    if let Ok(player_transform) = player_query.get_single() {
+        for mut experience_transform in experience_query.iter_mut() {
+            let distance = experience_transform
+                .translation
+                .distance(player_transform.translation);
+
+            if distance < EXPERIENCE_RADIUS {
+                let direction =
+                    (player_transform.translation - experience_transform.translation).normalize();
+                experience_transform.translation +=
+                    direction * EXPERIENCE_SPEED * time.delta_seconds();
             }
         }
     }
