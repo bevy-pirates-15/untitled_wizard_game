@@ -445,7 +445,7 @@ fn gem_menu(
 
     let generated_spell_table = pool.get_x_random_unique_spell_components(3);
     // For rendering the random gems on screen
-    for n in 0..=2 as usize {
+    for spell_index in generated_spell_table.iter().take(2 + 1) {
         let select_gem_button = ButtonBundle {
             style: Style {
                 width: Val::Percent(25.0),
@@ -467,10 +467,10 @@ fn gem_menu(
             background_color: BackgroundColor(NODE_BACKGROUND.0),
             ..default()
         };
-        let spell_index = generated_spell_table[n];
+        // let spell_index = generated_spell_table[n];
         let (name_entity, gem_entity, text_entity, spell) = spawn_gem(
             &mut commands,
-            &spell_index,
+            spell_index,
             &images,
             &mut texture_atlas_layouts,
         );
