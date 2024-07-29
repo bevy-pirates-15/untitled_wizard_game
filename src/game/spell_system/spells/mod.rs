@@ -9,6 +9,13 @@ pub mod targeters;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Startup, load_spells);
+    app.add_plugins(
+        // (
+        // cores::plugin,
+        // modifiers::plugin,
+        // multicasters::plugin,
+        targeters::plugin, // ),
+    );
 }
 
 pub fn load_spells(mut pool: ResMut<SpellPool>) {

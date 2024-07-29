@@ -68,7 +68,7 @@ fn detect_player_experience_collision(
                 } else {
                     player_level.exp_to_level_up -= experience.0;
                 }
-                commands.entity(exp_entity).despawn();
+                commands.entity(exp_entity).despawn_recursive();
             }
         }
     }

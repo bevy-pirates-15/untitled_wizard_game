@@ -203,7 +203,9 @@ pub fn do_caster(
     for (ent, mut caster, g_transform) in q_caster.iter_mut() {
         //check if caster can be deleted first:
         if caster.can_delete() {
-            commands.entity(ent).despawn_recursive();
+            if let Some(ecmd) = commands.get_entity(ent) {
+                ecmd.despawn_recursive();
+            }
             info!("removed spell caster");
         }
 

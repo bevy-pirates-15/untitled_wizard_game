@@ -8,7 +8,7 @@ use crate::screen::Screen;
 use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
 use bevy::asset::Assets;
 use bevy::log::warn;
-use bevy::math::{Quat, Vec3};
+use bevy::math::{EulerRot, Quat, Vec2, Vec3};
 use bevy::prelude::{
     Entity, GlobalTransform, Mesh, SpatialBundle, StateScoped, Timer, TimerMode, Transform, World,
 };
@@ -45,6 +45,26 @@ pub fn spawn_spell_projectile(
         return None;
     };
 
+    /*
+    let (z, _, _) = g_transform
+            .compute_transform()
+            .rotation
+            .to_euler(EulerRot::ZXY);
+
+     direction: Vec2::new(-z.sin(), z.cos()),
+     */
+
+    //calculate new rotation using context direction and context spread
+    let direction = -context.direction.x.atan2(context.direction.y);
+    //spread is degrees of spread, so we need to convert to radians
+    let spread = context.values.spread.to_radians();
+    let rotation = Quat::from_rotation_z(direction + spread * ((rand::random::<f32>() - 0.5) * 2.));
+
+    let (z, _, _) = rotation.to_euler(EulerRot::ZXY);
+
+    //convert rotation back into a direction vector for the velocity
+    let vel_vec = Vec2::new(-z.sin(), z.cos());
+
     //create new spell entity:
     let spell = world
         .spawn((
@@ -55,14 +75,12 @@ pub fn spawn_spell_projectile(
                 transform: Transform::from_translation(
                     caster_transform.translation + Vec3::new(0.0, 0.0, 0.1),
                 )
-                .with_rotation(Quat::from_rotation_z(
-                    -context.direction.x.atan2(context.direction.y),
-                ))
+                .with_rotation(rotation)
                 .with_scale(Vec3::splat(1.0)),
                 ..Default::default()
             },
             // LinearVelocity((spell_transform.rotation * Vec3::Y).truncate() * speed),
-            LinearVelocity(context.direction * stats.speed),
+            LinearVelocity(vel_vec * stats.speed),
             CollisionLayers::new(
                 GameLayer::PlayerProjectile,
                 [GameLayer::Environment, GameLayer::Enemy],
