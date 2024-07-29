@@ -2,14 +2,7 @@
 
 use avian2d::collision::Collider;
 use avian2d::prelude::{CollisionLayers, LinearVelocity, LockedAxes, RigidBody};
-use bevy::{
-    app::App,
-    color::palettes::css::LIGHT_CORAL,
-    math::vec3,
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-    time::common_conditions::on_timer,
-};
+use bevy::{app::App, math::vec3, prelude::*, time::common_conditions::on_timer};
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
@@ -138,7 +131,7 @@ impl EnemyBundle {
                 max_health: (ENEMY_HEALTH * hp_modifier).ceil(),
                 health: (ENEMY_HEALTH * hp_modifier).ceil(),
                 team: ProjectileTeam::Enemy,
-                invincibility_timer: None, //Duration::from_secs_f32(0.1),
+                invincibility_timer: Some(Duration::from_secs_f32(0.05)),
             },
             xp: Experience(BASE_ENEMY_XP * xp_modifier),
             sprite: SpriteBundle {
@@ -289,8 +282,7 @@ fn clear_dead_enemies(
         (&Damageable, &Transform, &Experience, Entity),
         (With<Enemy>, Without<Player>),
     >,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    images: Res<ImageAssets>,
 ) {
     if enemy_query.is_empty() {
         return;
@@ -298,22 +290,37 @@ fn clear_dead_enemies(
 
     for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.health <= 0.0 {
-            commands.entity(enemy).despawn();
+            commands.entity(enemy).despawn_recursive();
             commands.spawn((
                 Name::new("Xp drop"),
                 *xp,
                 ItemDrop,
-                MaterialMesh2dBundle {
-                    //todo add texture
-                    mesh: Mesh2dHandle(meshes.add(Rectangle::new(20., 20.))),
-                    material: materials.add(Color::from(LIGHT_CORAL)),
+                SpriteBundle {
+                    texture: images[&ImageAsset::Exp].clone_weak(),
                     transform: *pos,
                     ..default()
                 },
-                Collider::circle(20.),
+                Collider::circle(1.),
                 StateScoped(Screen::Playing),
             ));
             // todo xp drops should only live for a short while
         }
     }
+}
+
+#[derive(Event, Debug)]
+pub struct ClearWave;
+
+fn clear_wave(
+    _trigger: Trigger<ClearWave>,
+    mut commands: Commands,
+    all_enemies: Query<Entity, With<Enemy>>,
+) {
+    if all_enemies.is_empty() {
+        return;
+    }
+
+    let _ = all_enemies
+        .iter()
+        .map(|e| commands.entity(e).despawn_recursive());
 }

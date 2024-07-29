@@ -7,8 +7,15 @@ use bevy::prelude::*;
 pub mod borders;
 pub mod map;
 pub mod player;
+pub mod prompt;
 pub mod wand;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins((map::plugin, player::plugin, wand::plugin, borders::plugin));
+    app.add_plugins((
+        map::plugin,
+        player::plugin,
+        wand::plugin,
+        borders::plugin,
+        prompt::plugin,
+    ));
 }

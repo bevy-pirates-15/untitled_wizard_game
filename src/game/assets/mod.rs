@@ -14,6 +14,11 @@ pub enum ImageAsset {
     Wand,
     SpellIcons,
     FullScreen,
+    Exp,
+    MapTileset,
+    Forest,
+    MovePrompt,
+    ShootPrompt,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -60,6 +65,55 @@ impl ImageAssets {
             ),
         );
 
+        assets.insert(
+            ImageAsset::MapTileset,
+            asset_server.load_with_settings(
+                "images/map.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::Forest,
+            asset_server.load_with_settings(
+                "images/forest.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::Exp,
+            asset_server.load_with_settings(
+                "images/exp.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::MovePrompt,
+            asset_server.load_with_settings(
+                "images/move_prompt.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::ShootPrompt,
+            asset_server.load_with_settings(
+                "images/shoot_prompt.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
         // enemies
         assets.insert(
             ImageAsset::BasicEnemy,
@@ -101,6 +155,7 @@ impl ImageAssets {
 pub enum SfxAsset {
     ButtonHover,
     ButtonPress,
+    DiscardGem,
     EnemyCollision,
     LevelUp,
     PickUpExperience,
@@ -128,6 +183,10 @@ impl SfxAssets {
         assets.insert(
             SfxAsset::ButtonPress,
             asset_server.load("audio/sfx/button_press.wav"),
+        );
+        assets.insert(
+            SfxAsset::DiscardGem,
+            asset_server.load("audio/sfx/discard_gem.wav"),
         );
         assets.insert(
             SfxAsset::EnemyCollision,
@@ -187,7 +246,7 @@ impl SoundtrackAssets {
         );
         assets.insert(
             SoundtrackAsset::Gameplay,
-            asset_server.load("audio/soundtracks/This Night Won't End.mp3"),
+            asset_server.load("audio/soundtracks/This Night Won't End.ogg"),
         );
         Self(assets)
     }

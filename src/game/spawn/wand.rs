@@ -43,7 +43,7 @@ fn spawn_wand(_trigger: Trigger<SpawnWand>, images: Res<ImageAssets>, mut comman
     e.insert((PlayerSpellTrigger {
         current_caster: None,
         values: SpellCastValues {
-            spread: 10.0,
+            spread: 0.0,
             modifiers: Arc::new(SpellModifierNode::Root),
         },
         spells: Arc::new(vec![]),

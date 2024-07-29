@@ -58,7 +58,7 @@ fn spawn_player(
         PlayerLevel::default(),
         SpriteBundle {
             texture: images[&ImageAsset::Wizard].clone_weak(),
-            transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
+            transform: Transform::from_translation(Vec3::new(0., 0., 3.)),
             ..Default::default()
         },
         TextureAtlas {
