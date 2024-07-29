@@ -1,15 +1,14 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use avian2d::prelude::LinearVelocity;
 use bevy::app::{App, Update};
+use bevy::log::info;
 use bevy::math::EulerRot;
 use bevy::prelude::{
-    in_state, Commands, Component, Entity, GlobalTransform, IntoSystemConfigs, Query, Res, Time,
-    Timer, TimerMode, Vec2, World,
+    in_state, Commands, Component, DespawnRecursiveExt, Entity, GlobalTransform, IntoSystemConfigs,
+    Query, Reflect, Res, Time, Timer, TimerMode, Vec2, World,
 };
 
-use crate::game::projectiles::ProjectileTeam;
 use crate::game::spell_system::{SpellEffect, SpellModifier, SpellModifierNode};
 use crate::screen::GameState;
 use crate::AppSet;
@@ -22,13 +21,11 @@ pub(super) fn plugin(app: &mut App) {
                 .in_set(AppSet::TickTimers)
                 .run_if(in_state(GameState::Running)),
             do_caster.in_set(AppSet::Update),
-            (
-                update_rotation_based_targeter,
-                update_velocity_based_targeter,
-            )
-                .in_set(AppSet::Update),
         ),
-    );
+    )
+    .register_type::<SpellCaster>()
+    .register_type::<SequentialCaster>()
+    .register_type::<InstantCaster>();
 }
 
 /////////////////////
@@ -36,7 +33,7 @@ pub(super) fn plugin(app: &mut App) {
 /////////////////////
 
 /// values passed down the spell chain, modified by modifiers, and used on spell cast
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct SpellCastValues {
     #[allow(dead_code)]
     pub spread: f32, //used for multicasting/multishot spell_system
@@ -73,41 +70,38 @@ impl SpellCastContext {
 //////////////////
 // SPELL CASTER //
 //////////////////
-#[derive(Component, Debug, Clone)]
+#[derive(Reflect, Component, Debug, Clone)]
 pub enum SpellCaster {
     Sequential(SequentialCaster),
     Instant(InstantCaster),
 }
 impl SpellCaster {
-    pub fn try_cast(&mut self, values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) {
+    pub fn get_next_casts(&mut self) -> (SpellCastValues, Vec<Arc<dyn SpellEffect>>) {
         match self {
-            Self::Sequential(caster) => caster.try_cast(values, spells),
-            Self::Instant(caster) => caster.try_cast(values, spells),
+            Self::Sequential(caster) => (caster.cast_values.clone(), caster.get_next_cast()),
+            Self::Instant(caster) => (caster.cast_values.clone(), caster.get_next_cast()),
         }
     }
-    pub fn get_next_casts(&mut self) -> Option<(SpellCastValues, Vec<Arc<dyn SpellEffect>>)> {
-        match self {
-            Self::Sequential(caster) => {
-                Some((caster.cast_data.clone()?.0, vec![caster.get_next_cast()?]))
-            }
-            Self::Instant(caster) => caster
-                .cast_data
-                .take()
-                .into_iter()
-                .map(|(values, spells)| (values.clone(), spells.clone()))
-                .next(),
-        }
-    }
-    pub fn get_base_spell_delay(&self) -> Duration {
+    fn get_base_spell_delay(&self) -> Duration {
         match self {
             Self::Sequential(caster) => caster.base_spell_delay,
             Self::Instant(_) => Duration::from_secs_f32(0.0),
         }
     }
-    pub fn add_spell_delay(&mut self, delay: Duration) {
+    fn add_spell_delay(&mut self, delay: Duration) {
         match self {
             Self::Sequential(caster) => caster.add_spell_delay(delay),
             Self::Instant(_) => (),
+        }
+    }
+    fn can_delete(&self) -> bool {
+        match self {
+            Self::Sequential(caster) => {
+                caster.spell_queue.is_empty()
+                    && caster.caster_delay.finished()
+                    && caster.spell_delay.finished()
+            }
+            Self::Instant(caster) => caster.spell_list.is_empty(),
         }
     }
 }
@@ -118,18 +112,26 @@ impl SpellCaster {
 /// instead of directly casting a spell through an observer, you can instead add a sequential caster to an entity
 /// then instead of casting the spell directly, the observer will add the spell to the sequential caster's queue
 /// this is used for the players wand, which has a mouse click trigger
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Reflect)]
 pub struct SequentialCaster {
-    pub cast_data: Option<(SpellCastValues, Vec<Arc<dyn SpellEffect>>)>,
+    #[reflect(ignore)]
+    pub spell_queue: Vec<Arc<dyn SpellEffect>>,
+    #[reflect(ignore)]
+    pub cast_values: SpellCastValues,
     pub base_spell_delay: Duration,
     spell_delay: Timer,
     pub base_caster_delay: Duration,
     caster_delay: Timer,
 }
 impl SequentialCaster {
-    pub fn new() -> Self {
+    pub fn new(cast_values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) -> Self {
+        let mut spell_queue = Vec::<Arc<dyn SpellEffect>>::new();
+        for spell in spells.iter().rev() {
+            spell_queue.push(spell.clone());
+        }
         Self {
-            cast_data: None,
+            spell_queue,
+            cast_values,
             base_spell_delay: Duration::from_secs_f32(0.1),
             spell_delay: Timer::from_seconds(0.0, TimerMode::Once),
             base_caster_delay: Duration::from_secs_f32(0.5),
@@ -137,35 +139,19 @@ impl SequentialCaster {
         }
     }
 
-    fn try_cast(&mut self, values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) {
-        if self.spell_delay.finished() && self.caster_delay.finished() && self.cast_data.is_none() {
-            let mut spell_queue = Vec::<Arc<dyn SpellEffect>>::new();
-            for spell in spells.iter().rev() {
-                spell_queue.push(spell.clone());
-            }
-
-            self.cast_data = Some((values.clone(), spell_queue));
-        }
-    }
-
-    fn get_next_cast(&mut self) -> Option<Arc<dyn SpellEffect>> {
+    fn get_next_cast(&mut self) -> Vec<Arc<dyn SpellEffect>> {
         //can cast?
         if !self.spell_delay.finished() || !self.caster_delay.finished() {
-            return None;
+            return vec![];
         }
-        let Some(data) = &mut self.cast_data else {
-            return None;
-        };
 
-        let spell = data.1.pop();
-        if data.1.is_empty() {
-            self.cast_data = None;
-            let delay = self.base_caster_delay;
-            self.caster_delay.set_duration(delay);
+        let spell = self.spell_queue.pop();
+        if self.spell_queue.is_empty() {
+            self.caster_delay.set_duration(self.base_caster_delay);
             self.caster_delay.reset();
         }
 
-        spell
+        spell.map_or_else(Vec::new, |spell| vec![spell])
     }
 
     fn add_spell_delay(&mut self, delay: Duration) {
@@ -185,43 +171,57 @@ pub fn tick_sequential_caster(time: Res<Time>, mut caster: Query<&mut SpellCaste
 ////////////////////
 // INSTANT CASTER //
 ////////////////////
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Reflect)]
 pub struct InstantCaster {
-    pub cast_data: Option<(SpellCastValues, Vec<Arc<dyn SpellEffect>>)>,
+    #[reflect(ignore)]
+    pub spell_list: Vec<Arc<dyn SpellEffect>>,
+    #[reflect(ignore)]
+    pub cast_values: SpellCastValues,
 }
 impl InstantCaster {
-    pub fn new() -> Self {
-        Self { cast_data: None }
+    pub fn new(cast_values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) -> Self {
+        Self {
+            spell_list: spells.to_vec(),
+            cast_values,
+        }
     }
 
-    fn try_cast(&mut self, values: SpellCastValues, spells: Arc<Vec<Arc<dyn SpellEffect>>>) {
-        let mut spell_queue = Vec::<Arc<dyn SpellEffect>>::new();
-        for spell in spells.iter() {
-            spell_queue.push(spell.clone());
-        }
+    fn get_next_cast(&mut self) -> Vec<Arc<dyn SpellEffect>> {
+        //take ALL the spells out the list, replace with empty list
+        let spells = self.spell_list.clone();
+        self.spell_list = vec![];
 
-        self.cast_data = Some((values.clone(), spell_queue));
+        //return the spells
+        spells
     }
 }
 
 pub fn do_caster(
-    mut q_caster: Query<(
-        Entity,
-        &mut SpellCaster,
-        &CasterTargeter,
-        Option<&DeleteOnCast>,
-    )>,
+    mut q_caster: Query<(Entity, &mut SpellCaster, &GlobalTransform)>,
     mut commands: Commands,
 ) {
-    for (ent, mut caster, targeter, delete) in q_caster.iter_mut() {
-        let Some((values, spells)) = caster.get_next_casts() else {
+    for (ent, mut caster, g_transform) in q_caster.iter_mut() {
+        //check if caster can be deleted first:
+        if caster.can_delete() {
+            commands.entity(ent).despawn_recursive();
+            info!("removed spell caster");
+        }
+
+        let (values, spells) = caster.get_next_casts();
+
+        if spells.is_empty() {
             continue;
-        };
+        }
+
+        let (z, _, _) = g_transform
+            .compute_transform()
+            .rotation
+            .to_euler(EulerRot::ZXY);
 
         //build new context from castvalues
         let context = SpellCastContext {
             caster: ent,
-            direction: targeter.get_spell_vec(),
+            direction: Vec2::new(-z.sin(), z.cos()),
             inherit_direction: true,
             spell_delay: Arc::new(Mutex::new(caster.get_base_spell_delay())),
             values,
@@ -232,60 +232,24 @@ pub fn do_caster(
                 spell.cast(&mut cast_context, w);
             });
         }
-        caster.add_spell_delay(*context.spell_delay.lock().unwrap());
-
-        if delete.is_some() {
-            commands.entity(ent).despawn();
-        }
+        let delay = *context.spell_delay.lock().unwrap();
+        caster.add_spell_delay(delay);
+        info!("delay: {}", delay.as_secs_f32());
     }
 }
-
-#[derive(Component, Debug, Clone)]
-pub enum CasterTargeter {
-    VelocityBased(Vec2),
-    RotationBased(Vec2),
-    #[allow(dead_code)]
-    Random(Vec2),
-    #[allow(dead_code)]
-    NearestHostile(Vec2, ProjectileTeam),
-}
-impl CasterTargeter {
-    pub fn get_spell_vec(&self) -> Vec2 {
-        match self {
-            Self::VelocityBased(vec) => *vec,
-            Self::RotationBased(vec) => *vec,
-            Self::Random(vec) => *vec,
-            Self::NearestHostile(vec, _) => *vec,
-        }
-    }
-}
-
-pub fn update_velocity_based_targeter(
-    mut q_targeter: Query<(&mut CasterTargeter, &LinearVelocity)>,
-) {
-    for (targeter, velocity) in q_targeter.iter_mut() {
-        if let CasterTargeter::VelocityBased(ref mut vec) = targeter.into_inner() {
-            *vec = Vec2::new(velocity.0.x, velocity.0.y).normalize();
-        }
-    }
-}
-
-pub fn update_rotation_based_targeter(
-    mut q_targeter: Query<(&mut CasterTargeter, &GlobalTransform)>,
-) {
-    for (targeter, transform) in q_targeter.iter_mut() {
-        if let CasterTargeter::RotationBased(ref mut vec) = targeter.into_inner() {
-            let (z, _, _) = transform
-                .compute_transform()
-                .rotation
-                .to_euler(EulerRot::ZXY);
-            *vec = Vec2::new(-z.sin(), z.cos());
-        }
-    }
-}
-
-#[derive(Component, Debug, Clone)]
-pub struct DeleteOnCast;
+// pub fn update_rotation_based_targeter(
+//     mut q_targeter: Query<(&mut CasterTargeter, &GlobalTransform)>,
+// ) {
+//     for (targeter, transform) in q_targeter.iter_mut() {
+//         if let CasterTargeter::RotationBased(ref mut vec) = targeter.into_inner() {
+//             let (z, _, _) = transform
+//                 .compute_transform()
+//                 .rotation
+//                 .to_euler(EulerRot::ZXY);
+//             *vec = Vec2::new(-z.sin(), z.cos());
+//         }
+//     }
+// }
 
 // pub fn update_random_targeter(mut q_targeter: Query<(&mut CasterTargeter)>) {
 //     todo!();

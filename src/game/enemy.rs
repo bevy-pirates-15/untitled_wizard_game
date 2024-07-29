@@ -138,7 +138,7 @@ impl EnemyBundle {
                 max_health: (ENEMY_HEALTH * hp_modifier).ceil(),
                 health: (ENEMY_HEALTH * hp_modifier).ceil(),
                 team: ProjectileTeam::Enemy,
-                invincibility_timer: Duration::from_secs_f32(0.1),
+                invincibility_timer: None, //Duration::from_secs_f32(0.1),
             },
             xp: Experience(BASE_ENEMY_XP * xp_modifier),
             sprite: SpriteBundle {

@@ -56,8 +56,9 @@ pub fn spawn_spell_projectile(
                     caster_transform.translation + Vec3::new(0.0, 0.0, 0.1),
                 )
                 .with_rotation(Quat::from_rotation_z(
-                    context.direction.y.atan2(context.direction.x),
-                )),
+                    -context.direction.x.atan2(context.direction.y),
+                ))
+                .with_scale(Vec3::splat(1.0)),
                 ..Default::default()
             },
             // LinearVelocity((spell_transform.rotation * Vec3::Y).truncate() * speed),

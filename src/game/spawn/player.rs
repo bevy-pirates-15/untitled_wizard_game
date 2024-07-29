@@ -53,7 +53,7 @@ fn spawn_player(
             max_health: PLAYER_HEALTH,
             health: PLAYER_HEALTH,
             team: ProjectileTeam::Player,
-            invincibility_timer: Duration::from_secs_f32(0.5),
+            invincibility_timer: Some(Duration::from_secs_f32(0.5)),
         },
         PlayerLevel::default(),
         SpriteBundle {

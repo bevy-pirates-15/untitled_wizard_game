@@ -28,7 +28,7 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Clone, Component)]
 pub struct SpellComponent {
     pub data: Box<dyn SpellData>,
-    pub icon_id: u32,
+    pub icon_id: usize,
     // pub tier: u32, //todo
 }
 
@@ -66,12 +66,14 @@ pub trait SpellEffect: Send + Sync + Debug {
 
 pub type SpellModifier = Box<dyn Fn(Entity, &mut World) + Send + Sync + 'static>;
 
+#[derive(Default)]
 pub enum SpellModifierNode {
     Node {
         id: String,
         modifier: SpellModifier,
         prev: Option<Arc<SpellModifierNode>>,
     },
+    #[default]
     Root,
 }
 impl Debug for SpellModifierNode {

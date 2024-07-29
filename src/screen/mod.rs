@@ -2,6 +2,7 @@
 
 mod credits;
 mod death;
+mod fullscreen;
 mod gem_selection;
 mod loading;
 mod pause;
@@ -25,6 +26,7 @@ pub(super) fn plugin(app: &mut App) {
         pause::plugin,
         gem_selection::plugin,
         death::plugin,
+        fullscreen::plugin,
     ));
 }
 

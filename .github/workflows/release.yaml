@@ -22,7 +22,7 @@ env:
   PACKAGE_NAME: wizard_game
   # The itch.io page to upload to, in the format: `user-name/project-name`.
   # Comment this out to disable.
-  ITCH_TARGET: rynkitty/piratejam15testgame
+  ITCH_TARGET: rynkitty/spellforged-survival
   # The organization or author that owns the rights to the game.
   OWNER: the-wizard-gang
   # The path to the assets directory.

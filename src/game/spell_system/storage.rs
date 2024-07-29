@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use bevy::app::{App, Startup};
 use bevy::prelude::{Event, IntoSystemConfigs, Query, ResMut, Resource, Trigger};
+use log::{debug, info};
 
 use crate::game::spell_system::spells::load_spells;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
@@ -14,6 +15,27 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(
             Startup,
             (|mut spell_inventory: ResMut<SpellInventory>, pool: ResMut<SpellPool>| {
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(TriggerSpellData {
+                //         spells_triggered: 1,
+                //     }),
+                //     icon_id: 24,
+                // });
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(BangSpellData {
+                //         base_damage: 40.0,
+                //         radius: 50.0,
+                //     }),
+                //     icon_id: 3,
+                // });
+                // spell_inventory.push_spell(SpellComponent {
+                //     data: Box::new(SplitterBoltsSpellData {
+                //         base_damage: 20.0,
+                //         projectile_count: 3,
+                //     }),
+                //     icon_id: 2,
+                // });
+
                 for _ in 0..2 {
                     spell_inventory.push_spell(pool.get_random_spell_component().clone());
                 }
@@ -91,8 +113,14 @@ fn insert_spell_at_pos(
     mut wand_inventory: ResMut<SpellInventory>,
     mut player_caster: Query<&mut PlayerSpellTrigger>,
 ) {
+    info!(
+        "inserted spell: {} at pos: {}",
+        trigger.event().0.data.get_name(),
+        trigger.event().1.get_index(&wand_inventory.spells)
+    );
     wand_inventory.insert_spell(trigger.event().0.clone(), trigger.event().1);
     wand_inventory.rebuild_effects();
+    debug!("effects: {:?}", wand_inventory.spell_effects);
 
     player_caster.single_mut().spells = Arc::new(wand_inventory.spell_effects.clone());
 }
@@ -102,7 +130,16 @@ fn rebuild_wand(
     mut wand_inventory: ResMut<SpellInventory>,
     mut player_caster: Query<&mut PlayerSpellTrigger>,
 ) {
+    info!(
+        "rebuilt wand with spells: {}",
+        wand_inventory
+            .spells
+            .iter()
+            .map(|s| s.data.get_name())
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
     wand_inventory.rebuild_effects();
-
+    info!("effects: {:?}", wand_inventory.spell_effects);
     player_caster.single_mut().spells = Arc::new(wand_inventory.spell_effects.clone());
 }

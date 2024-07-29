@@ -19,3 +19,5 @@ pub const SPAWN_RADIUS: Range<f32> = 1000.0..2000.0;
 
 // Experience Mechanic
 pub const BASE_ENEMY_XP: u32 = 5;
+pub const EXPERIENCE_SPEED: f32 = 100.;
+pub const EXPERIENCE_RADIUS: f32 = 200.;
