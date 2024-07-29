@@ -17,6 +17,8 @@ pub enum ImageAsset {
     Exp,
     MapTileset,
     Forest,
+    MovePrompt,
+    ShootPrompt,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -87,6 +89,26 @@ impl ImageAssets {
             ImageAsset::Exp,
             asset_server.load_with_settings(
                 "images/exp.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::MovePrompt,
+            asset_server.load_with_settings(
+                "images/move_prompt.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::ShootPrompt,
+            asset_server.load_with_settings(
+                "images/shoot_prompt.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
@@ -224,7 +246,7 @@ impl SoundtrackAssets {
         );
         assets.insert(
             SoundtrackAsset::Gameplay,
-            asset_server.load("audio/soundtracks/This Night Won't End.mp3"),
+            asset_server.load("audio/soundtracks/This Night Won't End.ogg"),
         );
         Self(assets)
     }

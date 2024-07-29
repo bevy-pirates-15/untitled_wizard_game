@@ -58,13 +58,11 @@ struct ScrollingList {
 // This spawns the UI components for the Spell
 fn spawn_gem(
     commands: &mut Commands,
-    pool: &ResMut<SpellPool>,
+    spell_index: &SpellComponent,
     images: &Res<ImageAssets>,
     texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
 ) -> (Entity, Entity, Entity, SpellComponent) {
     // For spawning the actual gem image
-    let gem = pool.get_random_spell_component().clone();
-    let gem_description = gem.data.get_desc();
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 12, 4, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
@@ -78,7 +76,7 @@ fn spawn_gem(
                 margin: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-            text: Text::from_section(gem.data.get_name(), TextStyle { ..default() }),
+            text: Text::from_section(spell_index.data.get_name(), TextStyle { ..default() }),
             ..default()
         })
         .id();
@@ -100,7 +98,7 @@ fn spawn_gem(
             },
             TextureAtlas {
                 layout: texture_atlas_layout.clone(),
-                index: gem.icon_id,
+                index: spell_index.icon_id,
             },
         ))
         .id();
@@ -115,12 +113,12 @@ fn spawn_gem(
                 margin: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-            text: Text::from_section(gem_description, TextStyle { ..default() }),
+            text: Text::from_section(spell_index.data.get_desc(), TextStyle { ..default() }),
             ..default()
         })
         .id();
 
-    (name_entity, gem_image_entity, text_entity, gem)
+    (name_entity, gem_image_entity, text_entity, spell_index.clone())
 }
 
 fn gem_menu(
@@ -440,8 +438,9 @@ fn gem_menu(
             .push_children(&[spell_image_entity, spell_name_entity]);
     }
 
+    let generated_spell_table = pool.get_x_random_unique_spell_components(3);
     // For rendering the random gems on screen
-    for _ in 1..=3 {
+    for n in 0..=2 as usize {
         let select_gem_button = ButtonBundle {
             style: Style {
                 width: Val::Percent(25.0),
@@ -463,8 +462,9 @@ fn gem_menu(
             background_color: BackgroundColor(NODE_BACKGROUND.0),
             ..default()
         };
+        let spell_index = generated_spell_table[n];
         let (name_entity, gem_entity, text_entity, spell) =
-            spawn_gem(&mut commands, &pool, &images, &mut texture_atlas_layouts);
+            spawn_gem(&mut commands, &spell_index, &images, &mut texture_atlas_layouts);
 
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
