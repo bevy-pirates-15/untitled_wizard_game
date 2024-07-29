@@ -13,6 +13,7 @@ use bevy::{
     render::camera::ScalingMode,
     window::WindowResolution,
 };
+use bevy_ecs_tilemap::TilemapPlugin;
 
 pub struct AppPlugin;
 
@@ -68,6 +69,9 @@ impl Plugin for AppPlugin {
 
         // Add physics
         app.add_plugins(PhysicsPlugins::default().with_length_unit(20.));
+
+        // Add tilemaps
+        app.add_plugins(TilemapPlugin);
 
         // Add other plugins.
         app.add_plugins((game::plugin, screen::plugin, ui::plugin));

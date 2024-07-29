@@ -1,8 +1,8 @@
 use std::ops::Range;
 
 // Map
-pub const MAP_HEIGHT: f32 = 5000.0;
-pub const MAP_WIDTH: f32 = 5000.0;
+pub const MAP_HEIGHT: f32 = 768.0;
+pub const MAP_WIDTH: f32 = 768.0;
 
 // Borders
 pub const BORDER_THICKNESS: f32 = 100.0;

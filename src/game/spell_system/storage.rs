@@ -2,13 +2,14 @@ use std::cmp::Ordering;
 use std::sync::Arc;
 
 use crate::game::spell_system::spells::load_spells;
-use crate::game::spell_system::spells::targeters::HomingData;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
 use crate::game::spell_system::{SpellComponent, SpellEffect};
 use bevy::app::{App, Startup};
 use bevy::prelude::{Event, IntoSystemConfigs, Query, ResMut, Resource, Trigger};
 use log::{debug, info};
 use rand::Rng;
+
+use super::spells::cores::ZapSpellData;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<SpellPool>()
@@ -38,10 +39,7 @@ pub(super) fn plugin(app: &mut App) {
                 //     icon_id: 2,
                 // });
                 spell_inventory.push_spell(SpellComponent {
-                    data: Box::new(HomingData {
-                        homing_range: 100.0,
-                        homing_rate: 0.1,
-                    }),
+                    data: Box::new(ZapSpellData { base_damage: 40.0 }),
                     icon_id: 36,
                 });
 

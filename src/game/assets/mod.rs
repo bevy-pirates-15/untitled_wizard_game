@@ -15,6 +15,8 @@ pub enum ImageAsset {
     SpellIcons,
     FullScreen,
     Exp,
+    MapTileset,
+    Forest,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -55,6 +57,26 @@ impl ImageAssets {
             ImageAsset::FullScreen,
             asset_server.load_with_settings(
                 "images/fullscreen.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::MapTileset,
+            asset_server.load_with_settings(
+                "images/map.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::Forest,
+            asset_server.load_with_settings(
+                "images/forest.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
@@ -111,6 +133,7 @@ impl ImageAssets {
 pub enum SfxAsset {
     ButtonHover,
     ButtonPress,
+    DiscardGem,
     EnemyCollision,
     LevelUp,
     PickUpExperience,
@@ -138,6 +161,10 @@ impl SfxAssets {
         assets.insert(
             SfxAsset::ButtonPress,
             asset_server.load("audio/sfx/button_press.wav"),
+        );
+        assets.insert(
+            SfxAsset::DiscardGem,
+            asset_server.load("audio/sfx/discard_gem.wav"),
         );
         assets.insert(
             SfxAsset::EnemyCollision,
