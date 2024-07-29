@@ -14,6 +14,7 @@ pub enum ImageAsset {
     Wand,
     SpellIcons,
     FullScreen,
+    Exp,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -60,6 +61,15 @@ impl ImageAssets {
             ),
         );
 
+        assets.insert(
+            ImageAsset::Exp,
+            asset_server.load_with_settings(
+                "images/exp.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
         // enemies
         assets.insert(
             ImageAsset::BasicEnemy,

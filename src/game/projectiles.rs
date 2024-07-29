@@ -3,8 +3,8 @@ use std::cmp::PartialEq;
 use avian2d::prelude::{Collision, LinearVelocity};
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::{
-    in_state, App, Commands, Component, Entity, Event, EventReader, GlobalTransform,
-    IntoSystemConfigs, Query, Reflect, Res, Time, Timer, TimerMode, Update,
+    in_state, App, Commands, Component, DespawnRecursiveExt, Entity, Event, EventReader,
+    GlobalTransform, IntoSystemConfigs, Query, Reflect, Res, Time, Timer, TimerMode, Update,
 };
 
 use crate::game::player_mods::damage::Invincibility;
@@ -79,7 +79,7 @@ fn despawn_projectiles_lifetime(
     //despawn if pierce = 0 or lifetime is up
     for (entity, lifetime) in projectile_query.iter_mut() {
         if lifetime.lifetime.finished() {
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
@@ -91,7 +91,7 @@ fn despawn_projectiles_no_hits(
     //despawn if pierce = 0 or lifetime is up
     for (entity, dmg) in projectile_query.iter_mut() {
         if dmg.hits_remaining <= 0 {
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
         }
     }
 }

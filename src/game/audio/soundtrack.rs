@@ -10,7 +10,7 @@ pub(super) fn play_soundtrack(
 ) {
     let event = trigger.event();
     for entity in query.iter() {
-        commands.entity(entity).despawn();
+        commands.entity(entity).despawn_recursive();
     }
 
     let source = match event {
