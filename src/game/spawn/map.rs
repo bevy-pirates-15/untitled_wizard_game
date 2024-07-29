@@ -8,7 +8,7 @@ use crate::{
     screen::Screen,
 };
 
-use super::{borders::SpawnBorders, player::SpawnPlayer, wand::SpawnWand};
+use super::{borders::SpawnBorders, player::SpawnPlayer, prompt::SpawnPrompt, wand::SpawnWand};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);
@@ -17,6 +17,7 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         (spawn_chunks_around_camera, despawn_outofrange_chunks).run_if(in_state(Screen::Playing)),
     );
+    app.add_systems(OnExit(Screen::Playing), despawn_all_chunks);
 }
 
 #[derive(Event, Debug)]
@@ -48,6 +49,7 @@ fn spawn_level(_trigger: Trigger<SpawnLevel>, mut commands: Commands, images: Re
     commands.trigger(SpawnBorders);
     commands.trigger(SpawnPlayer);
     commands.trigger(SpawnWand);
+    commands.trigger(SpawnPrompt);
     // commands.trigger(StartWave);
 }
 
@@ -149,5 +151,19 @@ fn despawn_outofrange_chunks(
                 commands.entity(entity).despawn_recursive();
             }
         }
+    }
+}
+
+fn despawn_all_chunks(
+    mut commands: Commands,
+    chunks_query: Query<(Entity, &Transform), With<Forest>>,
+    mut chunk_manager: ResMut<ChunkManager>,
+) {
+    for (entity, chunk_transform) in chunks_query.iter() {
+        let chunk_pos = chunk_transform.translation.xy();
+        let x = (chunk_pos.x / (CHUNK_SIZE.x as f32 * TILE_SIZE.x)).floor() as i32;
+        let y = (chunk_pos.y / (CHUNK_SIZE.y as f32 * TILE_SIZE.y)).floor() as i32;
+        chunk_manager.spawned_chunks.remove(&IVec2::new(x, y));
+        commands.entity(entity).despawn_recursive();
     }
 }
