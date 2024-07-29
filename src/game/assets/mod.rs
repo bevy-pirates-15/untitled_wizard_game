@@ -14,6 +14,7 @@ pub enum ImageAsset {
     Wand,
     SpellIcons,
     FullScreen,
+    MapTileset,
     BasicEnemy,
     TankEnemy,
     RangedEnemy,
@@ -54,6 +55,16 @@ impl ImageAssets {
             ImageAsset::FullScreen,
             asset_server.load_with_settings(
                 "images/fullscreen.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+
+        assets.insert(
+            ImageAsset::MapTileset,
+            asset_server.load_with_settings(
+                "images/map.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
