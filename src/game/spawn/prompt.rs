@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{game::assets::{ImageAsset, ImageAssets}, screen::Screen};
+use crate::{
+    game::assets::{ImageAsset, ImageAssets},
+    screen::Screen,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_temp_prompt);
@@ -31,7 +34,7 @@ fn spawn_temp_prompt(
             ..Default::default()
         },
         StateScoped(Screen::Playing),
-        ToBeDespawned
+        ToBeDespawned,
     ));
 
     commands.spawn((
@@ -41,7 +44,7 @@ fn spawn_temp_prompt(
             ..Default::default()
         },
         StateScoped(Screen::Playing),
-        ToBeDespawned
+        ToBeDespawned,
     ));
 }
 
@@ -51,16 +54,14 @@ fn count_down(
     mut countdown_timer: ResMut<CountdownTimer>,
     prompt_query: Query<Entity, With<ToBeDespawned>>,
 ) {
-     countdown_timer.0.tick(time.delta());
-     if countdown_timer.0.finished() {
-         for prompt in prompt_query.iter(){
-             commands.entity(prompt).despawn_recursive();
-         }
-     }
+    countdown_timer.0.tick(time.delta());
+    if countdown_timer.0.finished() {
+        for prompt in prompt_query.iter() {
+            commands.entity(prompt).despawn_recursive();
+        }
+    }
 }
 
-fn reset_count_down(
-    mut countdown_timer: ResMut<CountdownTimer>,
-) {
+fn reset_count_down(mut countdown_timer: ResMut<CountdownTimer>) {
     countdown_timer.0.reset();
 }

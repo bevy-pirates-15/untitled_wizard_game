@@ -118,7 +118,12 @@ fn spawn_gem(
         })
         .id();
 
-    (name_entity, gem_image_entity, text_entity, spell_index.clone())
+    (
+        name_entity,
+        gem_image_entity,
+        text_entity,
+        spell_index.clone(),
+    )
 }
 
 fn gem_menu(
@@ -463,8 +468,12 @@ fn gem_menu(
             ..default()
         };
         let spell_index = generated_spell_table[n];
-        let (name_entity, gem_entity, text_entity, spell) =
-            spawn_gem(&mut commands, &spell_index, &images, &mut texture_atlas_layouts);
+        let (name_entity, gem_entity, text_entity, spell) = spawn_gem(
+            &mut commands,
+            &spell_index,
+            &images,
+            &mut texture_atlas_layouts,
+        );
 
         let select_gem_button_entity = commands
             .spawn(select_gem_button)
