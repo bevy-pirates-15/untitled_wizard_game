@@ -15,8 +15,6 @@ use std::f32::consts::PI;
 use std::time::Duration;
 
 use super::ItemDrop;
-use crate::game::physics::GameLayer;
-use crate::game::projectiles::{ProjectileDamage, ProjectileTeam};
 use crate::{
     config::*,
     game::{
@@ -24,6 +22,8 @@ use crate::{
         levelling::Experience,
         spawn::player::Player,
         Damageable,
+        physics::GameLayer,
+        projectiles::{ProjectileDamage, ProjectileTeam},
     },
     screen::{GameState, Screen},
 };
@@ -98,6 +98,99 @@ impl Default for Wave {
 #[reflect(Component)]
 pub struct Enemy;
 
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
+#[reflect(Component)]
+pub enum EnemyKind {
+    #[default]
+    Basic,
+    Ranged,
+    Tank,
+}
+
+#[derive(Bundle)]
+struct EnemyBundle {
+    name: Name,
+    tag: Enemy,
+    breed: EnemyKind,
+    health: Damageable,
+    xp: Experience,
+    sprite: SpriteBundle,
+    state: StateScoped<Screen>,
+    collision_box: Collider,
+    collision_layers: CollisionLayers,
+    locked_axes: LockedAxes,
+    rigid_body: RigidBody,
+    linear_velocity: LinearVelocity,
+    damage: ProjectileDamage,
+
+}
+
+impl EnemyBundle {
+    fn basic(x: f32, y: f32, diff: u32, sprites: &Res<ImageAssets>) -> Self {
+        let hp_modifier = diff as f32 * 1.1;
+        let xp_modifier = (diff as f32 * 0.2).floor() as u32;
+        let dmg_modifier = diff as f32 * 1.125;
+        EnemyBundle {
+            name: Name::new("Enemy"),
+            tag: Enemy,
+            breed: EnemyKind::Basic,
+            health: Damageable {
+                max_health: (ENEMY_HEALTH * hp_modifier).ceil(),
+                health: (ENEMY_HEALTH * hp_modifier).ceil(),
+                team: ProjectileTeam::Enemy,
+                invincibility_timer: Duration::from_secs_f32(0.1),
+            },
+            xp: Experience(BASE_ENEMY_XP * xp_modifier),
+            sprite: SpriteBundle {
+                texture: sprites[&ImageAsset::BasicEnemy].clone_weak(),
+                transform: Transform::from_translation(vec3(x, y, 2.0)),
+                ..default()
+            },
+            state: StateScoped(Screen::Playing),
+            collision_box: Collider::circle(8.),
+            collision_layers: CollisionLayers::new(
+                GameLayer::Enemy,
+                [
+                    GameLayer::Enemy,
+                    GameLayer::Environment,
+                    GameLayer::Player,
+                    GameLayer::PlayerProjectile,
+                ],
+            ),
+            locked_axes: LockedAxes::ROTATION_LOCKED,
+            rigid_body: RigidBody::Dynamic,
+            linear_velocity: LinearVelocity::default(),
+            damage: ProjectileDamage {
+                team: ProjectileTeam::Enemy,
+                damage: (1.0 * dmg_modifier).ceil(),
+                hits_remaining: 1000,
+                knockback_force: 0.4,
+            },
+        }
+    }
+
+    fn ranged(x:f32, y: f32, diff: u32, sprites: &Res<ImageAssets>) -> EnemyBundle {
+        let mut ranged = Self::basic(x, y, diff, sprites);
+        ranged.breed = EnemyKind::Ranged;
+        ranged.health.max_health *= 0.75;
+        ranged.sprite.texture = sprites[&ImageAsset::RangedEnemy].clone_weak();
+        ranged.damage.damage *= 1.05;
+        ranged.damage.knockback_force = 1.5;
+        ranged
+    }
+
+    fn tank(x:f32, y: f32, diff: u32, sprites: &Res<ImageAssets>) -> EnemyBundle {
+        let mut tank = Self::basic(x, y, diff, sprites);
+        tank.breed = EnemyKind::Tank;
+        tank.health.max_health *= 1.5;
+        tank.health.invincibility_timer = Some(Duration::from_secs_f32(0.5));
+        tank.sprite.texture = sprites[&ImageAsset::TankEnemy].clone_weak();
+        tank.damage.damage *= 0.85;
+        tank.damage.knockback_force = 2.5;
+        tank
+    }
+}
+
 #[derive(Resource, Debug, Default, PartialEq)]
 enum WaveState {
     Active,
@@ -140,48 +233,21 @@ fn spawn_enemies(
     if curr_enemies >= wave.max_enemies || player_query.is_empty() || wave_state.eq(&WaveState::Inactive) {
         return;
     }
+    let enemy_spawn_limit = (wave.max_enemies - curr_enemies).min(wave.spawn_rate_per_sec);
+
+    //todo when make wave, randomly choose enemy amounts
 
     let player_pos = player_query.single().translation.truncate();
-    let enemy_spawn_count = (wave.max_enemies - curr_enemies).min(wave.spawn_rate_per_sec);
-    for _ in 0..enemy_spawn_count {
+    for n in 0..enemy_spawn_limit {
         let (x, y) = get_random_pos_around(player_pos);
-
-        commands.spawn((
-            Name::new("Enemy"),
-            Enemy,
-            Damageable {
-                max_health: ENEMY_HEALTH * wave.number as f32,
-                health: ENEMY_HEALTH * wave.number as f32,
-                team: ProjectileTeam::Enemy,
-                invincibility_timer: Duration::from_secs_f32(0.1),
-            },
-            Experience(BASE_ENEMY_XP),
-            SpriteBundle {
-                texture: images[&ImageAsset::BasicEnemy].clone_weak(),
-                transform: Transform::from_translation(vec3(x, y, 2.0)),
-                ..default()
-            },
-            StateScoped(Screen::Playing),
-            Collider::circle(8.),
-            CollisionLayers::new(
-                GameLayer::Enemy,
-                [
-                    GameLayer::Enemy,
-                    GameLayer::Environment,
-                    GameLayer::Player,
-                    GameLayer::PlayerProjectile,
-                ],
-            ),
-            LockedAxes::ROTATION_LOCKED,
-            RigidBody::Dynamic,
-            LinearVelocity::default(),
-            ProjectileDamage {
-                team: ProjectileTeam::Enemy,
-                damage: 1.0,
-                hits_remaining: 1000,
-                knockback_force: 0.0,
-            },
-        ));
+        let base_enemy_limit = 10;
+        let tank_enemy_limit = 20;
+        match n {
+            _ if (0..=base_enemy_limit-1).contains(&n) => commands.spawn(EnemyBundle::basic(x, y, 10, &images)),
+            _ if (base_enemy_limit..=tank_enemy_limit-1).contains(&n) => commands.spawn(EnemyBundle::tank(x, y, 10, &images)),
+            _ if (tank_enemy_limit..=enemy_spawn_limit).contains(&n) => commands.spawn(EnemyBundle::ranged(x, y, 10, &images)),
+            _ => unreachable!("Enemy ranges not exhaustive at wave: "),
+        };
     }
 }
 
