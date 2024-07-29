@@ -3,17 +3,20 @@
 use bevy::{prelude::*, utils::HashSet};
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::{game::assets::{ImageAsset, ImageAssets}, screen::Screen};
+use crate::{
+    game::assets::{ImageAsset, ImageAssets},
+    screen::Screen,
+};
 
 use super::{borders::SpawnBorders, player::SpawnPlayer, wand::SpawnWand};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);
     app.insert_resource(ChunkManager::default());
-    app.add_systems(Update, (
-        spawn_chunks_around_camera,
-        despawn_outofrange_chunks
-    ).run_if(in_state(Screen::Playing)));
+    app.add_systems(
+        Update,
+        (spawn_chunks_around_camera, despawn_outofrange_chunks).run_if(in_state(Screen::Playing)),
+    );
 }
 
 #[derive(Event, Debug)]
@@ -28,19 +31,14 @@ struct ChunkManager {
     pub spawned_chunks: HashSet<IVec2>,
 }
 
-
-fn spawn_level(
-    _trigger: Trigger<SpawnLevel>,
-    mut commands: Commands,
-    images: Res<ImageAssets>
-) {
+fn spawn_level(_trigger: Trigger<SpawnLevel>, mut commands: Commands, images: Res<ImageAssets>) {
     // Spawn level box here, change to very pretty art later
     commands.spawn((
         Name::new("World Box"),
         WorldBox,
         SpriteBundle {
             texture: images[&ImageAsset::MapTileset].clone_weak(),
-            transform: Transform::from_translation(Vec3::new(0.,0.,1.)),
+            transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
             ..default()
         },
         StateScoped(Screen::Playing),
@@ -90,19 +88,22 @@ fn spawn_chunk(commands: &mut Commands, images: &Res<ImageAssets>, chunk_pos: IV
         0.0,
     ));
     let texture_handle: Handle<Image> = images[&ImageAsset::Forest].clone_weak();
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size: TILE_SIZE.into(),
-        size: CHUNK_SIZE.into(),
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size: TILE_SIZE,
-        transform,
-        render_settings: TilemapRenderSettings {
-            render_chunk_size: RENDER_CHUNK_SIZE,
+    commands
+        .entity(tilemap_entity)
+        .insert(TilemapBundle {
+            grid_size: TILE_SIZE.into(),
+            size: CHUNK_SIZE.into(),
+            storage: tile_storage,
+            texture: TilemapTexture::Single(texture_handle),
+            tile_size: TILE_SIZE,
+            transform,
+            render_settings: TilemapRenderSettings {
+                render_chunk_size: RENDER_CHUNK_SIZE,
+                ..Default::default()
+            },
             ..Default::default()
-        },
-        ..Default::default()
-    }).insert(Forest);
+        })
+        .insert(Forest);
 }
 
 fn camera_pos_to_chunk_pos(camera_pos: &Vec2) -> IVec2 {

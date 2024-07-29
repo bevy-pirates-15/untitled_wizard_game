@@ -149,7 +149,13 @@ fn gem_menu(
                 margin: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-            text: Text::from_section("Select Spell", TextStyle { font_size: 60., ..default() }),
+            text: Text::from_section(
+                "Select Spell",
+                TextStyle {
+                    font_size: 60.,
+                    ..default()
+                },
+            ),
             ..default()
         })
         .id();
@@ -167,16 +173,22 @@ fn gem_menu(
     };
 
     let scroll_text_entity = commands
-    .spawn(TextBundle {
-        style: Style {
-            align_items: AlignItems::Center,
-            margin: UiRect::all(Val::Px(5.0)),
+        .spawn(TextBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                margin: UiRect::all(Val::Px(5.0)),
+                ..default()
+            },
+            text: Text::from_section(
+                "Place in front/back (container is scrollable)",
+                TextStyle {
+                    font_size: 60.,
+                    ..default()
+                },
+            ),
             ..default()
-        },
-        text: Text::from_section("Place in front/back (container is scrollable)", TextStyle { font_size: 60., ..default() }),
-        ..default()
-    })
-    .id();
+        })
+        .id();
 
     let mid_section_container = NodeBundle {
         style: Style {

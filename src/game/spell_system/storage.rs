@@ -39,9 +39,7 @@ pub(super) fn plugin(app: &mut App) {
                 //     icon_id: 2,
                 // });
                 spell_inventory.push_spell(SpellComponent {
-                    data: Box::new(ZapSpellData {
-                        base_damage: 40.0,
-                    }),
+                    data: Box::new(ZapSpellData { base_damage: 40.0 }),
                     icon_id: 36,
                 });
 
