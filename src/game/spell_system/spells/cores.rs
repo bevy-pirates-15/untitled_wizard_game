@@ -5,42 +5,52 @@ use crate::game::spell_system::helpers::{spawn_spell_projectile, ProjectileStats
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect};
 use bevy::color::Color;
 use bevy::log::{info, warn};
-use bevy::math::Vec2;
 use bevy::prelude::{Circle, MeshBuilder, Meshable, World};
 use bevy::sprite::ColorMaterial;
-use std::f32::consts::PI;
 use std::slice::Iter;
 use std::sync::Arc;
 use std::time::Duration;
 
-pub(super) fn get_spells() -> Vec<SpellComponent> {
+pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
     vec![
-        SpellComponent {
-            data: Box::new(ZapSpellData { base_damage: 40.0 }),
-            icon_id: 0,
-        },
-        SpellComponent {
-            data: Box::new(BangSpellData {
-                base_damage: 40.0,
-                radius: 50.0,
-            }),
-            icon_id: 3,
-        },
-        SpellComponent {
-            data: Box::new(ArcaneArrowSpellData {
-                base_damage: 30.0,
-                speed: 400.0,
-                num_hits: 3,
-            }),
-            icon_id: 1,
-        },
-        SpellComponent {
-            data: Box::new(SplitterBoltsSpellData {
-                base_damage: 20.0,
-                projectile_count: 3,
-            }),
-            icon_id: 2,
-        },
+        (
+            SpellComponent {
+                data: Box::new(ZapSpellData { base_damage: 40.0 }),
+                icon_id: 0,
+            },
+            1.0,
+        ),
+        (
+            SpellComponent {
+                data: Box::new(BangSpellData {
+                    base_damage: 40.0,
+                    radius: 30.0,
+                }),
+                icon_id: 3,
+            },
+            0.2,
+        ),
+        (
+            SpellComponent {
+                data: Box::new(ArcaneArrowSpellData {
+                    base_damage: 30.0,
+                    speed: 400.0,
+                    num_hits: 3,
+                }),
+                icon_id: 1,
+            },
+            0.5,
+        ),
+        (
+            SpellComponent {
+                data: Box::new(SplitterBoltsSpellData {
+                    base_damage: 20.0,
+                    projectile_count: 3,
+                }),
+                icon_id: 2,
+            },
+            0.2,
+        ),
     ]
 }
 
@@ -61,7 +71,7 @@ impl SpellData for ZapSpellData {
     }
 
     fn get_name(&self) -> String {
-        String::from("Zap Spell")
+        String::from("Zap")
     }
 
     fn get_desc(&self) -> String {
@@ -117,7 +127,7 @@ impl SpellData for BangSpellData {
     }
 
     fn get_name(&self) -> String {
-        String::from("Bang Spell")
+        String::from("Bang")
     }
 
     fn get_desc(&self) -> String {
@@ -189,7 +199,7 @@ impl SpellData for ArcaneArrowSpellData {
     }
 
     fn get_name(&self) -> String {
-        String::from("Arcane Arrow Spell")
+        String::from("Arrow")
     }
 
     fn get_desc(&self) -> String {
@@ -249,7 +259,7 @@ impl SpellData for SplitterBoltsSpellData {
     }
 
     fn get_name(&self) -> String {
-        String::from("splitter Bolts Spell")
+        String::from("split")
     }
 
     fn get_desc(&self) -> String {
@@ -270,11 +280,7 @@ impl SpellEffect for SplitterBoltsSpell {
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
         for _ in 0..self.projectile_count {
             let mut cast_context = context.clone();
-
-            //randomly offset the direction
-            cast_context.direction =
-                Vec2::from_angle(rand::random::<f32>() * (PI / 4.) - (PI / 8.))
-                    .rotate(cast_context.direction);
+            cast_context.values.spread += 30.0;
 
             let Some(spell_entity) = spawn_spell_projectile(
                 &mut cast_context,

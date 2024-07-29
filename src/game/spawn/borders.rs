@@ -42,7 +42,7 @@ fn spawn_box_borders(_trigger: Trigger<SpawnBorders>, mut commands: Commands) {
         ),
         // Bottom border
         (
-            Vec3::new(0., -(MAP_HEIGHT / 2. + BORDER_THICKNESS / 2.), 3.),
+            Vec3::new(0., -(MAP_HEIGHT / 2. + BORDER_THICKNESS / 2.), 0.),
             Vec2::new(MAP_WIDTH + BORDER_THICKNESS * 2., BORDER_THICKNESS),
         ),
     ];
