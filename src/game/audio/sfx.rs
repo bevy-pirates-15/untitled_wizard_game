@@ -8,6 +8,7 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
     let source = match event {
         Sfx::ButtonHover => &sfxs[&SfxAsset::ButtonHover],
         Sfx::ButtonPress => &sfxs[&SfxAsset::ButtonPress],
+        Sfx::DiscardGem => &sfxs[&SfxAsset::DiscardGem],
         Sfx::EnemyCollision => &sfxs[&SfxAsset::EnemyCollision],
         Sfx::LevelUp => &sfxs[&SfxAsset::LevelUp],
         Sfx::PickUpExperience => &sfxs[&SfxAsset::PickUpExperience],
@@ -30,6 +31,7 @@ pub(super) fn play_sfx(trigger: Trigger<Sfx>, mut commands: Commands, sfxs: Res<
 pub enum Sfx {
     ButtonHover,
     ButtonPress,
+    DiscardGem,
     EnemyCollision,
     LevelUp,
     PickUpExperience,

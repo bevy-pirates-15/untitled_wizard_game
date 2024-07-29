@@ -14,7 +14,7 @@ use crate::{
     game::{
         assets::{ImageAsset, ImageAssets},
         spell_system::{
-            storage::{RebuildWand, SpellInventory, SpellPool},
+            storage::{RebuildWand, SpellAddPos, SpellInventory, SpellPool},
             SpellComponent,
         },
     },
@@ -29,7 +29,9 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         (
             handle_gem_select_action,
-            handle_gem_placement_action,
+            handle_gem_back_placement_action,
+            handle_gem_front_placement_action,
+            handle_gem_discard_action,
             handle_mouse_scroll,
         )
             .run_if(in_state(GameState::GemSelection)),
@@ -42,6 +44,7 @@ enum LevelUpAction {
     Selected,
     PlaceBack,
     PlaceFront,
+    DiscardGem,
 }
 
 #[derive(Component)]
@@ -136,8 +139,21 @@ fn gem_menu(
             justify_content: JustifyContent::Center,
             ..default()
         },
+        background_color: BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.4)),
         ..default()
     };
+    let select_spell_text_entity = commands
+        .spawn(TextBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                margin: UiRect::all(Val::Px(5.0)),
+                ..default()
+            },
+            text: Text::from_section("Select Spell", TextStyle { font_size: 60., ..default() }),
+            ..default()
+        })
+        .id();
+
     let gem_container = NodeBundle {
         style: Style {
             width: Val::Percent(80.0),
@@ -149,6 +165,18 @@ fn gem_menu(
         },
         ..default()
     };
+
+    let scroll_text_entity = commands
+    .spawn(TextBundle {
+        style: Style {
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Px(5.0)),
+            ..default()
+        },
+        text: Text::from_section("Place in front/back (container is scrollable)", TextStyle { font_size: 60., ..default() }),
+        ..default()
+    })
+    .id();
 
     let mid_section_container = NodeBundle {
         style: Style {
@@ -188,8 +216,8 @@ fn gem_menu(
 
     let place_back_button = ButtonBundle {
         style: Style {
-            width: Val::Percent(10.0),
-            height: Val::Percent(20.0),
+            width: Val::Percent(20.0),
+            height: Val::Percent(35.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             border: UiRect::all(Val::Percent(0.5)),
@@ -206,14 +234,14 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("Place Back", TextStyle { ..default() }),
+        text: Text::from_section("Place Back -->", TextStyle { ..default() }),
         ..default()
     };
 
     let place_front_button = ButtonBundle {
         style: Style {
-            width: Val::Percent(10.0),
-            height: Val::Percent(20.0),
+            width: Val::Percent(20.0),
+            height: Val::Percent(35.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             border: UiRect::all(Val::Percent(0.5)),
@@ -230,7 +258,7 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("Place Front", TextStyle { ..default() }),
+        text: Text::from_section("<-- Place Front", TextStyle { ..default() }),
         ..default()
     };
 
@@ -272,8 +300,16 @@ fn gem_menu(
             pressed: BUTTON_PRESSED_BACKGROUND,
         })
         .insert(LevelUpAction::PlaceBack)
+        .insert(GemPlaceButtonSound)
         .id();
-    let text_place_back_button_entity = commands.spawn(text_place_back_button).id();
+    let text_place_back_button_entity = commands
+        .spawn(text_place_back_button)
+        .insert(InteractionPalette {
+            none: NODE_BACKGROUND,
+            hovered: BUTTON_HOVERED_BACKGROUND,
+            pressed: BUTTON_PRESSED_BACKGROUND,
+        })
+        .id();
     let place_front_button_entity = commands
         .spawn(place_front_button)
         .insert(InteractionPalette {
@@ -281,6 +317,7 @@ fn gem_menu(
             hovered: BUTTON_HOVERED_BACKGROUND,
             pressed: BUTTON_PRESSED_BACKGROUND,
         })
+        .insert(GemPlaceButtonSound)
         .insert(LevelUpAction::PlaceFront)
         .id();
     let text_place_front_button_entity = commands.spawn(text_place_front_button).id();
@@ -291,12 +328,22 @@ fn gem_menu(
             hovered: BUTTON_HOVERED_BACKGROUND,
             pressed: BUTTON_PRESSED_BACKGROUND,
         })
-        .insert(GemPlaceButtonSound)
-        .insert(LevelUpAction::PlaceFront)
+        .insert(TextBundle {
+            style: Style {
+                margin: UiRect::all(Val::Px(5.0)),
+                ..default()
+            },
+            text: Text::from_section("Discard", TextStyle { ..default() }),
+            ..default()
+        })
+        .insert(GemDiscardButtonSound)
+        .insert(LevelUpAction::DiscardGem)
         .id();
 
     commands.entity(ui_container_entity).push_children(&[
+        select_spell_text_entity,
         gem_container_entity,
+        scroll_text_entity,
         mid_section_container_entity,
         continue_button_entity,
     ]);
@@ -451,7 +498,7 @@ fn handle_gem_select_action(
     }
 }
 
-fn handle_gem_placement_action(
+fn handle_gem_front_placement_action(
     mut commands: Commands,
     mut button_query: InteractionQuery<&LevelUpAction>,
     mut spell_inventory: ResMut<SpellInventory>,
@@ -465,6 +512,35 @@ fn handle_gem_placement_action(
                 commands.trigger(RebuildWand);
                 next_gamestate.set(GameState::Running);
             }
+        }
+    }
+}
+
+fn handle_gem_back_placement_action(
+    mut commands: Commands,
+    mut button_query: InteractionQuery<&LevelUpAction>,
+    mut spell_inventory: ResMut<SpellInventory>,
+    mut next_gamestate: ResMut<NextState<GameState>>,
+    selected_gem_query: Query<&SpellComponent, With<SelectedGem>>,
+) {
+    for (interaction, action) in &mut button_query.iter_mut() {
+        if matches!(interaction, Interaction::Pressed) && action == &LevelUpAction::PlaceBack {
+            if let Ok(spell) = selected_gem_query.get_single() {
+                spell_inventory.insert_spell(spell.clone(), SpellAddPos::Index(0));
+                commands.trigger(RebuildWand);
+                next_gamestate.set(GameState::Running);
+            }
+        }
+    }
+}
+
+fn handle_gem_discard_action(
+    mut button_query: InteractionQuery<&LevelUpAction>,
+    mut next_gamestate: ResMut<NextState<GameState>>,
+) {
+    for (interaction, action) in &mut button_query.iter_mut() {
+        if matches!(interaction, Interaction::Pressed) && action == &LevelUpAction::DiscardGem {
+            next_gamestate.set(GameState::Running);
         }
     }
 }

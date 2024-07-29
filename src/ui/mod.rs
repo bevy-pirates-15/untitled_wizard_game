@@ -31,3 +31,6 @@ pub struct GemPickUpButtonSound;
 
 #[derive(Component, Debug)]
 pub struct GemPlaceButtonSound;
+
+#[derive(Component, Debug)]
+pub struct GemDiscardButtonSound;

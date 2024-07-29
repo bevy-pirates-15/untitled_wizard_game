@@ -112,6 +112,7 @@ impl ImageAssets {
 pub enum SfxAsset {
     ButtonHover,
     ButtonPress,
+    DiscardGem,
     EnemyCollision,
     LevelUp,
     PickUpExperience,
@@ -139,6 +140,10 @@ impl SfxAssets {
         assets.insert(
             SfxAsset::ButtonPress,
             asset_server.load("audio/sfx/button_press.wav"),
+        );
+        assets.insert(
+            SfxAsset::DiscardGem,
+            asset_server.load("audio/sfx/discard_gem.wav"),
         );
         assets.insert(
             SfxAsset::EnemyCollision,
