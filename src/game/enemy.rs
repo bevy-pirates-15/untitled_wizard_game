@@ -49,17 +49,15 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Resource, Debug, Clone)]
 struct Wave {
     number: u32,
-    spawn_period: f32,
     spawn_rate_per_sec: usize,
     max_enemies: usize,
     timer: Timer,
 }
 
 impl Wave {
-    fn new(num: u32, sp: f32, srps: usize, me: usize, dur: f64) -> Self {
+    fn new(num: u32, srps: usize, me: usize, dur: f64) -> Self {
         Wave {
             number: num,
-            spawn_period: sp,
             spawn_rate_per_sec: srps,
             max_enemies: me,
             timer: Timer::new(Duration::from_secs_f64(dur), TimerMode::Once),
@@ -69,16 +67,16 @@ impl Wave {
     fn increment(self) -> Self {
         match self.number {
             // todo tweak numbers to be more balanced
-            n @ 1..=5 => Wave::new(n + 1, 10., n as usize * 2, n as usize * 15, 45.),
-            n @ 6..=10 => Wave::new(n + 1, 9., n as usize * 2, n as usize * 20, 50.),
-            n @ 11..=15 => Wave::new(n + 1, 8., n as usize * 3, n as usize * 25, 55.),
-            n @ 16..=20 => Wave::new(n + 1, 7., n as usize * 3, n as usize * 30, 60.),
-            n @ 21..=25 => Wave::new(n + 1, 6., n as usize * 4, n as usize * 35, 65.),
-            n @ 26..=30 => Wave::new(n + 1, 5., n as usize * 4, n as usize * 40, 70.),
-            n @ 31..=35 => Wave::new(n + 1, 4., n as usize * 5, n as usize * 45, 75.),
-            n @ 36..=40 => Wave::new(n + 1, 3., n as usize * 5, n as usize * 50, 80.),
-            n @ 41..=45 => Wave::new(n + 1, 2., n as usize * 6, n as usize * 55, 85.),
-            n @ 46..=50 => Wave::new(n + 1, 1., n as usize * 6, n as usize * 60, 90.),
+            n @ 1..=5 => Wave::new(n + 1, n as usize * 2, n as usize * 15, 45.),
+            n @ 6..=10 => Wave::new(n + 1, n as usize * 2, n as usize * 20, 50.),
+            n @ 11..=15 => Wave::new(n + 1,  n as usize * 3, n as usize * 25, 55.),
+            n @ 16..=20 => Wave::new(n + 1,  n as usize * 3, n as usize * 30, 60.),
+            n @ 21..=25 => Wave::new(n + 1,  n as usize * 4, n as usize * 35, 65.),
+            n @ 26..=30 => Wave::new(n + 1,  n as usize * 4, n as usize * 40, 70.),
+            n @ 31..=35 => Wave::new(n + 1,  n as usize * 5, n as usize * 45, 75.),
+            n @ 36..=40 => Wave::new(n + 1,  n as usize * 5, n as usize * 50, 80.),
+            n @ 41..=45 => Wave::new(n + 1,  n as usize * 6, n as usize * 55, 85.),
+            n @ 46..=50 => Wave::new(n + 1,  n as usize * 6, n as usize * 60, 90.),
             51..=u32::MAX => self,
             _ => unreachable!("Wave number out of bounds!"),
         }
@@ -89,7 +87,6 @@ impl Default for Wave {
     fn default() -> Self {
         Wave {
             number: 1,
-            spawn_period: 10.,
             spawn_rate_per_sec: 10,
             max_enemies: 30,
             timer: Timer::new(Duration::from_secs_f64(30.), TimerMode::Once),
@@ -134,12 +131,13 @@ fn start_wave(
 fn spawn_enemies(
     mut commands: Commands,
     wave: Res<Wave>,
+    wave_state: Res<WaveState>,
     images: Res<ImageAssets>,
     player_query: Query<&Transform, With<Player>>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
 ) {
     let curr_enemies = enemy_query.iter().len();
-    if curr_enemies >= wave.max_enemies || player_query.is_empty() {
+    if curr_enemies >= wave.max_enemies || player_query.is_empty() || wave_state.eq(&WaveState::Inactive) {
         return;
     }
 
