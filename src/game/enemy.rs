@@ -186,6 +186,83 @@ impl EnemyBundle {
     }
 }
 
+#[derive(Resource)]
+struct EnemyAtlases {
+    map: HashMap<EnemyKind, Handle<TextureAtlasLayout>>,
+}
+
+impl EnemyAtlases {
+    fn initialise(mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>) -> Self {
+        let mut enemy_sprites = EnemyAtlases {
+            map: HashMap::new(),
+        };
+        let ranged_layout: TextureAtlasLayout =
+            TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 1, Some(UVec2::splat(0)), None);
+        let ranged_handle = texture_atlas_layouts.add(ranged_layout);
+        enemy_sprites.map.insert(
+            EnemyKind::Ranged {
+                proximity: RANGED_ENEMY_DIST,
+            },
+            ranged_handle,
+        );
+
+        let tank_layout: TextureAtlasLayout =
+            TextureAtlasLayout::from_grid(UVec2::new(64, 48), 4, 1, Some(UVec2::splat(0)), None);
+        let tank_handle = texture_atlas_layouts.add(tank_layout);
+        enemy_sprites.map.insert(EnemyKind::Tank, tank_handle);
+        enemy_sprites
+    }
+}
+
+#[derive(Bundle)]
+struct AnimatedEnemyBundle {
+    base: EnemyBundle,
+    texture_atlas: TextureAtlas,
+    animation: EnemyAnimation,
+}
+
+impl AnimatedEnemyBundle {
+    fn ranged(
+        x: f32,
+        y: f32,
+        diff: u32,
+        sprites: &Res<ImageAssets>,
+        enemy_sprites: &EnemyAtlases,
+    ) -> Self {
+        AnimatedEnemyBundle {
+            base: EnemyBundle::ranged(x, y, diff, sprites),
+            texture_atlas: TextureAtlas {
+                layout: enemy_sprites
+                    .map
+                    .get(&EnemyKind::Ranged {
+                        proximity: RANGED_ENEMY_DIST,
+                    })
+                    .unwrap()
+                    .clone(),
+                index: 0,
+            },
+            animation: EnemyAnimation::new(),
+        }
+    }
+
+    fn tank(
+        x: f32,
+        y: f32,
+        diff: u32,
+        sprites: &Res<ImageAssets>,
+        enemy_sprites: &EnemyAtlases,
+    ) -> Self {
+        AnimatedEnemyBundle {
+            base: EnemyBundle::tank(x, y, diff, sprites),
+            texture_atlas: TextureAtlas {
+                layout: enemy_sprites.map.get(&EnemyKind::Tank).unwrap().clone(),
+                index: 0,
+            },
+            animation: EnemyAnimation::new(),
+        }
+    }
+}
+
 #[derive(Resource, Debug, Default, PartialEq)]
 enum WaveState {
     Active,
