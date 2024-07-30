@@ -2,17 +2,22 @@
 
 use avian2d::collision::Collider;
 use avian2d::prelude::{CollisionLayers, LinearVelocity, LockedAxes, RigidBody};
+use bevy::utils::HashMap;
 use bevy::{app::App, math::vec3, prelude::*, time::common_conditions::on_timer};
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Duration;
 
+use super::animation::EnemyAnimation;
 use super::ItemDrop;
 use crate::{
     config::*,
     game::{
         assets::{ImageAsset, ImageAssets},
         levelling::Experience,
+        physics::GameLayer,
+        player_mods::health::HealEvent,
+        projectiles::{ProjectileDamage, ProjectileTeam},
         spawn::player::Player,
         Damageable,
         physics::GameLayer,
@@ -285,6 +290,8 @@ fn start_wave(
 
     if curr_wave.timer.finished() {
         commands.insert_resource(WaveState::Inactive);
+        commands.trigger(HealEvent(2.5 + (curr_wave.clone().number as f32 * 1.05)));
+
         let new_wave = curr_wave.into_inner().clone().increment();
         commands.remove_resource::<Wave>();
         commands.insert_resource(new_wave);
