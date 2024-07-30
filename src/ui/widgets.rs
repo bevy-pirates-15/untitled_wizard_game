@@ -47,7 +47,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0.1,
+                        font_size: FONT_SIZE_CONST.0 .1,
                         color: BUTTON_TEXT,
                         ..default()
                     },
@@ -82,7 +82,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0.0,
+                        font_size: FONT_SIZE_CONST.0 .0,
                         color: HEADER_TEXT,
                         ..default()
                     },
@@ -113,7 +113,7 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0.0,
+                        font_size: FONT_SIZE_CONST.0 .0,
                         color: LABEL_TEXT,
                         ..default()
                     },

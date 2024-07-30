@@ -155,7 +155,7 @@ fn gem_menu(
             text: Text::from_section(
                 "Select Spell",
                 TextStyle {
-                    font_size: FONT_SIZE_CONST.0.0,
+                    font_size: FONT_SIZE_CONST.0 .0,
                     ..default()
                 },
             ),
@@ -186,7 +186,7 @@ fn gem_menu(
             text: Text::from_section(
                 "Place in front/back (container is scrollable)",
                 TextStyle {
-                    font_size: FONT_SIZE_CONST.0.0,
+                    font_size: FONT_SIZE_CONST.0 .0,
                     ..default()
                 },
             ),
@@ -424,7 +424,7 @@ fn gem_menu(
         let spell_name = TextBundle::from_section(
             spell.data.get_name(),
             TextStyle {
-                font_size: FONT_SIZE_CONST.0.0,
+                font_size: FONT_SIZE_CONST.0 .0,
                 ..default()
             },
         );

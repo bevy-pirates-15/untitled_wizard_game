@@ -9,8 +9,14 @@ use super::{loading::LoadingState, FullscreenState};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(LoadingState::Loaded), spawn_fullscreen_icon);
-    app.add_systems(Update, handle_font_size_fullscreen.run_if(in_state(FullscreenState::Fullscreen)));
-    app.add_systems(Update, handle_font_size_windowed.run_if(in_state(FullscreenState::Windowed)));
+    app.add_systems(
+        Update,
+        handle_font_size_fullscreen.run_if(in_state(FullscreenState::Fullscreen)),
+    );
+    app.add_systems(
+        Update,
+        handle_font_size_windowed.run_if(in_state(FullscreenState::Windowed)),
+    );
     app.add_systems(
         Update,
         (handle_fullscreen_button, handle_fullscreen_boolean).chain(),
@@ -87,23 +93,21 @@ fn handle_fullscreen_button(
                 false => {
                     window.mode = WindowMode::BorderlessFullscreen;
                     next_fullscreen_state.set(FullscreenState::Fullscreen);
-                },
+                }
                 true => {
                     window.mode = WindowMode::Windowed;
                     next_fullscreen_state.set(FullscreenState::Windowed);
-                },
+                }
             }
         }
     }
 }
 
-fn handle_font_size_windowed(
-    mut text_query: Query<&mut Text, With<SmallerTextFont>>,
-) {
+fn handle_font_size_windowed(mut text_query: Query<&mut Text, With<SmallerTextFont>>) {
     for mut text in text_query.iter_mut() {
         text.sections[0] = TextSection {
             style: TextStyle {
-                font_size: FONT_SIZE_CONST.0.0,
+                font_size: FONT_SIZE_CONST.0 .0,
                 ..default()
             },
             value: text.sections[0].value.clone(),
@@ -111,13 +115,11 @@ fn handle_font_size_windowed(
     }
 }
 
-fn handle_font_size_fullscreen(
-    mut text_query: Query<&mut Text, With<SmallerTextFont>>,
-) {
+fn handle_font_size_fullscreen(mut text_query: Query<&mut Text, With<SmallerTextFont>>) {
     for mut text in text_query.iter_mut() {
         text.sections[0] = TextSection {
             style: TextStyle {
-                font_size: FONT_SIZE_CONST.1.0,
+                font_size: FONT_SIZE_CONST.1 .0,
                 ..default()
             },
             value: text.sections[0].value.clone(),
