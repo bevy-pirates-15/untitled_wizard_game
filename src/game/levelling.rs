@@ -7,7 +7,7 @@ use crate::{
     screen::GameState,
 };
 
-use super::{enemy::Enemy, spawn::player::Player};
+use super::{enemy::{Enemy, ExpireTimer}, spawn::player::Player};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
@@ -16,6 +16,7 @@ pub(super) fn plugin(app: &mut App) {
         (
             detect_player_experience_collision,
             move_experience_towards_player,
+            despawn_experience_timer,
         )
             .run_if(in_state(GameState::Running)),
     );
@@ -91,6 +92,20 @@ fn move_experience_towards_player(
                 experience_transform.translation +=
                     direction * EXPERIENCE_SPEED * time.delta_seconds();
             }
+        }
+    }
+}
+
+fn despawn_experience_timer(
+    mut commands: Commands,
+    mut experience_query: Query<(Entity, &mut ExpireTimer), (With<Experience>, Without<Enemy>)>,
+    time: Res<Time>,
+) {
+    for (experience, mut expire_timer) in experience_query.iter_mut() {
+        expire_timer.timer.tick(time.delta());
+
+        if expire_timer.timer.finished() {
+            commands.entity(experience).despawn_recursive();
         }
     }
 }
