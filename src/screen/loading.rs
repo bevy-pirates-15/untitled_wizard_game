@@ -4,6 +4,7 @@
 use bevy::prelude::*;
 
 use super::Screen;
+use crate::game::assets::particles::ParticleAssets;
 use crate::game::assets::spell_gfx::SpellGFXAssets;
 use crate::{
     game::assets::{ImageAssets, SfxAssets, SoundtrackAssets},
@@ -29,6 +30,7 @@ fn enter_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(SfxAssets::new(&asset_server));
     commands.insert_resource(SoundtrackAssets::new(&asset_server));
     commands.insert_resource(SpellGFXAssets::new(&asset_server));
+    commands.insert_resource(ParticleAssets::new(&asset_server));
 }
 
 fn check_all_loaded(

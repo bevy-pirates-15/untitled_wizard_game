@@ -1,3 +1,4 @@
+pub mod particles;
 pub mod spell_gfx;
 
 use bevy::{

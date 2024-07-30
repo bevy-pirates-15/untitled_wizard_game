@@ -1,24 +1,23 @@
+use crate::game::assets::particles::ParticleAsset;
 use crate::game::assets::spell_gfx::SpellGFXAsset;
-use crate::game::projectiles::ProjectileDamage;
+use crate::game::projectiles::{ProjectileDamage, ProjectileTeam};
 use crate::game::spell_system::casting::SpellCastContext;
 use crate::game::spell_system::helpers::{spawn_spell_projectile, ProjectileStats, SpellModel};
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect};
-use bevy::color::Color;
 use bevy::log::{info, warn};
-use bevy::prelude::{Circle, MeshBuilder, Meshable, World};
-use bevy::sprite::ColorMaterial;
+use bevy::prelude::World;
 use std::slice::Iter;
 use std::sync::Arc;
 use std::time::Duration;
 
-pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
+pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
     vec![
         (
             SpellComponent {
                 data: Box::new(ZapSpellData { base_damage: 40.0 }),
                 icon_id: 0,
             },
-            1.0,
+            1,
         ),
         (
             SpellComponent {
@@ -28,7 +27,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 3,
             },
-            0.2,
+            20,
         ),
         (
             SpellComponent {
@@ -39,7 +38,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 1,
             },
-            0.5,
+            5,
         ),
         (
             SpellComponent {
@@ -49,7 +48,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 2,
             },
-            0.2,
+            10,
         ),
     ]
 }
@@ -90,7 +89,9 @@ impl SpellEffect for ZapSpell {
         let Some(spell_entity) = spawn_spell_projectile(
             context,
             world,
+            ProjectileTeam::Player,
             SpellModel::StaticSprite(SpellGFXAsset::Zap),
+            Some(ParticleAsset::Zap),
             ProjectileStats {
                 radius: 5.,
                 speed: 200.0,
@@ -149,14 +150,9 @@ impl SpellEffect for BangSpell {
         let Some(spell_entity) = spawn_spell_projectile(
             context,
             world,
-            SpellModel::MeshMat(
-                Circle {
-                    radius: self.radius,
-                }
-                .mesh()
-                .build(),
-                ColorMaterial::from(Color::WHITE),
-            ),
+            ProjectileTeam::Player,
+            SpellModel::None,
+            Some(ParticleAsset::Bang),
             ProjectileStats {
                 radius: self.radius,
                 speed: 0.0,
@@ -222,7 +218,9 @@ impl SpellEffect for ArcaneArrowSpell {
         let Some(spell_entity) = spawn_spell_projectile(
             context,
             world,
+            ProjectileTeam::Player,
             SpellModel::StaticSprite(SpellGFXAsset::ArcaneArrow),
+            Some(ParticleAsset::ArcaneArrow),
             ProjectileStats {
                 radius: 5.,
                 speed: self.speed,
@@ -285,7 +283,9 @@ impl SpellEffect for SplitterBoltsSpell {
             let Some(spell_entity) = spawn_spell_projectile(
                 &mut cast_context,
                 world,
+                ProjectileTeam::Player,
                 SpellModel::StaticSprite(SpellGFXAsset::SplitterBolts),
+                Some(ParticleAsset::SplitterBolts),
                 ProjectileStats {
                     radius: 5.,
                     speed: 250.0,

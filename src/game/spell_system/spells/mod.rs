@@ -3,6 +3,7 @@ use bevy::app::{App, Startup};
 use bevy::prelude::ResMut;
 
 pub mod cores;
+pub mod enemy;
 pub mod modifiers;
 pub mod multicasters;
 pub mod targeters;

@@ -8,7 +8,7 @@ use crate::game::spell_system::casting::{SpellCastContext, SpellCastValues};
 use crate::game::spell_system::triggers::{do_collision_trigger, CollisionSpellTrigger};
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 
-pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
+pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
     vec![
         (
             SpellComponent {
@@ -17,7 +17,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 24,
             },
-            0.25,
+            10,
         ),
         (
             SpellComponent {
@@ -27,7 +27,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 26,
             },
-            0.25,
+            10,
         ),
         (
             SpellComponent {
@@ -37,39 +37,39 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, f32)> {
                 }),
                 icon_id: 27,
             },
-            0.1,
+            25,
         ),
-        // (
-        //     SpellComponent {
-        //         data: Box::new(ScatterCastData {
-        //             spell_count: 4,
-        //             spread: 90.0,
-        //         }),
-        //         icon_id: 28,
-        //     },
-        //     0.05,
-        // ),
+        (
+            SpellComponent {
+                data: Box::new(ScatterCastData {
+                    spell_count: 4,
+                    spread: 90.0,
+                }),
+                icon_id: 28,
+            },
+            80,
+        ),
         (
             SpellComponent {
                 data: Box::new(BurstCastData { spell_count: 2 }),
                 icon_id: 29,
             },
-            0.25,
+            15,
         ),
         (
             SpellComponent {
                 data: Box::new(BurstCastData { spell_count: 3 }),
                 icon_id: 30,
             },
-            0.1,
+            30,
         ),
-        // (
-        //     SpellComponent {
-        //         data: Box::new(BurstCastData { spell_count: 4 }),
-        //         icon_id: 31,
-        //     },
-        //     0.05,
-        // ),
+        (
+            SpellComponent {
+                data: Box::new(BurstCastData { spell_count: 4 }),
+                icon_id: 28,
+            },
+            100,
+        ),
     ]
 }
 
