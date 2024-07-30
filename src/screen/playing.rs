@@ -1,15 +1,18 @@
 //! The screen state for the main game loop.
 
-use bevy::color::palettes::css::RED;
+use bevy::color::palettes::css::{DARK_RED, RED};
 use bevy::color::palettes::tailwind::GREEN_400;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use super::{GameState, Screen};
-use crate::game::enemy::StartWave;
-use crate::game::levelling::{compute_next_level, LevelText, PlayerLevel};
-use crate::game::spawn::player::Player;
-use crate::game::Damageable;
-use crate::game::{audio::soundtrack::Soundtrack, spawn::map::SpawnLevel};
+use crate::game::{
+    audio::soundtrack::Soundtrack,
+    enemy::{StartWave, Wave, WaveState, WaveText},
+    levelling::{compute_next_level, LevelText, PlayerLevel},
+    spawn::map::SpawnLevel,
+    spawn::player::Player,
+    Damageable,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_playing_gui));
@@ -17,7 +20,12 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        (update_level_bar, update_health_bar).run_if(in_state(Screen::Playing)),
+        (
+            update_level_bar,
+            update_health_bar,
+            update_wave_bar.run_if(resource_equals(WaveState::Active)),
+        )
+            .run_if(in_state(Screen::Playing)),
     );
     app.add_systems(
         Update,
@@ -42,6 +50,9 @@ struct LevelBar;
 
 #[derive(Component)]
 struct HealthBar;
+
+#[derive(Component)]
+struct WaveBar;
 
 fn spawn_playing_gui(mut commands: Commands) {
     // TODO: check if bar is already here
@@ -94,6 +105,47 @@ fn spawn_playing_gui(mut commands: Commands) {
         ..default()
     };
 
+    // Wave Banner
+
+    let wave_banner = NodeBundle {
+        style: Style {
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Baseline,
+            justify_content: JustifyContent::FlexStart,
+            width: Val::Percent(30.),
+            height: Val::Percent(50.),
+            ..default()
+        },
+        ..default()
+    };
+
+    let wave_bar = NodeBundle {
+        style: Style {
+            width: Val::Percent(90.),
+            height: Val::Percent(2.),
+            ..default()
+        },
+        background_color: BackgroundColor(Color::from(DARK_RED)),
+        ..default()
+    };
+
+    let wave_text = TextBundle {
+        style: Style {
+            width: Val::Percent(50.),
+            height: Val::Percent(20.),
+            margin: UiRect::all(Val::Percent(2.0)),
+            ..default()
+        },
+        text: Text::from_section(
+            "Wave 1",
+            TextStyle {
+                font_size: *UiScale(60.),
+                ..default()
+            },
+        ),
+        ..default()
+    };
+
     let ui_container_entity = commands
         .spawn(ui_container)
         .insert(StateScoped(Screen::Playing))
@@ -102,10 +154,18 @@ fn spawn_playing_gui(mut commands: Commands) {
     let health_bar_entity = commands.spawn(health_bar).insert(HealthBar).id();
     let level_text_entity = commands.spawn(level_text).insert(LevelText).id();
 
+    let wave_banner_entity = commands.spawn(wave_banner).id();
+    let wave_bar_entity = commands.spawn(wave_bar).insert(WaveBar).id();
+    let wave_text_entity = commands.spawn(wave_text).insert(WaveText).id();
+    commands
+        .entity(wave_banner_entity)
+        .push_children(&[wave_bar_entity, wave_text_entity]);
+
     commands.entity(ui_container_entity).push_children(&[
         level_bar_entity,
         health_bar_entity,
         level_text_entity,
+        wave_banner_entity,
     ]);
 }
 
@@ -133,6 +193,12 @@ fn update_health_bar(
             let percent_fill = (player_health.health / player_health.max_health) * 100.;
             style.width = Val::Percent(percent_fill);
         };
+    }
+}
+
+fn update_wave_bar(mut wave_bar_query: Query<&mut Style, With<WaveBar>>, wave: Res<Wave>) {
+    for mut style in &mut wave_bar_query {
+        style.width = Val::Percent(wave.timer.fraction_remaining() * 100.);
     }
 }
 
