@@ -150,12 +150,24 @@ fn spawn_playing_gui(mut commands: Commands) {
         .spawn(ui_container)
         .insert(StateScoped(Screen::Playing))
         .id();
-    let level_bar_entity = commands.spawn(level_bar).insert(LevelBar).id();
-    let health_bar_entity = commands.spawn(health_bar).insert(HealthBar).id();
+    let level_bar_entity = commands
+        .spawn(level_bar)
+        .insert(LevelBar)
+        .insert(Name::new("Level Bar"))
+        .id();
+    let health_bar_entity = commands
+        .spawn(health_bar)
+        .insert(HealthBar)
+        .insert(Name::new("Health Bar"))
+        .id();
     let level_text_entity = commands.spawn(level_text).insert(LevelText).id();
 
     let wave_banner_entity = commands.spawn(wave_banner).id();
-    let wave_bar_entity = commands.spawn(wave_bar).insert(WaveBar).id();
+    let wave_bar_entity = commands
+        .spawn(wave_bar)
+        .insert(WaveBar)
+        .insert(Name::new("Wave Bar"))
+        .id();
     let wave_text_entity = commands.spawn(wave_text).insert(WaveText).id();
     commands
         .entity(wave_banner_entity)
