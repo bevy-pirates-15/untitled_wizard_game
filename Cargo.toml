@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0 OR CC0-1.0"
 [dependencies]
 avian2d = "0.1.1"
 bevy = { version = "0.14", features = ["mp3", "wav"]}
-bevy_ecs_tilemap = "0.14.0"
+bevy_ecs_tilemap = { version = "0.14.0", features = ["atlas"] }
 leafwing-input-manager = "0.14.0"
 # Disable low-severity logs at compile time for performance.
 log = { version = "0.4", features = [
