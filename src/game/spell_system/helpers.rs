@@ -2,11 +2,10 @@ use std::time::Duration;
 
 use crate::game::assets::particles::{ParticleAsset, ParticleAssets};
 use crate::game::assets::spell_gfx::{SpellGFXAsset, SpellGFXAssets};
-use crate::game::physics::GameLayer;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
 use crate::game::spell_system::casting::SpellCastContext;
 use crate::screen::Screen;
-use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
+use avian2d::prelude::{Collider, LinearVelocity, RigidBody, Sensor};
 use bevy::asset::Assets;
 use bevy::log::{info, warn};
 use bevy::math::{EulerRot, Quat, Vec2, Vec3};
@@ -14,13 +13,12 @@ use bevy::prelude::{
     Entity, GlobalTransform, Mesh, SpatialBundle, StateScoped, Timer, TimerMode, Transform, World,
 };
 use bevy::sprite::{ColorMaterial, Mesh2dHandle, Sprite};
-use bevy_particle_systems::{
-    BurstIndex, ParticleCount, ParticleSystemBundle, Playing, RunningState,
-};
+use bevy_particle_systems::{BurstIndex, ParticleCount, Playing, RunningState};
 
 pub enum SpellModel {
     None,
     StaticSprite(SpellGFXAsset),
+    #[allow(dead_code)]
     MeshMat(Mesh, ColorMaterial),
 }
 
@@ -120,7 +118,7 @@ pub fn spawn_spell_projectile(
     //add particles if not None
     if let Some(particle) = spell_particles {
         info!("Adding particles to spell");
-        let mut particles = world.get_resource_mut::<ParticleAssets>().unwrap()[&particle].clone();
+        let particles = world.get_resource_mut::<ParticleAssets>().unwrap()[&particle].clone();
         world.entity_mut(spell).insert((
             particles,
             ParticleCount::default(),

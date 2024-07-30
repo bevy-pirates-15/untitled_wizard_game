@@ -1,14 +1,11 @@
 use std::cmp::Ordering;
 use std::sync::Arc;
 
-use crate::game::input::PlayerAction;
-use crate::game::spawn::player::SpawnPlayer;
 use crate::game::spawn::wand::SpawnWand;
-use crate::game::spell_system::spells::load_spells;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
 use crate::game::spell_system::{SpellComponent, SpellEffect};
-use bevy::app::{App, Startup};
-use bevy::prelude::{Commands, Event, IntoSystemConfigs, Query, Res, ResMut, Resource, Trigger};
+use bevy::app::App;
+use bevy::prelude::{Commands, Event, Query, ResMut, Resource, Trigger};
 use log::{debug, info};
 use rand::Rng;
 
@@ -25,19 +22,19 @@ pub struct SpellPool {
     pub spells: Vec<(SpellComponent, i32)>,
 }
 impl SpellPool {
-    pub fn get_random_spell_component(&self) -> &SpellComponent {
-        //gets random spell based on the weights
-        let total_weight = self.spells.iter().map(|(_, w)| w).sum::<i32>();
-        let mut rng = rand::thread_rng();
-        let mut roll = rng.gen_range(0..total_weight);
-        for (spell, weight) in &self.spells {
-            if roll < *weight {
-                return spell;
-            }
-            roll -= *weight;
-        }
-        panic!("Failed to get random spell");
-    }
+    // pub fn get_random_spell_component(&self) -> &SpellComponent {
+    //     //gets random spell based on the weights
+    //     let total_weight = self.spells.iter().map(|(_, w)| w).sum::<i32>();
+    //     let mut rng = rand::thread_rng();
+    //     let mut roll = rng.gen_range(0..total_weight);
+    //     for (spell, weight) in &self.spells {
+    //         if roll < *weight {
+    //             return spell;
+    //         }
+    //         roll -= *weight;
+    //     }
+    //     panic!("Failed to get random spell");
+    // }
 
     #[allow(dead_code)]
     pub fn get_x_random_unique_spell_components(&self, x: usize) -> Vec<&SpellComponent> {
@@ -155,14 +152,16 @@ pub fn new_wand_spells(
     mut commands: Commands,
 ) {
     inventory.spells.clear();
-    inventory.push_spell(SpellComponent {
-        data: Box::new(crate::game::spell_system::spells::modifiers::DuplicateData {
-            spread_increase: 40.,
-            bullet_count: 3,
-            damage_decrease: 0.5,
-        }),
-        icon_id: 18,
-    });
+    // inventory.push_spell(SpellComponent {
+    //     data: Box::new(
+    //         crate::game::spell_system::spells::modifiers::DuplicateData {
+    //             spread_increase: 40.,
+    //             bullet_count: 3,
+    //             damage_decrease: 0.5,
+    //         },
+    //     ),
+    //     icon_id: 18,
+    // });
     inventory.push_spell(SpellComponent {
         data: Box::new(crate::game::spell_system::spells::cores::ZapSpellData {
             base_damage: 40.0,

@@ -3,17 +3,15 @@
 /////////
 // A simple spell that fires a jolt of energy dealing damage.
 
-use std::slice::Iter;
-use std::sync::Arc;
-use std::time::Duration;
-use bevy::log::{info, warn};
-use bevy::prelude::World;
 use crate::game::assets::particles::ParticleAsset;
 use crate::game::assets::spell_gfx::SpellGFXAsset;
 use crate::game::projectiles::{ProjectileDamage, ProjectileTeam};
-use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect};
 use crate::game::spell_system::casting::SpellCastContext;
-use crate::game::spell_system::helpers::{ProjectileStats, spawn_spell_projectile, SpellModel};
+use crate::game::spell_system::helpers::{spawn_spell_projectile, ProjectileStats, SpellModel};
+use crate::game::spell_system::SpellEffect;
+use bevy::log::{info, warn};
+use bevy::prelude::World;
+use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct EnemySpell;

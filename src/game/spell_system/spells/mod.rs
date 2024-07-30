@@ -3,10 +3,10 @@ use bevy::app::{App, Startup};
 use bevy::prelude::ResMut;
 
 pub mod cores;
+pub mod enemy;
 pub mod modifiers;
 pub mod multicasters;
 pub mod targeters;
-pub mod enemy;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Startup, load_spells);

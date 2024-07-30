@@ -1,12 +1,12 @@
+use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime};
+use crate::game::spell_system::casting::SpellCastContext;
+use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 use avian2d::prelude::LinearVelocity;
 use bevy::log::info;
 use bevy::prelude::{Entity, World};
 use std::slice::Iter;
 use std::sync::Arc;
 use std::time::Duration;
-use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime};
-use crate::game::spell_system::casting::SpellCastContext;
-use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 
 pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
     vec![
@@ -60,7 +60,6 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
             },
             20,
         ),
-
     ]
 }
 
@@ -88,7 +87,9 @@ impl SpellData for DmgUpSpellModData {
 
     fn get_desc(&self) -> String {
         "The next spells gains: \n".to_string()
-            + "- Damage: +" + &*(100. * (&self.damage_increase - 1.)).to_string() + "%"
+            + "- Damage: +"
+            + &*(100. * (&self.damage_increase - 1.)).to_string()
+            + "%"
     }
 }
 
@@ -113,7 +114,6 @@ impl SpellEffect for DmgUpSpellMod {
     }
 }
 
-
 #[derive(Clone)]
 pub struct PiercingData {
     pub pierce_increase: i32,
@@ -135,8 +135,12 @@ impl SpellData for PiercingData {
 
     fn get_desc(&self) -> String {
         "The next spells gains: \n".to_string()
-            + "- Pierce: +" + &self.pierce_increase.to_string() + "\n"
-            + "- Speed: +" + &*(100. * (&self.speed_increase - 1.)).to_string() + "%"
+            + "- Pierce: +"
+            + &self.pierce_increase.to_string()
+            + "\n"
+            + "- Speed: +"
+            + &*(100. * (&self.speed_increase - 1.)).to_string()
+            + "%"
     }
 }
 
@@ -190,9 +194,15 @@ impl SpellData for DuplicateData {
 
     fn get_desc(&self) -> String {
         "The next spells gains: \n".to_string()
-            + "- Bullets: +" + &self.bullet_count.to_string() + "\n"
-            + "- Spread: +" + &self.spread_increase.to_string() + "\n"
-            + "- Damage: " + &*(100. * (&self.damage_decrease - 1.)).to_string() + "%"
+            + "- Bullets: +"
+            + &self.bullet_count.to_string()
+            + "\n"
+            + "- Spread: +"
+            + &self.spread_increase.to_string()
+            + "\n"
+            + "- Damage: "
+            + &*(100. * (&self.damage_decrease - 1.)).to_string()
+            + "%"
     }
 }
 
@@ -205,8 +215,6 @@ pub struct Duplicate {
 }
 impl SpellEffect for Duplicate {
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
-
-
         let spread_increase = self.spread_increase;
         let damage_decrease = self.damage_decrease;
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
@@ -246,7 +254,9 @@ impl SpellData for LifetimeData {
 
     fn get_desc(&self) -> String {
         "The next spells gains: \n".to_string()
-            + "- Lifetime: +" + &(100. * (self.lifetime_increase - 1.)).to_string() + "%"
+            + "- Lifetime: +"
+            + &(100. * (self.lifetime_increase - 1.)).to_string()
+            + "%"
     }
 }
 
@@ -261,10 +271,11 @@ impl SpellEffect for Lifetime {
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
             // get ProjectileLifetime component
             if let Some(mut projectile_lifetime) = mod_world.get_mut::<ProjectileLifetime>(e) {
-                let new_lifetime = &projectile_lifetime.lifetime.duration().as_secs_f32() * lifetime_increase;
-                projectile_lifetime.lifetime.set_duration(
-                    Duration::from_secs_f32(new_lifetime)
-                );
+                let new_lifetime =
+                    projectile_lifetime.lifetime.duration().as_secs_f32() * lifetime_increase;
+                projectile_lifetime
+                    .lifetime
+                    .set_duration(Duration::from_secs_f32(new_lifetime));
             };
         });
 

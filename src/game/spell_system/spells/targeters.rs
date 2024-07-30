@@ -5,12 +5,10 @@ use std::sync::Arc;
 use avian2d::collision::Collider;
 use avian2d::prelude::{LinearVelocity, SpatialQuery, SpatialQueryFilter};
 use bevy::app::{App, Update};
-use bevy::ecs::query::QuerySingleError;
 use bevy::log::info;
 use bevy::math::{Quat, Vec3Swizzles};
 use bevy::prelude::{
-    BuildWorldChildren, Component, Entity, GlobalTransform, IntoSystemConfigs, Parent, Query,
-    StateScoped, Transform, With, World,
+    Component, Entity, GlobalTransform, IntoSystemConfigs, Query, Transform, With, World,
 };
 use log::warn;
 
@@ -20,7 +18,6 @@ use crate::game::spawn::player::Player;
 use crate::game::spell_system::casting::SpellCastContext;
 use crate::game::spell_system::{SpellComponent, SpellData, SpellEffect, SpellModifier};
 use crate::game::Damageable;
-use crate::screen::Screen;
 use crate::AppSet;
 
 pub(super) fn plugin(app: &mut App) {
@@ -73,9 +70,7 @@ impl HomingTarget {
             HomingTarget::PlayerOrbit => "Player".to_string(),
         }
     }
-
 }
-
 
 #[derive(Clone)]
 pub struct HomingData {
@@ -89,7 +84,7 @@ impl SpellData for HomingData {
         Some(Arc::new(Homing {
             homing_range: self.homing_range,
             homing_rate: self.homing_rate,
-            target: self.target.clone(),
+            target: self.target,
             spell,
         }))
     }
@@ -103,7 +98,6 @@ impl SpellData for HomingData {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct Homing {
     pub homing_range: f32,
@@ -115,13 +109,13 @@ impl SpellEffect for Homing {
     fn cast(&self, context: &mut SpellCastContext, world: &mut World) {
         let range = self.homing_range;
         let rate = self.homing_rate;
-        let target = self.target.clone();
+        let target = self.target;
         let modifier: SpellModifier = Box::new(move |e: Entity, mod_world: &mut World| {
             //spawn a homing child component on the projectile
             mod_world.entity_mut(e).insert(HomingComponent {
                 rate,
                 range,
-                target: target.clone(),
+                target,
             });
         });
 

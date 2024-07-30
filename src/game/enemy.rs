@@ -7,9 +7,9 @@ use bevy::{app::App, math::vec3, prelude::*, time::common_conditions::on_timer};
 use rand::Rng;
 use std::{f32::consts::PI, ops::Neg, time::Duration};
 
-use super::animation::{EnemyAnimation, PlayerAnimation, PlayerAnimationState};
+use super::animation::EnemyAnimation;
 use super::ItemDrop;
-use crate::game::player_mods::movement::PlayerMovement;
+use crate::game::enemy_casting::add_enemy_aim;
 use crate::{
     config::*,
     game::{
@@ -23,7 +23,6 @@ use crate::{
     },
     screen::{GameState, Screen},
 };
-use crate::game::enemy_casting::add_enemy_aim;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(clear_wave);
@@ -355,9 +354,13 @@ fn spawn_enemies(
                 AnimatedEnemyBundle::tank(x, y, wave.number, &images, e_sprites),
             )),
             _ if (tank_enemy_limit + 1..=ranged_enemy_limit).contains(&n) => {
-                let re = commands.spawn((
-                    AnimatedEnemyBundle::ranged(x, y, wave.number, &images, e_sprites),
-                ));
+                let re = commands.spawn((AnimatedEnemyBundle::ranged(
+                    x,
+                    y,
+                    wave.number,
+                    &images,
+                    e_sprites,
+                ),));
                 let re_id = re.id();
                 add_enemy_aim(re_id, &mut commands);
 
@@ -437,7 +440,7 @@ fn clear_dead_enemies(
         return;
     }
 
-    let mut rng = rand::thread_rng();
+    // let rng = rand::thread_rng();
     for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.health <= 0.0 {
             commands.entity(enemy).despawn_recursive();

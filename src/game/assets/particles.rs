@@ -1,15 +1,12 @@
-use bevy::asset::{AssetServer, Assets, Handle};
-use bevy::color::palettes::basic::{PURPLE, RED, WHITE};
+use bevy::asset::AssetServer;
+use bevy::color::palettes::basic::WHITE;
 use bevy::color::Color;
-use bevy::math::{Vec3, Vec4};
-use bevy::prelude::{Deref, DerefMut, Image, Reflect, Resource};
+use bevy::prelude::{Deref, DerefMut, Reflect, Resource};
 use bevy::render::texture::{ImageLoaderSettings, ImageSampler};
 use bevy::utils::HashMap;
-use bevy_particle_systems::ColorOverTime::Gradient;
-use bevy_particle_systems::VelocityModifier::Drag;
 use bevy_particle_systems::{
     CircleSegment, ColorOverTime, Curve, CurvePoint, EmitterShape, JitteredValue, ParticleBurst,
-    ParticleSystem, ParticleTexture,
+    ParticleSystem,
 };
 
 #[derive(PartialEq, Eq, Hash, Reflect)]
@@ -150,7 +147,6 @@ fn bang_particles(asset_server: &AssetServer) -> ParticleSystem {
     }
 }
 
-
 fn enemy_particles(asset_server: &AssetServer) -> ParticleSystem {
     ParticleSystem {
         max_particles: 500,
@@ -164,7 +160,7 @@ fn enemy_particles(asset_server: &AssetServer) -> ParticleSystem {
         // velocity_modifiers: vec![Drag(0.01.into())],
         lifetime: JitteredValue::new(0.25),
         color: ColorOverTime::Gradient(Curve::new(vec![
-            CurvePoint::new(Color::srgba_u8(255,93,204,255) , 0.0),
+            CurvePoint::new(Color::srgba_u8(255, 93, 204, 255), 0.0),
             CurvePoint::new(Color::srgba(0.0, 0.0, 0.0, 1.0), 0.5),
             CurvePoint::new(Color::srgba(0.0, 0.0, 0.0, 0.0), 1.0),
         ])),
