@@ -31,6 +31,7 @@ pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Wave>();
     app.init_resource::<WaveState>();
     app.add_systems(Startup, setup);
+    app.add_systems(OnEnter(Screen::Playing), reset_wave);
     app.add_systems(
         Update,
         (
@@ -292,6 +293,17 @@ pub enum WaveState {
 #[derive(Debug, Event)]
 pub struct StartWave;
 
+#[derive(Component)]
+pub struct ExpireTimer {
+    pub timer: Timer,
+}
+
+fn reset_wave(
+    mut wave: ResMut<Wave>,
+) {
+    *wave = Wave::default();
+}
+
 fn tick_wave(
     // _trigger: Trigger<StartWave>,
     mut commands: Commands,
@@ -452,6 +464,9 @@ fn clear_dead_enemies(
                     texture: images[&ImageAsset::Exp].clone_weak(),
                     transform: *pos,
                     ..default()
+                },
+                ExpireTimer {
+                    timer: Timer::new(Duration::from_secs(15), TimerMode::Once),
                 },
                 Collider::circle(1.),
                 CollisionLayers::new(GameLayer::Pickups, GameLayer::Player),

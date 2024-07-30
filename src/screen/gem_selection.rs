@@ -249,7 +249,7 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("Place Back -->", TextStyle { ..default() }),
+        text: Text::from_section("Place Start -->", TextStyle { ..default() }),
         ..default()
     };
 
@@ -273,7 +273,7 @@ fn gem_menu(
             margin: UiRect::all(Val::Px(5.0)),
             ..default()
         },
-        text: Text::from_section("<-- Place Front", TextStyle { ..default() }),
+        text: Text::from_section("<-- Place End", TextStyle { ..default() }),
         ..default()
     };
 
@@ -422,7 +422,7 @@ fn gem_menu(
         let spell_name = TextBundle::from_section(
             spell.data.get_name(),
             TextStyle {
-                font_size: 60.,
+                font_size: 40.,
                 ..default()
             },
         );

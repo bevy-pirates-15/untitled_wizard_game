@@ -7,7 +7,7 @@ use crate::{
     screen::GameState,
 };
 
-use super::{enemy::Enemy, spawn::player::Player, Damageable};
+use super::{enemy::{Enemy, ExpireTimer}, spawn::player::Player};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
@@ -16,6 +16,7 @@ pub(super) fn plugin(app: &mut App) {
         (
             detect_player_experience_collision,
             move_experience_towards_player,
+            despawn_experience_timer,
         )
             .run_if(in_state(GameState::Running)),
     );
@@ -95,13 +96,27 @@ fn move_experience_towards_player(
     }
 }
 
+fn despawn_experience_timer(
+    mut commands: Commands,
+    mut experience_query: Query<(Entity, &mut ExpireTimer), (With<Experience>, Without<Enemy>)>,
+    time: Res<Time>,
+) {
+    for (experience, mut expire_timer) in experience_query.iter_mut() {
+        expire_timer.timer.tick(time.delta());
+
+        if expire_timer.timer.finished() {
+            commands.entity(experience).despawn_recursive();
+        }
+    }
+}
+
 #[derive(Debug, Event)]
 struct LevelUp;
 
 fn level_up(
     _trigger: Trigger<LevelUp>,
     mut commands: Commands,
-    mut player_query: Query<(&mut PlayerLevel, &mut Damageable), With<Player>>,
+    mut player_query: Query<&mut PlayerLevel, With<Player>>,
     mut level_text_query: Query<&mut Text, With<LevelText>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
@@ -109,11 +124,11 @@ fn level_up(
         return;
     }
 
-    let (mut player, mut damageable) = player_query.single_mut();
+    let mut player = player_query.single_mut();
 
     player.level += 1;
-    damageable.max_health *= player.level as f32 * 1.05;
-    damageable.health *= 1.001;
+    // damageable.max_health *= player.level as f32 * 1.05;
+    // damageable.health *= 1.001;
     info!("Player levels up to level {}", player.level);
     // todo do level up specifics here
 
