@@ -9,6 +9,7 @@ pub enum SpellGFXAsset {
     // Bang,
     ArcaneArrow,
     SplitterBolts,
+    Enemy,
 }
 
 #[derive(Resource, Reflect, Deref, DerefMut)]
@@ -49,6 +50,15 @@ impl SpellGFXAssets {
             SpellGFXAsset::SplitterBolts,
             asset_server.load_with_settings(
                 "images/spell_gfx/split.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+        );
+        assets.insert(
+            SpellGFXAsset::Enemy,
+            asset_server.load_with_settings(
+                "images/spell_gfx/enemy.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },

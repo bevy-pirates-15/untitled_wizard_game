@@ -9,6 +9,7 @@ pub mod assets;
 pub mod audio;
 mod camera;
 pub mod enemy;
+pub mod enemy_casting;
 pub mod input;
 pub mod levelling;
 pub mod physics;
@@ -25,6 +26,7 @@ pub(super) fn plugin(app: &mut App) {
         audio::plugin,
         spawn::plugin,
         enemy::plugin,
+        enemy_casting::plugin,
         spell_system::plugin,
         levelling::plugin,
         projectiles::plugin,

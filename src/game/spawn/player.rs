@@ -80,6 +80,7 @@ fn spawn_player(
                 GameLayer::Environment,
                 GameLayer::Enemy,
                 GameLayer::EnemyProjectile,
+                GameLayer::Pickups,
             ],
         ),
         LinearVelocity::default(),
