@@ -11,3 +11,5 @@ pub const NODE_BACKGROUND: (Color, Color) = (
     Color::srgb(0.15, 0.15, 0.15),
     (Color::srgb(0.50, 0.50, 0.50)),
 );
+
+pub const FONT_SIZE_CONST: ((f32, f32), (f32, f32)) = ((30., 90.), (60., 120.));

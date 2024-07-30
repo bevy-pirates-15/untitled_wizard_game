@@ -155,12 +155,13 @@ fn gem_menu(
             text: Text::from_section(
                 "Select Spell",
                 TextStyle {
-                    font_size: 60.,
+                    font_size: FONT_SIZE_CONST.0 .0,
                     ..default()
                 },
             ),
             ..default()
         })
+        .insert(SmallerTextFont)
         .id();
 
     let gem_container = NodeBundle {
@@ -185,12 +186,13 @@ fn gem_menu(
             text: Text::from_section(
                 "Place in front/back (container is scrollable)",
                 TextStyle {
-                    font_size: 60.,
+                    font_size: FONT_SIZE_CONST.0 .0,
                     ..default()
                 },
             ),
             ..default()
         })
+        .insert(SmallerTextFont)
         .id();
 
     let mid_section_container = NodeBundle {
@@ -422,7 +424,7 @@ fn gem_menu(
         let spell_name = TextBundle::from_section(
             spell.data.get_name(),
             TextStyle {
-                font_size: 40.,
+                font_size: FONT_SIZE_CONST.0 .0,
                 ..default()
             },
         );
@@ -432,6 +434,7 @@ fn gem_menu(
         let spell_name_entity = commands
             .spawn(spell_name)
             .insert(AccessibilityNode(NodeBuilder::new(Role::ListItem)))
+            .insert(SmallerTextFont)
             .id();
 
         commands

@@ -13,6 +13,8 @@ use crate::game::{
     spawn::player::Player,
     Damageable,
 };
+use crate::ui::palette::FONT_SIZE_CONST;
+use crate::ui::SmallerTextFont;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Playing), (enter_playing, spawn_playing_gui));
@@ -98,7 +100,7 @@ fn spawn_playing_gui(mut commands: Commands) {
         text: Text::from_section(
             "Level 1",
             TextStyle {
-                font_size: *UiScale(60.),
+                font_size: FONT_SIZE_CONST.0 .0,
                 ..default()
             },
         ),
@@ -139,7 +141,7 @@ fn spawn_playing_gui(mut commands: Commands) {
         text: Text::from_section(
             "Wave 1",
             TextStyle {
-                font_size: *UiScale(60.),
+                font_size: FONT_SIZE_CONST.0 .0,
                 ..default()
             },
         ),
@@ -160,7 +162,11 @@ fn spawn_playing_gui(mut commands: Commands) {
         .insert(HealthBar)
         .insert(Name::new("Health Bar"))
         .id();
-    let level_text_entity = commands.spawn(level_text).insert(LevelText).id();
+    let level_text_entity = commands
+        .spawn(level_text)
+        .insert(SmallerTextFont)
+        .insert(LevelText)
+        .id();
 
     let wave_banner_entity = commands.spawn(wave_banner).id();
     let wave_bar_entity = commands
@@ -168,7 +174,11 @@ fn spawn_playing_gui(mut commands: Commands) {
         .insert(WaveBar)
         .insert(Name::new("Wave Bar"))
         .id();
-    let wave_text_entity = commands.spawn(wave_text).insert(WaveText).id();
+    let wave_text_entity = commands
+        .spawn(wave_text)
+        .insert(SmallerTextFont)
+        .insert(WaveText)
+        .id();
     commands
         .entity(wave_banner_entity)
         .push_children(&[wave_bar_entity, wave_text_entity]);
