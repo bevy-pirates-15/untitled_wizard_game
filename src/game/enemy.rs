@@ -164,7 +164,9 @@ impl EnemyBundle {
 
     fn ranged(x:f32, y: f32, diff: u32, sprites: &Res<ImageAssets>) -> EnemyBundle {
         let mut ranged = Self::basic(x, y, diff, sprites);
-        ranged.breed = EnemyKind::Ranged;
+        ranged.breed = EnemyKind::Ranged {
+            proximity: RANGED_ENEMY_DIST,
+        };
         ranged.health.max_health *= 0.75;
         ranged.sprite.texture = sprites[&ImageAsset::RangedEnemy].clone_weak();
         ranged.damage.damage *= 1.05;
@@ -261,18 +263,29 @@ fn get_random_pos_around(pos: Vec2) -> (f32, f32) {
 //Enemies will always follow the position of the player
 pub fn chase_player(
     player_query: Query<&GlobalTransform, With<Player>>,
-    mut enemy_query: Query<(&mut LinearVelocity, &GlobalTransform), (With<Enemy>, Without<Player>)>,
+    mut enemy_query: Query<
+        (&mut LinearVelocity, &GlobalTransform, &EnemyKind),
+        (With<Enemy>, Without<Player>),
+    >,
 ) {
     if player_query.is_empty() || enemy_query.is_empty() {
         return;
     }
 
     let player_pos = player_query.single().translation();
-    for (mut lvelocity, gtransform) in enemy_query.iter_mut() {
+    for (mut lvelocity, gtransform, enemy_type) in enemy_query.iter_mut() {
+        let player_proximity = (player_pos - gtransform.translation()).length();
         let dir = (player_pos - gtransform.translation()).normalize();
         let target_velocity = dir * ENEMY_SPEED;
+        match enemy_type {
+            EnemyKind::Ranged { proximity } if (*proximity as f32) < player_proximity => {
+                lvelocity.0 = lvelocity.0.lerp(target_velocity.neg().xy(), 0.1);
+            }
+            _ => {
         //lerp velocity towards target velocity
         lvelocity.0 = lvelocity.0.lerp(target_velocity.xy(), 0.1);
+            }
+        };
     }
 }
 
