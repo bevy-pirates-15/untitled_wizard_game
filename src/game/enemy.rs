@@ -96,7 +96,9 @@ pub struct Enemy;
 pub enum EnemyKind {
     #[default]
     Basic,
-    Ranged,
+    Ranged {
+        proximity: u32,
+    },
     Tank,
 }
 
@@ -121,7 +123,7 @@ struct EnemyBundle {
 impl EnemyBundle {
     fn basic(x: f32, y: f32, diff: u32, sprites: &Res<ImageAssets>) -> Self {
         let hp_modifier = diff as f32 * 1.1;
-        let xp_modifier = (diff as f32 * 0.2).floor() as u32;
+        let xp_modifier = (diff as f32 * 1.02).floor() as u32;
         let dmg_modifier = diff as f32 * 1.125;
         EnemyBundle {
             name: Name::new("Enemy"),
@@ -381,6 +383,7 @@ fn clear_dead_enemies(
     for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.health <= 0.0 {
             commands.entity(enemy).despawn_recursive();
+            if rng.gen_bool(0.8) {
             commands.spawn((
                 Name::new("Xp drop"),
                 *xp,
@@ -394,6 +397,7 @@ fn clear_dead_enemies(
                 StateScoped(Screen::Playing),
             ));
             // todo xp drops should only live for a short while
+            }
         }
     }
 }
