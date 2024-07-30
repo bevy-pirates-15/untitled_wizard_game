@@ -298,9 +298,7 @@ pub struct ExpireTimer {
     pub timer: Timer,
 }
 
-fn reset_wave(
-    mut wave: ResMut<Wave>,
-) {
+fn reset_wave(mut wave: ResMut<Wave>) {
     *wave = Wave::default();
 }
 

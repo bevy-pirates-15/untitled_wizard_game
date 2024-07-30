@@ -7,7 +7,10 @@ use crate::{
     screen::GameState,
 };
 
-use super::{enemy::{Enemy, ExpireTimer}, spawn::player::Player};
+use super::{
+    enemy::{Enemy, ExpireTimer},
+    spawn::player::Player,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(level_up);
