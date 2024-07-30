@@ -8,7 +8,7 @@ mod animation;
 pub mod assets;
 pub mod audio;
 mod camera;
-mod enemy;
+pub mod enemy;
 pub mod input;
 pub mod levelling;
 pub mod physics;

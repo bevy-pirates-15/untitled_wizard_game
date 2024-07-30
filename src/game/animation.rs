@@ -15,6 +15,7 @@ use super::{audio::sfx::Sfx, player_mods::movement::PlayerMovement};
 pub(super) fn plugin(app: &mut App) {
     // Animate and play sound effects based on controls.
     app.register_type::<PlayerAnimation>();
+    app.register_type::<EnemyAnimation>();
     app.add_systems(
         Update,
         (
@@ -22,7 +23,7 @@ pub(super) fn plugin(app: &mut App) {
                 .in_set(AppSet::TickTimers)
                 .run_if(in_state(GameState::Running)),
             (
-                update_animation_movement,
+                update_player_animation_movement,
                 update_animation_atlas,
                 trigger_step_sfx,
             )
@@ -34,7 +35,7 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 /// Update the sprite direction and animation state (idling/walking).
-fn update_animation_movement(
+fn update_player_animation_movement(
     mut player_query: Query<(&PlayerMovement, &mut Sprite, &mut PlayerAnimation)>,
 ) {
     for (controller, mut sprite, mut animation) in &mut player_query {
@@ -53,17 +54,34 @@ fn update_animation_movement(
 }
 
 /// Update the animation timer.
-fn update_animation_timer(time: Res<Time>, mut query: Query<&mut PlayerAnimation>) {
-    for mut animation in &mut query {
+fn update_animation_timer(
+    time: Res<Time>,
+    mut player_query: Query<&mut PlayerAnimation>,
+    mut enemy_query: Query<&mut EnemyAnimation>,
+) {
+    for mut animation in &mut player_query {
+        animation.update_timer(time.delta());
+    }
+
+    for mut animation in &mut enemy_query {
         animation.update_timer(time.delta());
     }
 }
 
 /// Update the texture atlas to reflect changes in the animation.
-fn update_animation_atlas(mut query: Query<(&PlayerAnimation, &mut TextureAtlas)>) {
-    for (animation, mut atlas) in &mut query {
+fn update_animation_atlas(
+    mut player_query: Query<(&PlayerAnimation, &mut TextureAtlas), Without<EnemyAnimation>>,
+    mut enemy_query: Query<(&EnemyAnimation, &mut TextureAtlas), Without<PlayerAnimation>>,
+) {
+    for (animation, mut atlas) in &mut player_query {
         if animation.changed() {
             atlas.index = animation.get_atlas_index();
+        }
+    }
+
+    for (animation, mut atlas) in &mut enemy_query {
+        if animation.changed() {
+            atlas.index = animation.frame as usize;
         }
     }
 }
@@ -179,5 +197,36 @@ impl PlayerAnimation {
             PlayerAnimationState::Walking => 8 + self.frame,
             PlayerAnimationState::Death => 16 + self.frame,
         }
+    }
+}
+
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct EnemyAnimation {
+    timer: Timer,
+    frame: u32,
+}
+
+impl EnemyAnimation {
+    pub fn new() -> Self {
+        Self {
+            timer: Timer::new(Duration::from_millis(200), TimerMode::Repeating),
+            frame: 0,
+        }
+    }
+    const WALKING_FRAMES: u32 = 4;
+
+    /// Update animation timers.
+    pub fn update_timer(&mut self, delta: Duration) {
+        self.timer.tick(delta);
+        if !self.timer.finished() {
+            return;
+        }
+        self.frame = (self.frame + 1) % Self::WALKING_FRAMES;
+    }
+
+    /// Whether animation changed this tick.
+    pub fn changed(&self) -> bool {
+        self.timer.finished()
     }
 }
