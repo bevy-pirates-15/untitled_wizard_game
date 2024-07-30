@@ -14,6 +14,7 @@ use bevy::{
     window::WindowResolution,
 };
 use bevy_ecs_tilemap::TilemapPlugin;
+use bevy_particle_systems::ParticleSystemPlugin;
 
 pub struct AppPlugin;
 
@@ -72,6 +73,9 @@ impl Plugin for AppPlugin {
 
         // Add tilemaps
         app.add_plugins(TilemapPlugin);
+
+        // Add Particles
+        app.add_plugins(ParticleSystemPlugin);
 
         // Add other plugins.
         app.add_plugins((game::plugin, screen::plugin, ui::plugin));

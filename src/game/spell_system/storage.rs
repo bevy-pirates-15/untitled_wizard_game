@@ -1,74 +1,40 @@
 use std::cmp::Ordering;
 use std::sync::Arc;
 
+use crate::game::input::PlayerAction;
+use crate::game::spawn::player::SpawnPlayer;
+use crate::game::spawn::wand::SpawnWand;
 use crate::game::spell_system::spells::load_spells;
 use crate::game::spell_system::triggers::PlayerSpellTrigger;
 use crate::game::spell_system::{SpellComponent, SpellEffect};
 use bevy::app::{App, Startup};
-use bevy::prelude::{Event, IntoSystemConfigs, Query, ResMut, Resource, Trigger};
+use bevy::prelude::{Commands, Event, IntoSystemConfigs, Query, Res, ResMut, Resource, Trigger};
 use log::{debug, info};
 use rand::Rng;
-
-use super::spells::cores::ZapSpellData;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<SpellPool>()
         .init_resource::<SpellInventory>()
-        //temp system to load 6 random spells into the spell inventory
-        .add_systems(
-            Startup,
-            (|mut spell_inventory: ResMut<SpellInventory>, pool: ResMut<SpellPool>| {
-                // spell_inventory.push_spell(SpellComponent {
-                //     data: Box::new(TriggerSpellData {
-                //         spells_triggered: 1,
-                //     }),
-                //     icon_id: 24,
-                // });
-                // spell_inventory.push_spell(SpellComponent {
-                //     data: Box::new(BangSpellData {
-                //         base_damage: 40.0,
-                //         radius: 50.0,
-                //     }),
-                //     icon_id: 3,
-                // });
-                // spell_inventory.push_spell(SpellComponent {
-                //     data: Box::new(SplitterBoltsSpellData {
-                //         base_damage: 20.0,
-                //         projectile_count: 3,
-                //     }),
-                //     icon_id: 2,
-                // });
-                spell_inventory.push_spell(SpellComponent {
-                    data: Box::new(ZapSpellData { base_damage: 40.0 }),
-                    icon_id: 36,
-                });
-
-                for _ in 0..2 {
-                    spell_inventory.push_spell(pool.get_random_spell_component().clone());
-                }
-                spell_inventory.rebuild_effects()
-            })
-            .after(load_spells),
-        )
         .observe(insert_spell_at_pos)
-        .observe(rebuild_wand);
+        .observe(rebuild_wand)
+        .observe(new_wand_spells);
 }
 
 #[derive(Resource, Default)]
 pub struct SpellPool {
-    pub spells: Vec<(SpellComponent, f32)>,
+    pub spells: Vec<(SpellComponent, i32)>,
 }
 impl SpellPool {
     pub fn get_random_spell_component(&self) -> &SpellComponent {
         //gets random spell based on the weights
-        let total_weight = self.spells.iter().map(|(_, w)| w).sum::<f32>();
+        let total_weight = self.spells.iter().map(|(_, w)| w).sum::<i32>();
         let mut rng = rand::thread_rng();
-        let mut roll = rng.gen_range(0.0..total_weight);
+        let mut roll = rng.gen_range(0..total_weight);
         for (spell, weight) in &self.spells {
             if roll < *weight {
                 return spell;
             }
-            roll -= weight;
+            roll -= *weight;
         }
         panic!("Failed to get random spell");
     }
@@ -81,7 +47,7 @@ impl SpellPool {
 
         let mut weighted_indexes = spell_indexes
             .iter()
-            .map(|i| (*i, self.spells[*i].1 * rng.gen::<f32>()))
+            .map(|i| (*i, 1. - rng.gen::<f32>().powi(self.spells[*i].1)))
             .collect::<Vec<_>>();
         weighted_indexes.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(w2).unwrap_or(Ordering::Equal));
 
@@ -92,7 +58,7 @@ impl SpellPool {
             .collect()
     }
 
-    pub(crate) fn insert_spells(&mut self, spells: Vec<(SpellComponent, f32)>) {
+    pub(crate) fn insert_spells(&mut self, spells: Vec<(SpellComponent, i32)>) {
         self.spells.extend(spells);
     }
 }
@@ -177,5 +143,54 @@ fn rebuild_wand(
     );
     wand_inventory.rebuild_effects();
     info!("effects: {:?}", wand_inventory.spell_effects);
-    player_caster.single_mut().spells = Arc::new(wand_inventory.spell_effects.clone());
+
+    for mut caster in player_caster.iter_mut() {
+        caster.spells = Arc::new(wand_inventory.spell_effects.clone());
+    }
+}
+
+pub fn new_wand_spells(
+    _trigger: Trigger<SpawnWand>,
+    mut inventory: ResMut<SpellInventory>,
+    mut commands: Commands,
+) {
+    inventory.spells.clear();
+    inventory.push_spell(SpellComponent {
+        data: Box::new(crate::game::spell_system::spells::modifiers::DuplicateData {
+            spread_increase: 40.,
+            bullet_count: 3,
+            damage_decrease: 0.5,
+        }),
+        icon_id: 18,
+    });
+    inventory.push_spell(SpellComponent {
+        data: Box::new(crate::game::spell_system::spells::cores::ZapSpellData {
+            base_damage: 40.0,
+        }),
+        icon_id: 0,
+    });
+    // inventory.push_spell(SpellComponent {
+    //     data: Box::new(crate::game::spell_system::spells::cores::BangSpellData {
+    //         base_damage: 40.0,
+    //         radius: 30.0,
+    //     }),
+    //     icon_id: 3,
+    // },);
+    // inventory.push_spell(SpellComponent {
+    //     data: Box::new(crate::game::spell_system::spells::cores::ArcaneArrowSpellData {
+    //         base_damage: 30.0,
+    //         speed: 400.0,
+    //         num_hits: 3,
+    //     }),
+    //     icon_id: 1,
+    // });
+    // inventory.push_spell(SpellComponent {
+    //     data: Box::new(crate::game::spell_system::spells::cores::SplitterBoltsSpellData {
+    //         base_damage: 20.0,
+    //         projectile_count: 3,
+    //     }),
+    //     icon_id: 2,
+    // });
+
+    commands.trigger(RebuildWand);
 }

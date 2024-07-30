@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use crate::game::assets::particles::{ParticleAsset, ParticleAssets};
 use crate::game::assets::spell_gfx::{SpellGFXAsset, SpellGFXAssets};
 use crate::game::physics::GameLayer;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
@@ -7,15 +8,18 @@ use crate::game::spell_system::casting::SpellCastContext;
 use crate::screen::Screen;
 use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody, Sensor};
 use bevy::asset::Assets;
-use bevy::log::warn;
+use bevy::log::{info, warn};
 use bevy::math::{EulerRot, Quat, Vec2, Vec3};
 use bevy::prelude::{
     Entity, GlobalTransform, Mesh, SpatialBundle, StateScoped, Timer, TimerMode, Transform, World,
 };
 use bevy::sprite::{ColorMaterial, Mesh2dHandle, Sprite};
+use bevy_particle_systems::{
+    BurstIndex, ParticleCount, ParticleSystemBundle, Playing, RunningState,
+};
 
 pub enum SpellModel {
-    // None,
+    None,
     StaticSprite(SpellGFXAsset),
     MeshMat(Mesh, ColorMaterial),
 }
@@ -32,8 +36,9 @@ pub struct ProjectileStats {
 pub fn spawn_spell_projectile(
     context: &mut SpellCastContext,
     world: &mut World,
-
+    team: ProjectileTeam,
     spell_model: SpellModel,
+    spell_particles: Option<ParticleAsset>,
     stats: ProjectileStats,
 ) -> Option<Entity> {
     let Some(caster_transform) = world
@@ -81,14 +86,11 @@ pub fn spawn_spell_projectile(
             },
             // LinearVelocity((spell_transform.rotation * Vec3::Y).truncate() * speed),
             LinearVelocity(vel_vec * stats.speed),
-            CollisionLayers::new(
-                GameLayer::PlayerProjectile,
-                [GameLayer::Environment, GameLayer::Enemy],
-            ),
+            team.get_collision_layer(),
             ProjectileDamage {
                 damage: stats.damage,
                 hits_remaining: stats.num_hits,
-                team: ProjectileTeam::Player,
+                team,
                 knockback_force: stats.knockback_force,
             },
             ProjectileLifetime {
@@ -99,7 +101,7 @@ pub fn spawn_spell_projectile(
         .id();
 
     match spell_model {
-        // SpellModel::None => {}
+        SpellModel::None => {}
         SpellModel::StaticSprite(gfx) => {
             let gfx_assets = world.get_resource::<SpellGFXAssets>().unwrap();
             let sprite = gfx_assets[&gfx].clone_weak();
@@ -113,6 +115,19 @@ pub fn spawn_spell_projectile(
 
             world.entity_mut(spell).insert((h_mesh, h_mat));
         }
+    }
+
+    //add particles if not None
+    if let Some(particle) = spell_particles {
+        info!("Adding particles to spell");
+        let mut particles = world.get_resource_mut::<ParticleAssets>().unwrap()[&particle].clone();
+        world.entity_mut(spell).insert((
+            particles,
+            ParticleCount::default(),
+            RunningState::default(),
+            BurstIndex::default(),
+            Playing,
+        ));
     }
 
     //apply modifiers:

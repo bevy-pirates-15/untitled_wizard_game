@@ -1,6 +1,6 @@
 use std::cmp::PartialEq;
 
-use avian2d::prelude::{Collision, LinearVelocity};
+use avian2d::prelude::{Collision, CollisionLayers, LinearVelocity};
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::{
     in_state, App, Commands, Component, DespawnRecursiveExt, Entity, Event, EventReader,
@@ -11,7 +11,7 @@ use crate::game::player_mods::damage::Invincibility;
 use crate::game::Damageable;
 use crate::screen::GameState;
 use crate::AppSet;
-
+use crate::game::physics::GameLayer;
 use super::audio::sfx::Sfx;
 
 pub(super) fn plugin(app: &mut App) {
@@ -49,8 +49,20 @@ pub enum ProjectileTeam {
     Player,
     #[allow(dead_code)]
     Enemy,
-    #[allow(dead_code)]
-    Neither,
+}
+impl ProjectileTeam {
+    pub fn get_collision_layer(&self) -> CollisionLayers {
+        match self {
+            ProjectileTeam::Player => CollisionLayers::new(
+                GameLayer::PlayerProjectile,
+                [GameLayer::Environment, GameLayer::Enemy],
+            ),
+            ProjectileTeam::Enemy => CollisionLayers::new(
+                GameLayer::EnemyProjectile,
+                [GameLayer::Environment, GameLayer::Player],
+            ),
+        }
+    }
 }
 
 #[derive(Component)]

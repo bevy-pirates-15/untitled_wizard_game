@@ -30,7 +30,9 @@ pub(super) fn plugin(app: &mut App) {
             tick_timer_trigger
                 .in_set(AppSet::TickTimers)
                 .run_if(in_state(GameState::Running)),
-            (do_timer_trigger, do_player_trigger).in_set(AppSet::Update),
+            (do_timer_trigger, do_player_trigger)
+                .in_set(AppSet::Update)
+                .run_if(in_state(GameState::Running)),
             //todo: more triggers
         ),
     );

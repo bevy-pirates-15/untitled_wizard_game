@@ -7,8 +7,9 @@ use bevy::{app::App, math::vec3, prelude::*, time::common_conditions::on_timer};
 use rand::Rng;
 use std::{f32::consts::PI, ops::Neg, time::Duration};
 
-use super::animation::EnemyAnimation;
+use super::animation::{EnemyAnimation, PlayerAnimation, PlayerAnimationState};
 use super::ItemDrop;
+use crate::game::player_mods::movement::PlayerMovement;
 use crate::{
     config::*,
     game::{
@@ -22,6 +23,7 @@ use crate::{
     },
     screen::{GameState, Screen},
 };
+use crate::game::enemy_casting::add_enemy_aim;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(clear_wave);
@@ -352,9 +354,15 @@ fn spawn_enemies(
             _ if (0..=tank_enemy_limit).contains(&n) => commands.spawn((
                 AnimatedEnemyBundle::tank(x, y, wave.number, &images, e_sprites),
             )),
-            _ if (tank_enemy_limit + 1..=ranged_enemy_limit).contains(&n) => commands.spawn((
-                AnimatedEnemyBundle::ranged(x, y, wave.number, &images, e_sprites),
-            )),
+            _ if (tank_enemy_limit + 1..=ranged_enemy_limit).contains(&n) => {
+                let re = commands.spawn((
+                    AnimatedEnemyBundle::ranged(x, y, wave.number, &images, e_sprites),
+                ));
+                let re_id = re.id();
+                add_enemy_aim(re_id, &mut commands);
+
+                commands.entity(re_id)
+            }
             _ if (ranged_enemy_limit + 1..=enemy_spawn_limit).contains(&n) => {
                 commands.spawn(EnemyBundle::basic(x, y, wave.number, &images))
             }
@@ -381,7 +389,12 @@ fn get_random_pos_around(pos: Vec2) -> (f32, f32) {
 pub fn chase_player(
     player_query: Query<&GlobalTransform, With<Player>>,
     mut enemy_query: Query<
-        (&mut LinearVelocity, &GlobalTransform, &EnemyKind),
+        (
+            &mut LinearVelocity,
+            &GlobalTransform,
+            &EnemyKind,
+            &mut Sprite,
+        ),
         (With<Enemy>, Without<Player>),
     >,
 ) {
@@ -390,12 +403,18 @@ pub fn chase_player(
     }
 
     let player_pos = player_query.single().translation();
-    for (mut lvelocity, gtransform, enemy_type) in enemy_query.iter_mut() {
+    for (mut lvelocity, gtransform, enemy_type, mut enemy_sprite) in enemy_query.iter_mut() {
         let player_proximity = (player_pos - gtransform.translation()).length();
         let dir = (player_pos - gtransform.translation()).normalize();
+
+        //check if dir is pointing left:
+        enemy_sprite.flip_x = dir.x < 0.0;
+
         let target_velocity = dir * ENEMY_SPEED;
         match enemy_type {
-            EnemyKind::Ranged { proximity } if (*proximity as f32) < player_proximity => {
+            EnemyKind::Ranged { proximity } if (*proximity as f32) > player_proximity => {
+                //test to print rages:
+                // info!("e prox: {}, p prox: {}", proximity, player_proximity);
                 lvelocity.0 = lvelocity.0.lerp(target_velocity.neg().xy(), 0.1);
             }
             _ => {
@@ -422,21 +441,20 @@ fn clear_dead_enemies(
     for (health, pos, xp, enemy) in enemy_query.iter() {
         if health.health <= 0.0 {
             commands.entity(enemy).despawn_recursive();
-            if rng.gen_bool(0.8) {
-                commands.spawn((
-                    Name::new("Xp drop"),
-                    *xp,
-                    ItemDrop,
-                    SpriteBundle {
-                        texture: images[&ImageAsset::Exp].clone_weak(),
-                        transform: *pos,
-                        ..default()
-                    },
-                    Collider::circle(1.),
-                    StateScoped(Screen::Playing),
-                ));
-                // todo xp drops should only live for a short while
-            }
+            commands.spawn((
+                Name::new("Xp drop"),
+                *xp,
+                ItemDrop,
+                SpriteBundle {
+                    texture: images[&ImageAsset::Exp].clone_weak(),
+                    transform: *pos,
+                    ..default()
+                },
+                Collider::circle(1.),
+                CollisionLayers::new(GameLayer::Pickups, GameLayer::Player),
+                StateScoped(Screen::Playing),
+            ));
+            // todo xp drops should only live for a short while
         }
     }
 }

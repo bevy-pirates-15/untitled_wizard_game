@@ -16,6 +16,7 @@ pub enum GameLayer {
     Enemy,
     PlayerProjectile,
     EnemyProjectile,
+    Pickups,
 }
 
 fn pause(mut time: ResMut<Time<Physics>>) {
