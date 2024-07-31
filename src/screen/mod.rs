@@ -14,7 +14,6 @@ use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Screen>().add_sub_state::<GameState>();
-    app.init_state::<FullscreenState>();
     app.enable_state_scoped_entities::<Screen>();
     app.enable_state_scoped_entities::<GameState>();
 
@@ -51,11 +50,4 @@ pub enum GameState {
     Paused,
     GemSelection,
     Death,
-}
-
-#[derive(States, Debug, Hash, PartialEq, Eq, Clone, Default, Reflect)]
-pub enum FullscreenState {
-    #[default]
-    Windowed,
-    Fullscreen,
 }

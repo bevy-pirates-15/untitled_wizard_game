@@ -34,6 +34,3 @@ pub struct GemPlaceButtonSound;
 
 #[derive(Component, Debug)]
 pub struct GemDiscardButtonSound;
-
-#[derive(Component, Debug)]
-pub struct SmallerTextFont;

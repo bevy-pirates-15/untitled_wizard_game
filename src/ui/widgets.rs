@@ -2,7 +2,7 @@
 
 use bevy::{ecs::system::EntityCommands, prelude::*, ui::Val::*};
 
-use super::{interaction::InteractionPalette, palette::*, DefaultButtonSound, SmallerTextFont};
+use super::{interaction::InteractionPalette, palette::*, DefaultButtonSound};
 
 /// An extension trait for spawning UI widgets.
 pub trait Widgets {
@@ -47,12 +47,11 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0 .1,
+                        font_size: *UiScale(90.),
                         color: BUTTON_TEXT,
                         ..default()
                     },
                 ),
-                SmallerTextFont,
             ));
         });
         entity
@@ -82,12 +81,11 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0 .0,
+                        font_size: *UiScale(60.),
                         color: HEADER_TEXT,
                         ..default()
                     },
                 ),
-                SmallerTextFont,
             ));
         });
         entity
@@ -113,12 +111,11 @@ impl<T: Spawn> Widgets for T {
                 TextBundle::from_section(
                     text,
                     TextStyle {
-                        font_size: FONT_SIZE_CONST.0 .0,
+                        font_size: *UiScale(50.),
                         color: LABEL_TEXT,
                         ..default()
                     },
                 ),
-                SmallerTextFont,
             ));
         });
         entity
