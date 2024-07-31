@@ -72,9 +72,9 @@ impl Wave {
     fn increment(self) -> Self {
         match self.number {
             // todo tweak numbers to be more balanced
-            n @ 1..=5 => Wave::new(n + 1, n * 2, n * 15, n * 5, 0, 45.),
-            n @ 6..=10 => Wave::new(n + 1, n * 2, n * 20, n * 10, n * 5, 50.),
-            n @ 11..=15 => Wave::new(n + 1, n * 3, n * 25, n * 10, n * 5, 55.),
+            n @ 1..=5 => Wave::new(n + 1, n * 2, n * 15, n * 2, 1, 45.),
+            n @ 6..=10 => Wave::new(n + 1, n * 2, n * 20, n * 3, n * 5, 50.),
+            n @ 11..=15 => Wave::new(n + 1, n * 3, n * 25, n * 5, n * 5, 55.),
             n @ 16..=20 => Wave::new(n + 1, n * 3, n * 30, n * 10, n * 8, 60.),
             n @ 21..=25 => Wave::new(n + 1, n * 4, n * 35, n * 10, n * 10, 65.),
             n @ 26..=30 => Wave::new(n + 1, n * 4, n * 40, n * 10, n * 12, 70.),
@@ -464,7 +464,7 @@ fn clear_dead_enemies(
                     ..default()
                 },
                 ExpireTimer {
-                    timer: Timer::new(Duration::from_secs(15), TimerMode::Once),
+                    timer: Timer::new(Duration::from_secs(35), TimerMode::Once),
                 },
                 Collider::circle(1.),
                 CollisionLayers::new(GameLayer::Pickups, GameLayer::Player),

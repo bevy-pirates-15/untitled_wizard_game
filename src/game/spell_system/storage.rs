@@ -36,7 +36,6 @@ impl SpellPool {
     //     panic!("Failed to get random spell");
     // }
 
-    #[allow(dead_code)]
     pub fn get_x_random_unique_spell_components(&self, x: usize) -> Vec<&SpellComponent> {
         // gets x random unique spells, based on the weights
         let mut rng = rand::thread_rng();

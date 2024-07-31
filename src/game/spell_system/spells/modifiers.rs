@@ -47,7 +47,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
                 }),
                 icon_id: 17,
             },
-            10,
+            100,
         ),
         (
             SpellComponent {
