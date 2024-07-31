@@ -2,9 +2,7 @@
 
 use std::time::Duration;
 
-use avian2d::prelude::*;
-use bevy::prelude::*;
-
+use crate::game::lighting::{GameLight, LightMaterial};
 use crate::game::physics::GameLayer;
 use crate::game::player_mods::damage::player_hit_by_projectile;
 use crate::game::player_mods::movement::{Movement, PlayerMovement};
@@ -19,6 +17,8 @@ use crate::{
     },
     screen::Screen,
 };
+use avian2d::prelude::*;
+use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_player);
@@ -37,6 +37,8 @@ fn spawn_player(
     mut commands: Commands,
     images: Res<ImageAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    #[allow(dead_code)] _light_materials: ResMut<Assets<LightMaterial>>,
+    #[allow(dead_code)] _meshes: ResMut<Assets<Mesh>>,
 ) {
     // A texture atlas is a way to split one image with a grid into multiple sprites.
     // By attaching it to a [`SpriteBundle`] and providing an index, we can specify which section of the image we want to see.
@@ -87,5 +89,27 @@ fn spawn_player(
         StateScoped(Screen::Playing),
     ));
 
+    p.insert(GameLight {
+        radius: 100.0,
+        priority: 1,
+    });
+
     p.observe(player_hit_by_projectile);
+
+    // p.with_children(|parent| {
+    //     parent.spawn((
+    //         Name::new("Darkness"),
+    //         MaterialMesh2dBundle {
+    //             mesh: meshes.add(Rectangle::new(660.,380.)).into(),
+    //             material: light_materials.add(LightMaterial {
+    //                 color: LinearRgba::new(0.0,0.0,0.0,0.9),
+    //                 light_count: 2,
+    //                 lights: [Vec3::ZERO; 64],
+    //             }),
+    //             transform: Transform::from_translation(Vec3::new(0., 0., 20.)),
+    //             ..Default::default()
+    //         },
+    //         StateScoped(Screen::Playing),
+    //     ));
+    // });
 }

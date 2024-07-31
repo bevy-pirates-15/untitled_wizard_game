@@ -37,17 +37,17 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
             },
             15,
         ),
-        (
-            SpellComponent {
-                data: Box::new(HomingData {
-                    homing_range: 50.0,
-                    homing_rate: 0.99,
-                    target: HomingTarget::PlayerOrbit,
-                }),
-                icon_id: 38,
-            },
-            15,
-        ),
+        // (
+        //     SpellComponent {
+        //         data: Box::new(HomingData {
+        //             homing_range: 50.0,
+        //             homing_rate: 0.99,
+        //             target: HomingTarget::PlayerOrbit,
+        //         }),
+        //         icon_id: 38,
+        //     },
+        //     15,
+        // ),
     ]
 }
 
@@ -61,6 +61,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
 #[derive(Clone, Debug, Copy)]
 pub enum HomingTarget {
     ClosestEnemy,
+    #[allow(dead_code)]
     PlayerOrbit,
 }
 impl HomingTarget {

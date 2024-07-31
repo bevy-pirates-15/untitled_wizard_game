@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use crate::game::assets::particles::{ParticleAsset, ParticleAssets};
 use crate::game::assets::spell_gfx::{SpellGFXAsset, SpellGFXAssets};
+use crate::game::lighting::GameLight;
 use crate::game::projectiles::{ProjectileDamage, ProjectileLifetime, ProjectileTeam};
 use crate::game::spell_system::casting::SpellCastContext;
 use crate::screen::Screen;
@@ -76,7 +77,7 @@ pub fn spawn_spell_projectile(
             Sensor,
             SpatialBundle {
                 transform: Transform::from_translation(
-                    caster_transform.translation + Vec3::new(0.0, 0.0, 0.1),
+                    caster_transform.translation + Vec3::new(0.0, 0.0, 30.),
                 )
                 .with_rotation(rotation)
                 .with_scale(Vec3::splat(1.0)),
@@ -88,7 +89,7 @@ pub fn spawn_spell_projectile(
             ProjectileDamage {
                 damage: stats.damage,
                 hits_remaining: stats.num_hits,
-                team,
+                team: team.clone(),
                 knockback_force: stats.knockback_force,
             },
             ProjectileLifetime {
@@ -97,6 +98,13 @@ pub fn spawn_spell_projectile(
             StateScoped(Screen::Playing),
         ))
         .id();
+
+    if team == ProjectileTeam::Player {
+        world.entity_mut(spell).insert(GameLight {
+            radius: 20.0,
+            priority: 10,
+        });
+    }
 
     match spell_model {
         SpellModel::None => {}
