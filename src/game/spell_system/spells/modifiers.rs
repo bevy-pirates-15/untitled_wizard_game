@@ -47,7 +47,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
                 }),
                 icon_id: 17,
             },
-            100,
+            50,
         ),
         (
             SpellComponent {
@@ -58,7 +58,7 @@ pub(super) fn get_spells() -> Vec<(SpellComponent, i32)> {
                 }),
                 icon_id: 18,
             },
-            20,
+            100,
         ),
     ]
 }
@@ -221,6 +221,7 @@ impl SpellEffect for Duplicate {
             // get ProjectileDamage component
             if let Some(mut projectile_damage) = mod_world.get_mut::<ProjectileDamage>(e) {
                 projectile_damage.damage *= damage_decrease;
+                projectile_damage.knockback_force *= damage_decrease;
             };
         });
 

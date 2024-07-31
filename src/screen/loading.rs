@@ -36,6 +36,7 @@ fn enter_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn check_all_loaded(
     image_assets: Res<Assets<Image>>,
     audio_assets: Res<Assets<AudioSource>>,
+    #[allow(dead_code)] _shader_assets: Res<Assets<Shader>>,
     images: Res<ImageAssets>,
     sfxs: Res<SfxAssets>,
     soundtracks: Res<SoundtrackAssets>,

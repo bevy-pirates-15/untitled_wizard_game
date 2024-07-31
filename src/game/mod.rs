@@ -12,6 +12,7 @@ pub mod enemy;
 pub mod enemy_casting;
 pub mod input;
 pub mod levelling;
+pub mod lighting;
 pub mod physics;
 pub mod player_mods;
 pub mod projectiles;
@@ -32,6 +33,7 @@ pub(super) fn plugin(app: &mut App) {
         projectiles::plugin,
         physics::plugin,
         player_mods::plugin,
+        lighting::plugin,
     ));
 
     app.register_type::<Damageable>();

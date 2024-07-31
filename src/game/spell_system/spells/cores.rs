@@ -98,7 +98,7 @@ impl SpellEffect for ZapSpell {
                 damage: self.base_damage,
                 num_hits: 1,
                 lifetime: Duration::from_secs_f32(2.0),
-                knockback_force: 200.0,
+                knockback_force: 100.0,
             },
         ) else {
             warn!("Failed to spawn zap spell entity");
@@ -159,7 +159,7 @@ impl SpellEffect for BangSpell {
                 damage: self.base_damage,
                 num_hits: 1000,
                 lifetime: Duration::from_secs_f32(0.05),
-                knockback_force: 100.0,
+                knockback_force: 50.0,
             }, // self.radius,
                // 0.0,
                // self.base_damage,
@@ -227,7 +227,7 @@ impl SpellEffect for ArcaneArrowSpell {
                 damage: self.base_damage,
                 num_hits: self.num_hits,
                 lifetime: Duration::from_secs_f32(2.0),
-                knockback_force: 100.0,
+                knockback_force: 50.0,
             },
         ) else {
             warn!("Failed to spawn arcane arrow spell entity");
@@ -292,7 +292,7 @@ impl SpellEffect for SplitterBoltsSpell {
                     damage: self.base_damage,
                     num_hits: 1,
                     lifetime: Duration::from_secs_f32(2.0),
-                    knockback_force: 50.0,
+                    knockback_force: 25.0,
                 },
             ) else {
                 warn!("Failed to spawn splitter bolts spell entity");

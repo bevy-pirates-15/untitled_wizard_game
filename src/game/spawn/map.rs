@@ -3,12 +3,11 @@
 use bevy::{prelude::*, utils::HashSet};
 use bevy_ecs_tilemap::prelude::*;
 
+use super::{borders::SpawnBorders, player::SpawnPlayer, prompt::SpawnPrompt, wand::SpawnWand};
 use crate::{
     game::assets::{ImageAsset, ImageAssets},
     screen::Screen,
 };
-
-use super::{borders::SpawnBorders, player::SpawnPlayer, prompt::SpawnPrompt, wand::SpawnWand};
 
 pub(super) fn plugin(app: &mut App) {
     app.observe(spawn_level);

@@ -452,6 +452,9 @@ fn clear_dead_enemies(
 
     // let rng = rand::thread_rng();
     for (health, pos, xp, enemy) in enemy_query.iter() {
+        let mut exp_pos = *pos;
+        exp_pos.translation.z += 30.;
+
         if health.health <= 0.0 {
             commands.entity(enemy).despawn_recursive();
             commands.spawn((
@@ -460,7 +463,7 @@ fn clear_dead_enemies(
                 ItemDrop,
                 SpriteBundle {
                     texture: images[&ImageAsset::Exp].clone_weak(),
-                    transform: *pos,
+                    transform: exp_pos,
                     ..default()
                 },
                 ExpireTimer {

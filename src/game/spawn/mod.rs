@@ -9,6 +9,7 @@ pub mod map;
 pub mod player;
 pub mod prompt;
 pub mod wand;
+// pub mod lighting;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
@@ -17,5 +18,6 @@ pub(super) fn plugin(app: &mut App) {
         wand::plugin,
         borders::plugin,
         prompt::plugin,
+        // lighting::plugin,
     ));
 }
