@@ -33,7 +33,6 @@ pub(super) fn plugin(app: &mut App) {
         projectiles::plugin,
         physics::plugin,
         player_mods::plugin,
-        lighting::plugin,
     ));
 
     app.register_type::<Damageable>();

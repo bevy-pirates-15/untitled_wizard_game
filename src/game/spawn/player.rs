@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use crate::game::lighting::{GameLight, LightMaterial};
+// use crate::game::lighting::{GameLight, LightMaterial};
 use crate::game::physics::GameLayer;
 use crate::game::player_mods::damage::player_hit_by_projectile;
 use crate::game::player_mods::movement::{Movement, PlayerMovement};
@@ -37,7 +37,7 @@ fn spawn_player(
     mut commands: Commands,
     images: Res<ImageAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    #[allow(dead_code)] _light_materials: ResMut<Assets<LightMaterial>>,
+    // #[allow(dead_code)] _light_materials: ResMut<Assets<LightMaterial>>,
     #[allow(dead_code)] _meshes: ResMut<Assets<Mesh>>,
 ) {
     // A texture atlas is a way to split one image with a grid into multiple sprites.
@@ -89,10 +89,10 @@ fn spawn_player(
         StateScoped(Screen::Playing),
     ));
 
-    p.insert(GameLight {
-        radius: 100.0,
-        priority: 1,
-    });
+    // p.insert(GameLight {
+    //     radius: 100.0,
+    //     priority: 1,
+    // });
 
     p.observe(player_hit_by_projectile);
 
