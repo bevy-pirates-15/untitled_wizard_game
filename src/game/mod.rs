@@ -32,8 +32,7 @@ pub(super) fn plugin(app: &mut App) {
         levelling::plugin,
         projectiles::plugin,
         physics::plugin,
-        player_mods::plugin,
-        lighting::plugin,
+        player_mods::plugin
     ));
 
     app.register_type::<Damageable>();
